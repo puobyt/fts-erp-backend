@@ -147,4 +147,33 @@ currentStockService.editCurrentStock = async (currentStockData) => {
   }
 };
 
+
+currentStockService.removeCurrentStock = async (
+  currentStockId
+) => {
+  try {
+    const currentStock = await CurrentStock.findByIdAndDelete(
+      currentStockId
+    );
+ if(currentStock){
+  return {
+    status: 201,
+    message: "current stock deleted successfully",
+    token: "sampleToken",
+  };
+ }
+
+  } catch (error) {
+    console.log(
+      "An error occured at current stock remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in current Stock remove in current stock services",
+      });
+  }
+};
+
 module.exports = currentStockService;

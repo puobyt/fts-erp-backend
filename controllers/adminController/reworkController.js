@@ -121,4 +121,24 @@ reworkController.editRework = async (req, res) => {
     }
   };
 
+  reworkController.removeRework = async (req, res) => {
+    try {
+      console.log("deleting Rework...");
+  const {reworkId} = req.query;
+      // Pass the extracted data to the service function
+      const result = await reworkService.removeRework(reworkId);
+  
+      res.status(result.status).json({
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing Rework in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  };
+
 module.exports = reworkController;

@@ -101,4 +101,24 @@ qualityCheckController.editQualityCheck = async (req, res) => {
     }
   };
 
+
+  qualityCheckController.removeQualityCheck = async (req, res) => {
+    try {
+      console.log("deleting quality Check...");
+  const {qualityCheckId} = req.query;
+      // Pass the extracted data to the service function
+      const result = await qualityCheckService.removeQualityCheck(qualityCheckId);
+  
+      res.status(result.status).json({
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing current stock in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  };
 module.exports = qualityCheckController;

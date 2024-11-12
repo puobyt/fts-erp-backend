@@ -91,4 +91,27 @@ currentStockController.editCurrentStock = async (req, res) => {
   }
 };
 
+
+
+currentStockController.removeCurrentStock = async (req, res) => {
+  try {
+    console.log("deleting current stock...");
+const {currentStockId} = req.query;
+console.log('soock',currentStockId)
+    // Pass the extracted data to the service function
+    const result = await currentStockService.removeCurrentStock(currentStockId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing current stock in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
 module.exports = currentStockController;

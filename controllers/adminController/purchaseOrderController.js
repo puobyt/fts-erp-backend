@@ -159,4 +159,25 @@ purchaseOrderController.editPurchaseOrderCreation = async (req, res) => {
   }
 };
 
+
+purchaseOrderController.removePurchaseOrderCreation = async (req, res) => {
+  try {
+    console.log("deleting Production Order Creation...");
+const {purchaseOrderId} = req.query;
+    // Pass the extracted data to the service function
+    const result = await purchaseOrderService.removePurchaseOrderCreation(purchaseOrderId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing purchase Order creation in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
 module.exports = purchaseOrderController;

@@ -148,6 +148,43 @@ qualityCheckService.fetchQualityCheck = async () => {
       });
     }
   };
+
+
+  qualityCheckService.removeQualityCheck = async (
+    qualityCheckId
+  ) => {
+    try {
+      const qualityCheck = await QualityCheck.findByIdAndDelete(
+        qualityCheckId
+      );
+
+      if(!qualityCheck){
+        return {
+          status: 201,
+          message: "Product not found or can't able to delete right now,Please try again later",
+          token: "sampleToken",
+        };
+      }
+if(qualityCheck){
+  return {
+    status: 201,
+    message: "Quality check deleted successfully",
+    token: "sampleToken",
+  };
+}
+
+    } catch (error) {
+      console.log(
+        "An error occured at quality check remove",
+        error.message
+      );
+      res
+        .status(500)
+        .json({
+          info: "An error occured in quality check remove in current stock services",
+        });
+    }
+  };
   
   
   module.exports = qualityCheckService

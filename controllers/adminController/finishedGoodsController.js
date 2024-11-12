@@ -32,7 +32,7 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
     const { finishedGoodsName, batchNumber, productionDate, quantityProduced } =
       req.body;
 
-    const result = await adminService.newFinishedGoods({
+    const result = await finishedGoodsService.newFinishedGoods({
       finishedGoodsName,
       batchNumber,
       productionDate,
@@ -50,6 +50,64 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
       error.message
     );
     res.status(500).json({ info: "An error occurred in Server" });
+  }
+};
+
+
+finishedGoodsController.editFinishedGoods = async (req, res) => {
+  try {
+    console.log("editing Finished Goods..");
+
+    const {
+      authPassword,
+      finishedGoodsId,
+      finishedGoodsName,
+      batchNumber,
+      productionDate,
+      quantityProduced
+    } = req.body;
+
+    const result =
+      await finishedGoodsService.editFinishedGoods({
+        authPassword,
+        finishedGoodsId,
+        finishedGoodsName,
+        batchNumber,
+        productionDate,
+        quantityProduced
+      });
+
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while editing Finished Goods in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in Server" });
+  }
+};
+
+finishedGoodsController.removeFinishedGoods = async (req, res) => {
+  try {
+    console.log("deleting Rework...");
+const {finishedGoodsId} = req.query;
+
+    const result = await finishedGoodsService.removeFinishedGoods(finishedGoodsId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing Finished Goods in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
   }
 };
 

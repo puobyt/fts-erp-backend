@@ -82,4 +82,25 @@ gateEntryController.editGateEntry = async (req, res) => {
   }
 };
 
+
+gateEntryController.removeGateEntry = async (req, res) => {
+  try {
+    console.log("deleting Production Order Creation...");
+const {gateEntryId} = req.query;
+    // Pass the extracted data to the service function
+    const result = await gateEntryService.removeGateEntry(gateEntryId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing gate Entry in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
 module.exports = gateEntryController;

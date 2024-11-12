@@ -1,9 +1,8 @@
 const express = require("express");
 const VendorManagement = require("../../models/vendorManagement");
 let vendorService = {};
-require('dotenv').config();
+require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
-
 
 vendorService.vendorManagement = async (newVendorData) => {
   try {
@@ -75,7 +74,9 @@ vendorService.newVendorManagement = async (newVendorData) => {
     };
   } catch (error) {
     console.log("An error occured at login", error.message);
-    res.status(500).json({ info: "An error occured in Vendor added vendor services" });
+    res
+      .status(500)
+      .json({ info: "An error occured in Vendor added vendor services" });
   }
 };
 
@@ -151,8 +152,8 @@ vendorService.editVendorManagement = async (VendorData) => {
           gst,
         },
         {
-          new: true, 
-          runValidators: true, 
+          new: true,
+          runValidators: true,
         }
       );
     }
@@ -164,7 +165,26 @@ vendorService.editVendorManagement = async (VendorData) => {
     };
   } catch (error) {
     console.log("An error occured at editing vendor management", error.message);
-    res.status(500).json({ info: "An error occured in  vendor management services" });
+    res
+      .status(500)
+      .json({ info: "An error occured in  vendor management services" });
+  }
+};
+
+vendorService.removeVendorManagement = async (vendorId) => {
+  try {
+    const vendor = await VendorManagement.findByIdAndDelete(vendorId);
+
+    return {
+      status: 201,
+      message: "Vendor deleted successfully",
+      token: "sampleToken",
+    };
+  } catch (error) {
+    console.log("An error occured at vendor remove", error.message);
+    res
+      .status(500)
+      .json({ info: "An error occured in Vendor remove in vendor services" });
   }
 };
 

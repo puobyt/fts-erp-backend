@@ -97,4 +97,25 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
     }
   };
 
+
+  requestCreationMaterialController.removeRequestCreationForMaterials = async (req, res) => {
+    try {
+      console.log("deleting request creation materials...");
+  const {requestCreationId} = req.query;
+      // Pass the extracted data to the service function
+      const result = await requestCreationMaterialService.removeRequestCreationForMaterials(requestCreationId);
+  
+      res.status(result.status).json({
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing request creation order for materials in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  };
+
 module.exports = requestCreationMaterialController;

@@ -48,7 +48,21 @@ adminRouter.put('/editQualityCheck',qualityCheckController.editQualityCheck);
 adminRouter.put('/editRework',reworkController.editRework);
 adminRouter.put('/editProductionOrderCreation',productionOrderCreationController.editProductionOrderCreation);
 adminRouter.put('/editRequestCreationForMaterials',requestCreationMaterialController.editRequestCreationForMaterials);
-
-
+adminRouter.put('/editMaterialAssignment',materialAssignmentController.editMaterialAssignment);
+adminRouter.put('/editBillOfMaterials',billOfMaterialsController.editBillOfMaterials);
+adminRouter.put('/editQualityInspection',qualityInspectionController.editQualityInspection);
+adminRouter.put('/editFinishedGoods',finishedGoodsController.editFinishedGoods);
+adminRouter.delete('/removeVendorManagement',vendorController.removeVendorManagement);
+adminRouter.delete('/removePurchaseOrderCreation',purchaseOrderController.removePurchaseOrderCreation);
+adminRouter.delete('/removeGateEntry',gateEntryController.removeGateEntry);
+adminRouter.delete('/removeCurrentStock',currentStockController.removeCurrentStock);
+adminRouter.delete('/removeQualityCheck',qualityCheckController.removeQualityCheck);
+adminRouter.delete('/removeRework',reworkController.removeRework);
+adminRouter.delete('/removeProductionOrderCreation',productionOrderCreationController.removeProductionOrderCreation);
+adminRouter.delete('/removeRequestCreationForMaterials',requestCreationMaterialController.removeRequestCreationForMaterials);
+adminRouter.delete('/removeMaterialAssignment',materialAssignmentController.removeMaterialAssignment);
+adminRouter.delete('/removeBillOfMaterials',billOfMaterialsController.removeBillOfMaterials);
+adminRouter.delete('/removeFinalQualityInspection',qualityInspectionController.removeFinalQualityInspection);
+adminRouter.delete('/removeFinishedGoods',finishedGoodsController.removeFinishedGoods);
 
 module.exports = adminRouter;

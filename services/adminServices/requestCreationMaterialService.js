@@ -147,4 +147,42 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
     });
   }
 };
+
+
+
+requestCreationMaterialService.removeRequestCreationForMaterials = async (
+  requestCreationId
+) => {
+  try {
+    const requestCreationForMaterials = await RequestCreationForMaterials.findByIdAndDelete(
+      requestCreationId
+    );
+
+    if(!requestCreationForMaterials){
+      return {
+        status: 201,
+        message: "Request creation for materials not found or can't able to delete right now,Please try again later",
+        token: "sampleToken",
+      };
+    }
+if(requestCreationForMaterials){
+return {
+  status: 201,
+  message: "Request creation for materials deleted successfully",
+  token: "sampleToken",
+};
+}
+
+  } catch (error) {
+    console.log(
+      "An error occured at request creation for materials remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in request creation for materials remove in current stock services",
+      });
+  }
+};
 module.exports = requestCreationMaterialService;

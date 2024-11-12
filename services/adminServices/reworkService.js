@@ -185,4 +185,40 @@ reworkService.fetchRework = async () => {
       });
     }
   };
+
+  reworkService.removeRework = async (
+    reworkId
+  ) => {
+    try {
+      const rework = await Rework.findByIdAndDelete(
+        reworkId
+      );
+
+      if(!rework){
+        return {
+          status: 201,
+          message: "Rework not found or can't able to delete right now,Please try again later",
+          token: "sampleToken",
+        };
+      }
+if(rework){
+  return {
+    status: 201,
+    message: "Rework deleted successfully",
+    token: "sampleToken",
+  };
+}
+
+    } catch (error) {
+      console.log(
+        "An error occured at rework remove",
+        error.message
+      );
+      res
+        .status(500)
+        .json({
+          info: "An error occured in rework remove in current stock services",
+        });
+    }
+  };
   module.exports = reworkService

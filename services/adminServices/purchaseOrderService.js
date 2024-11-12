@@ -7,8 +7,8 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({})
-    .sort({ createdAt: -1 })
-    .populate({ path: 'vendorId', select: 'nameOfTheFirm' });
+      .sort({ createdAt: -1 })
+      .populate({ path: "vendorId", select: "nameOfTheFirm" });
 
     return {
       status: 200,
@@ -19,11 +19,9 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
       "An error occured at fetching purchase orders in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in fetching purchase order in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in fetching purchase order in admin services",
+    });
   }
 };
 
@@ -38,7 +36,7 @@ purchaseOrderService.fetchFirms = async () => {
     return {
       status: 200,
       data: firmNames,
-      contact:contact
+      contact: contact,
     };
   } catch (error) {
     console.log(
@@ -128,11 +126,9 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       "An error occured at adding purchase order in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in adding new purchase order in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in adding new purchase order in admin services",
+    });
   }
 };
 
@@ -244,10 +240,41 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       token: "sampleToken",
     };
   } catch (error) {
-    console.log("An error occured at editing purchase order management", error.message);
+    console.log(
+      "An error occured at editing purchase order management",
+      error.message
+    );
     res
       .status(500)
-      .json({ info: "An error occured in purchase order creation management services" });
+      .json({
+        info: "An error occured in purchase order creation management services",
+      });
+  }
+};
+
+purchaseOrderService.removePurchaseOrderCreation = async (
+  purchaseOrderId
+) => {
+  try {
+    const purchaseOrder = await PurchaseOrderCreation.findByIdAndDelete(
+      purchaseOrderId
+    );
+
+    return {
+      status: 201,
+      message: "Purchase Order deleted successfully",
+      token: "sampleToken",
+    };
+  } catch (error) {
+    console.log(
+      "An error occured at Purchase Order Creation remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in Purchase Order Creation remove in vendor services",
+      });
   }
 };
 

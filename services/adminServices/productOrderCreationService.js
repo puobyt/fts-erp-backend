@@ -193,4 +193,40 @@ productOrderCreationService.editProductionOrderCreation = async (
   }
 };
 
+productOrderCreationService.removeProductionOrderCreation = async (
+  productionOrderId
+) => {
+  try {
+    const productionOrderCreation = await ProductionOrderCreation.findByIdAndDelete(
+      productionOrderId
+    );
+
+    if(!productionOrderCreation){
+      return {
+        status: 201,
+        message: "production order creation not found or can't able to delete right now,Please try again later",
+        token: "sampleToken",
+      };
+    }
+if(productionOrderCreation){
+return {
+  status: 201,
+  message: "production order creation deleted successfully",
+  token: "sampleToken",
+};
+}
+
+  } catch (error) {
+    console.log(
+      "An error occured at production order creation remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in productio order creation remove in current stock services",
+      });
+  }
+};
+
 module.exports = productOrderCreationService;

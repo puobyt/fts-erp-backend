@@ -124,4 +124,23 @@ productionOrderCreationController.editProductionOrderCreation = async (req, res)
     }
   };
 
+  productionOrderCreationController.removeProductionOrderCreation = async (req, res) => {
+    try {
+      console.log("deleting Rework...");
+  const {productionOrderId} = req.query;
+      // Pass the extracted data to the service function
+      const result = await productOrderCreationService.removeProductionOrderCreation(productionOrderId);
+  
+      res.status(result.status).json({
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing production order in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  };
 module.exports = productionOrderCreationController;

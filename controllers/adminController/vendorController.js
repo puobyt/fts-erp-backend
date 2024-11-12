@@ -114,4 +114,27 @@ vendorController.editVendorManagement = async (req, res) => {
   }
 };
 
+
+
+vendorController.removeVendorManagement = async (req, res) => {
+  try {
+    console.log("deleting vendor...");
+const {vendorId} = req.query;
+
+    // Pass the extracted data to the service function
+    const result = await vendorService.removeVendorManagement(vendorId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing vendor in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
 module.exports = vendorController;

@@ -49,4 +49,60 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
   }
 };
 
+
+qualityInspectionController.editQualityInspection = async (req, res) => {
+  try {
+    console.log("editing Quality Inspection..");
+
+    const {
+      authPassword,
+      qualityInspectionId,
+      inspectionNumber,
+      productName,
+      inspectionResults
+    } = req.body;
+
+    const result =
+      await qualityInspectionService.editQualityInspection({
+        authPassword,
+        qualityInspectionId,
+        inspectionNumber,
+        productName,
+        inspectionResults
+      });
+
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while editing Material Assignment in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in Server" });
+  }
+};
+
+qualityInspectionController.removeFinalQualityInspection = async (req, res) => {
+  try {
+    console.log("deleting Rework...");
+const {qualityInspectionId} = req.query;
+
+    const result = await qualityInspectionService.removeFinalQualityInspection(qualityInspectionId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing final quality inspection in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
 module.exports = qualityInspectionController;

@@ -136,4 +136,31 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
   }
 };
 
+
+gateEntryService.removeGateEntry = async (
+  gateEntryId
+) => {
+  try {
+    const gateEntry = await GateEntry.findByIdAndDelete(
+      gateEntryId
+    );
+
+    return {
+      status: 201,
+      message: "Gate Entry deleted successfully",
+      token: "sampleToken",
+    };
+  } catch (error) {
+    console.log(
+      "An error occured at Gate entry remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in Gate entry remove in gate entry services",
+      });
+  }
+};
+
 module.exports = gateEntryService;
