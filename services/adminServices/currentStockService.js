@@ -1,5 +1,6 @@
 const CurrentStock = require("../../models/currentStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -7,7 +8,7 @@ currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({}).sort({ createdAt: -1 });
     const purchaseOrderCreationData = await PurchaseOrderCreation.find({}, 'price quantity productName').sort({ createdAt: -1 });
-
+   
     return {
       status: 200,
       data: data,

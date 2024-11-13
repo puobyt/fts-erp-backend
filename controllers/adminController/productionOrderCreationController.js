@@ -4,7 +4,10 @@ const productOrderCreationService = require("../../services/adminServices/produc
 
 let productionOrderCreationController = {};
 
-productionOrderCreationController.fetchProductOrderCreation = async (req, res) => {
+productionOrderCreationController.fetchProductOrderCreation = async (
+  req,
+  res
+) => {
   try {
     console.log("loading product orders...");
 
@@ -14,6 +17,7 @@ productionOrderCreationController.fetchProductOrderCreation = async (req, res) =
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      batches: result.batches,
       userToken: "",
     });
   } catch (error) {
@@ -73,13 +77,30 @@ productionOrderCreationController.newProductionOrderCreation = async (
   }
 };
 
+productionOrderCreationController.editProductionOrderCreation = async (
+  req,
+  res
+) => {
+  try {
+    console.log("editing production order creation..");
 
+    const {
+      authPassword,
+      productionOrderId,
+      processOrder,
+      plant,
+      materialCode,
+      productDescription,
+      storageLocation,
+      batch,
+      requiredQuantity,
+      instructions,
+      startDate,
+      endDate,
+    } = req.body;
 
-productionOrderCreationController.editProductionOrderCreation = async (req, res) => {
-    try {
-      console.log("editing production order creation..");
-  
-      const {
+    const result =
+      await productOrderCreationService.editProductionOrderCreation({
         authPassword,
         productionOrderId,
         processOrder,
@@ -91,56 +112,46 @@ productionOrderCreationController.editProductionOrderCreation = async (req, res)
         requiredQuantity,
         instructions,
         startDate,
-        endDate
-      } = req.body;
-  
+        endDate,
+      });
 
-      const result = await productOrderCreationService.editProductionOrderCreation({
-        authPassword,
-        productionOrderId,
-        processOrder,
-        plant,
-        materialCode,
-        productDescription,
-        storageLocation,
-        batch,
-        requiredQuantity,
-        instructions,
-        startDate,
-        endDate
-      });
-  
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while editing production order creation in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred" });
-    }
-  };
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while editing production order creation in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred" });
+  }
+};
 
-  productionOrderCreationController.removeProductionOrderCreation = async (req, res) => {
-    try {
-      console.log("deleting Rework...");
-  const {productionOrderId} = req.query;
-      // Pass the extracted data to the service function
-      const result = await productOrderCreationService.removeProductionOrderCreation(productionOrderId);
-  
-      res.status(result.status).json({
-        message: result.message,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while removing production order in admin controller:",
-        error.message
+productionOrderCreationController.removeProductionOrderCreation = async (
+  req,
+  res
+) => {
+  try {
+    console.log("deleting Rework...");
+    const { productionOrderId } = req.query;
+    // Pass the extracted data to the service function
+    const result =
+      await productOrderCreationService.removeProductionOrderCreation(
+        productionOrderId
       );
-      res.status(500).json({ info: "An error occurred in server" });
-    }
-  };
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing production order in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
 module.exports = productionOrderCreationController;

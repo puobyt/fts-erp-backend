@@ -12,6 +12,7 @@ const materialAssignmentController = require('../controllers/adminController/mat
 const billOfMaterialsController = require('../controllers/adminController/billOfMaterialsController');
 const qualityInspectionController = require('../controllers/adminController/qualityInspectionController');
 const finishedGoodsController = require('../controllers/adminController/finishedGoodsController');
+const invoiceCreationController = require('../controllers/adminController/invoiceCreationController');
 
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);
@@ -26,6 +27,7 @@ adminRouter.get('/billOfMaterials',billOfMaterialsController.fetchbillOfMaterial
 adminRouter.get('/qualityInpsection',qualityInspectionController.fetchQualityInspection);
 adminRouter.get('/finishedGoods',finishedGoodsController.fetchFinishedGoods);
 adminRouter.get('/firms',purchaseOrderController.fetchFirms);
+adminRouter.get('/invoiceCreations',invoiceCreationController.fetchInvoiceCreations);
 
 adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement); 
 adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchaseOrderCreation);
@@ -39,7 +41,9 @@ adminRouter.post('/newMaterialAssignment',materialAssignmentController.newMateri
 adminRouter.post('/newBillOfMaterials',billOfMaterialsController.newBillOfMaterials);
 adminRouter.post('/newQualityInspection',qualityInspectionController.newQualityInspection);
 adminRouter.post('/newFinishedGoods',finishedGoodsController.newFinishedGoods);
+adminRouter.post('/newInvoiceCreation',invoiceCreationController.newInvoiceCreation);
 
+adminRouter.put('/editInvoiceCreation',invoiceCreationController.editInvoiceCreation);
 adminRouter.put('/editVendorManagmenent',vendorController.editVendorManagement);
 adminRouter.put('/editPurchaseOrderCreation',purchaseOrderController.editPurchaseOrderCreation);
 adminRouter.put('/editGateEntry',gateEntryController.editGateEntry);
@@ -52,6 +56,7 @@ adminRouter.put('/editMaterialAssignment',materialAssignmentController.editMater
 adminRouter.put('/editBillOfMaterials',billOfMaterialsController.editBillOfMaterials);
 adminRouter.put('/editQualityInspection',qualityInspectionController.editQualityInspection);
 adminRouter.put('/editFinishedGoods',finishedGoodsController.editFinishedGoods);
+
 adminRouter.delete('/removeVendorManagement',vendorController.removeVendorManagement);
 adminRouter.delete('/removePurchaseOrderCreation',purchaseOrderController.removePurchaseOrderCreation);
 adminRouter.delete('/removeGateEntry',gateEntryController.removeGateEntry);
@@ -64,5 +69,7 @@ adminRouter.delete('/removeMaterialAssignment',materialAssignmentController.remo
 adminRouter.delete('/removeBillOfMaterials',billOfMaterialsController.removeBillOfMaterials);
 adminRouter.delete('/removeFinalQualityInspection',qualityInspectionController.removeFinalQualityInspection);
 adminRouter.delete('/removeFinishedGoods',finishedGoodsController.removeFinishedGoods);
+adminRouter.delete('/removeInvoiceCreation',invoiceCreationController.removeInvoiceCreation);
+
 
 module.exports = adminRouter;

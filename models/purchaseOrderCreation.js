@@ -25,7 +25,7 @@ const PurchaseOrderCreationSchema = new mongoose.Schema(
     },
 
     vendorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type:String ,
       ref: 'VendorManagement', 
     },
     

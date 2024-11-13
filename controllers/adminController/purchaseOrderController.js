@@ -33,12 +33,11 @@ purchaseOrderController.fetchFirms = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      contact:result.contact,
       userToken: "",
     });
   } catch (error) {
-    console.log(
-      "An error occurred while fetching bill Of Materials in admin controller:",
+    console.log( 
+      "An error occurred while fetching fetch Firms in admin controller:",
       error.message
     );
     res.status(500).json({ info: "An error occurred in server" });

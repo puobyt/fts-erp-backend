@@ -17,6 +17,7 @@ requestCreationMaterialController.fetchRequestCreationForMaterials = async (
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      materials:result.materials,
       userToken: "",
     });
   } catch (error) {

@@ -13,6 +13,7 @@ qualityCheckController.fetchQualityCheck = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      batches:result.batches,
       userToken: "",
     });
   } catch (error) {
@@ -112,6 +113,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
       res.status(result.status).json({
         message: result.message,
         userToken: result.token,
+        
       });
     } catch (error) {
       console.log(

@@ -152,8 +152,6 @@ reworkService.fetchRework = async () => {
         const reworkUpdate = await Rework.findByIdAndUpdate(
             reworkId,
           {
-            authPassword,
-            reworkId,
             batchNumber ,
             materialName,
             inspectionDate ,

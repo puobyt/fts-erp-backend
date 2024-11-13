@@ -1,3 +1,4 @@
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 let requestCreationMaterialService = {};
 require("dotenv").config();
@@ -8,10 +9,12 @@ requestCreationMaterialService.fetchRequestCreationForMaterials = async () => {
     const data = await RequestCreationForMaterials.find({}).sort({
       createdAt: -1,
     });
+    const materials = await PurchaseOrderCreation.distinct('productName');
 
     return {
       status: 200,
       data: data,
+      materials:materials
     };
   } catch (error) {
     console.log(

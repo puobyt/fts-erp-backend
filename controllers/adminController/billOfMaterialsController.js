@@ -13,6 +13,7 @@ billOfMaterialsController.fetchbillOfMaterials = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      productNames:result.productNames,
       userToken: "",
     });
   } catch (error) {

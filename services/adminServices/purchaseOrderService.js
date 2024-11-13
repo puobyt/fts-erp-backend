@@ -8,7 +8,7 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({})
       .sort({ createdAt: -1 })
-      .populate({ path: "vendorId", select: "nameOfTheFirm" });
+   
 
     return {
       status: 200,
@@ -31,12 +31,11 @@ purchaseOrderService.fetchFirms = async () => {
     // .sort({ createdAt: -1 })
     // .exec();
 
-    const firmNames = await VendorManagement.distinct("nameOfTheFirm");
-    const contact = await VendorManagement.distinct("contact");
+    const firmNames = await VendorManagement.find({});
+
     return {
       status: 200,
       data: firmNames,
-      contact: contact,
     };
   } catch (error) {
     console.log(

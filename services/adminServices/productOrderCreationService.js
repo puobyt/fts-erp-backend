@@ -1,4 +1,5 @@
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 let productOrderCreationService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -6,10 +7,11 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 productOrderCreationService.fetchProductOrderCreation = async () => {
   try {
     const data = await ProductionOrderCreation.find({}).sort({ createdAt: -1 });
-
+const batches = await PurchaseOrderCreation.distinct('batchNumber');
     return {
       status: 200,
       data: data,
+      batches:batches
     };
   } catch (error) {
     console.log(

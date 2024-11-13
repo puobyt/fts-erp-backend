@@ -1,6 +1,7 @@
 
 const FinalQualityInspection = require("../../models/finalQualityInspection");
-
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+   
 let qualityInspectionService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -8,10 +9,11 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 qualityInspectionService.fetchQualityInspection = async () => {
     try {
       const data = await FinalQualityInspection.find({}).sort({createdAt:-1})
-  
+      const productNames = await PurchaseOrderCreation.distinct('productName');
       return {
         status: 200,
         data: data,
+        productNames:productNames
       };
     } catch (error) {
       console.log("An error occured at fetching Quality Inspection in admin service", error.message);

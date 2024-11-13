@@ -1,4 +1,6 @@
 const BillOfMaterials = require("../../models/billOfMaterials");
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+ 
 let billOfMaterialsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -6,10 +8,11 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 billOfMaterialsService.fetchbillOfMaterials = async () => {
   try {
     const data = await BillOfMaterials.find({}).sort({ createdAt: -1 });
-
+    const productNames = await PurchaseOrderCreation.distinct('productName');
     return {
       status: 200,
       data: data,
+      productNames:productNames
     };
   } catch (error) {
     console.log(

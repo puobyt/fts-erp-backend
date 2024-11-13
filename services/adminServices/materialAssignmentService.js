@@ -1,4 +1,6 @@
 const MaterialAssignment = require("../../models/materialAssignment");
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -6,10 +8,11 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 materialAssignmentService.fetchMaterialAssignment = async () => {
   try {
     const data = await MaterialAssignment.find({}).sort({ createdAt: -1 });
-
+    const materials = await PurchaseOrderCreation.distinct('productName');
     return {
       status: 200,
       data: data,
+      materials:materials
     };
   } catch (error) {
     console.log(
