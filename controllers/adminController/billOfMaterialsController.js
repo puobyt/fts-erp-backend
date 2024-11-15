@@ -29,12 +29,13 @@ billOfMaterialsController.newBillOfMaterials = async (req, res) => {
   try {
     console.log("Adding new Bill Of Materials ");
 
-    const { bomNumber, productName, materialsList } = req.body;
+    const { bomNumber, productName, materialsList,quantity } = req.body;
 
     const result = await billOfMaterialsService.newBillOfMaterials({
       bomNumber,
       productName,
       materialsList,
+      quantity
     });
 
     res.status(result.status).json({
@@ -61,7 +62,8 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materialsList
+      materialsList,
+      quantity
     } = req.body;
 
     const result =
@@ -70,7 +72,8 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
         billOfMaterialsId,
         bomNumber,
         productName,
-        materialsList
+        materialsList,
+        quantity
       });
 
     res.status(result.status).json({

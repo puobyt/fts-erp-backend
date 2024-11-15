@@ -1,6 +1,6 @@
 const MaterialAssignment = require("../../models/materialAssignment");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
-
+const FinishedGoods = require('../../models/finishedGoods')
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -8,35 +8,45 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 materialAssignmentService.fetchMaterialAssignment = async () => {
   try {
     const data = await MaterialAssignment.find({}).sort({ createdAt: -1 });
-    const materials = await PurchaseOrderCreation.distinct('productName');
+
+    const products = await PurchaseOrderCreation.distinct('productName');
+    const finishedGoods = await FinishedGoods.distinct('finishedGoodsName');
     return {
       status: 200,
       data: data,
-      materials:materials
+      products:products,
+      finishedGoods:finishedGoods
     };
   } catch (error) {
     console.log(
       "An error occured at fetching Material Assignment in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in fetching Material Assignment in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in fetching Material Assignment in admin services",
+    });
   }
 };
 materialAssignmentService.newMaterialAssignment = async (materialData) => {
   try {
-    const { assignmentNumber, materialName, assignedQuantity, assignedTo } =
-      materialData;
+    const {
+      assignmentNumber,
+      batchNumber,
+      processOrderNumber,
+      materialName,
+      assignedQuantity,
+      assignedTo,
+    } = materialData;
 
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
+        { batchNumber: batchNumber },
+        { processOrderNumber: processOrderNumber },
         { materialName: materialName },
         { assignedQuantity: assignedQuantity },
         { assignedTo: assignedTo },
+        { batchNumber: batchNumber },
       ],
     });
 
@@ -49,6 +59,8 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
     const newData = new MaterialAssignment({
       assignmentNumber,
+      batchNumber,
+      processOrderNumber,
       materialName,
       assignedQuantity,
       assignedTo,
@@ -66,11 +78,9 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       "An error occured at adding new Material Assignment in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in adding new Material Assignment in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in adding new Material Assignment in admin services",
+    });
   }
 };
 
@@ -82,6 +92,8 @@ materialAssignmentService.editMaterialAssignment = async (
       authPassword,
       materialAssignmentId,
       assignmentNumber,
+      batchNumber,
+      processOrderNumber,
       materialName,
       assignedQuantity,
       assignedTo,
@@ -97,9 +109,12 @@ materialAssignmentService.editMaterialAssignment = async (
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
+        { batchNumber: batchNumber },
+        { processOrderNumber: processOrderNumber },
         { materialName: materialName },
         { assignedQuantity: assignedQuantity },
         { assignedTo: assignedTo },
+        { batchNumber: batchNumber },
       ],
     });
 
@@ -107,9 +122,12 @@ materialAssignmentService.editMaterialAssignment = async (
       $and: [
         { _id: materialAssignmentId },
         { assignmentNumber: assignmentNumber },
+        { batchNumber: batchNumber },
+        { processOrderNumber: processOrderNumber },
         { materialName: materialName },
         { assignedQuantity: assignedQuantity },
         { assignedTo: assignedTo },
+        { batchNumber: batchNumber },
       ],
     });
 
@@ -125,6 +143,8 @@ materialAssignmentService.editMaterialAssignment = async (
           materialAssignmentId,
           {
             assignmentNumber,
+            batchNumber,
+            processOrderNumber,
             materialName,
             assignedQuantity,
             assignedTo,
@@ -142,7 +162,10 @@ materialAssignmentService.editMaterialAssignment = async (
       token: "sampleToken",
     };
   } catch (error) {
-    console.log("An error occured at editing Material Assignment in services", error.message);
+    console.log(
+      "An error occured at editing Material Assignment in services",
+      error.message
+    );
     res.status(500).json({
       info: "An error occured in Material Assignment services",
     });
@@ -157,10 +180,11 @@ materialAssignmentService.removeMaterialAssignment = async (
       materialAssignmentId
     );
 
-    if(!materialAssignment){
+    if (!materialAssignment) {
       return {
         status: 201,
-        message: "Material assignment not found or can't able to delete right now,Please try again later",
+        message:
+          "Material assignment not found or can't able to delete right now,Please try again later",
         token: "sampleToken",
       };
     }
@@ -174,11 +198,9 @@ materialAssignmentService.removeMaterialAssignment = async (
       "An error occured at material asssignment remove",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in material asssignment remove in gate entry services",
-      });
+    res.status(500).json({
+      info: "An error occured in material asssignment remove in gate entry services",
+    });
   }
 };
 

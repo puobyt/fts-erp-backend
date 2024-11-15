@@ -11,6 +11,9 @@ const schema = new mongoose.Schema(
     materialsList: {
       type: String,
     },
+    quantity: {
+      type: String,
+    },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },

@@ -14,6 +14,7 @@ qualityCheckController.fetchQualityCheck = async (req, res) => {
       message: result.message,
       data: result.data,
       batches:result.batches,
+      products:result.products,
       userToken: "",
     });
   } catch (error) {

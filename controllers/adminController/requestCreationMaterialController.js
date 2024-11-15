@@ -17,7 +17,8 @@ requestCreationMaterialController.fetchRequestCreationForMaterials = async (
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      materials:result.materials,
+      products:result.products,
+      finishedGoods:result.finishedGoods,
       userToken: "",
     });
   } catch (error) {
@@ -36,11 +37,12 @@ requestCreationMaterialController.newRequestCreationForMaterials = async (
   try {
     console.log("Adding new  Request Creation For Materials creation ");
 
-    const { requestNumber, materialName, quantity, requiredDate } = req.body;
+    const { requestNumber,batchNumber, materialName, quantity, requiredDate } = req.body;
 
     const result =
       await requestCreationMaterialService.newRequestCreationForMaterials({
         requestNumber,
+        batchNumber,
         materialName,
         quantity,
         requiredDate,
@@ -69,6 +71,7 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
         authPassword,
         requestMaterialsId,
         requestNumber,
+        batchNumber,
         materialName,
         quantity,
         requiredDate
@@ -79,6 +82,7 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
         authPassword,
         requestMaterialsId,
         requestNumber,
+        batchNumber,
         materialName,
         quantity,
         requiredDate

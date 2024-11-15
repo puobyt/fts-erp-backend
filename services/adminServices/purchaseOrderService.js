@@ -8,11 +8,12 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({})
       .sort({ createdAt: -1 })
-   
+      const firms = await VendorManagement.find({});
 
     return {
       status: 200,
       data: orders,
+      firms:firms
     };
   } catch (error) {
     console.log(
@@ -25,28 +26,28 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   }
 };
 
-purchaseOrderService.fetchFirms = async () => {
-  try {
-    // const firms = await VendorManagement.find({}, 'nameOfTheFirm')
-    // .sort({ createdAt: -1 })
-    // .exec();
+// purchaseOrderService.fetchFirms = async () => {
+//   try {
+//     // const firms = await VendorManagement.find({}, 'nameOfTheFirm')
+//     // .sort({ createdAt: -1 })
+//     // .exec();
 
-    const firmNames = await VendorManagement.find({});
+//     const firmNames = await VendorManagement.find({});
 
-    return {
-      status: 200,
-      data: firmNames,
-    };
-  } catch (error) {
-    console.log(
-      "An error occured at fetching Firms in admin service",
-      error.message
-    );
-    res
-      .status(500)
-      .json({ info: "An error occured in fetching Firms in admin services" });
-  }
-};
+//     return {
+//       status: 200,
+//       data: firmNames,
+//     };
+//   } catch (error) {
+//     console.log(
+//       "An error occured at fetching Firms in admin service",
+//       error.message
+//     );
+//     res
+//       .status(500)
+//       .json({ info: "An error occured in fetching Firms in admin services" });
+//   }
+// };
 
 purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
   try {

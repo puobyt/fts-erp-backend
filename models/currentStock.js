@@ -17,6 +17,9 @@ const schema = new mongoose.Schema(
     dateRecieved: {
       type: Date,
     },
+    expiryDate: {
+      type: Date,
+    },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },

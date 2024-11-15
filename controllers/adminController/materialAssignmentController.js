@@ -1,6 +1,7 @@
 const express = require("express");
 
 const materialAssignmentService = require("../../services/adminServices/materialAssignmentService");
+const finishedGoods = require("../../models/finishedGoods");
 
 let materialAssignmentController = {};
 
@@ -13,7 +14,8 @@ materialAssignmentController.fetchMaterialAssignment = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      materials:result.materials,
+      products:result.products,
+      finishedGoods:result.finishedGoods,
       userToken: "",
     });
   } catch (error) {
@@ -28,11 +30,13 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
   try {
     console.log("Adding new Material Assignment ");
 
-    const { assignmentNumber, materialName, assignedQuantity, assignedTo } =
+    const { assignmentNumber,batchNumber,processOrderNumber, materialName, assignedQuantity, assignedTo } =
       req.body;
 
     const result = await materialAssignmentService.newMaterialAssignment({
       assignmentNumber,
+      batchNumber,
+      processOrderNumber,
       materialName,
       assignedQuantity,
       assignedTo,
@@ -60,6 +64,8 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
       authPassword,
       materialAssignmentId,
       assignmentNumber,
+      batchNumber,
+      processOrderNumber,
       materialName,
       assignedQuantity,
       assignedTo,
@@ -70,6 +76,8 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
         authPassword,
         materialAssignmentId,
         assignmentNumber,
+        batchNumber,
+        processOrderNumber,
         materialName,
         assignedQuantity,
         assignedTo,

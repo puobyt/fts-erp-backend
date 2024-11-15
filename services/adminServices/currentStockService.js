@@ -7,12 +7,15 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({}).sort({ createdAt: -1 });
-    const purchaseOrderCreationData = await PurchaseOrderCreation.find({}, 'price quantity productName').sort({ createdAt: -1 });
-   
+    const purchaseOrderCreationData = await PurchaseOrderCreation.find(
+      {},
+      "price quantity productName"
+    ).sort({ createdAt: -1 });
+
     return {
       status: 200,
       data: data,
-      purchaseOrderCreationData:purchaseOrderCreationData
+      purchaseOrderCreationData: purchaseOrderCreationData,
     };
   } catch (error) {
     console.log(
@@ -27,7 +30,7 @@ currentStockService.fetchCurrentStock = async () => {
 
 currentStockService.newCurrentStock = async (newStockData) => {
   try {
-    const { productName, quantity, price, supplier, dateRecieved } =
+    const { productName, quantity, price, supplier, dateRecieved, expiryDate } =
       newStockData;
 
     const existing = await CurrentStock.findOne({
@@ -37,6 +40,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
         { price: price },
         { supplier: supplier },
         { dateRecieved: dateRecieved },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -53,6 +57,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       price,
       supplier,
       dateRecieved,
+      expiryDate,
     });
 
     await newStock.save();
@@ -83,6 +88,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       price,
       supplier,
       dateRecieved,
+      expiryDate,
     } = currentStockData;
 
     if (adminAuthPassword !== authPassword) {
@@ -99,6 +105,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { price: price },
         { supplier: supplier },
         { dateRecieved: dateRecieved },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -110,6 +117,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { price: price },
         { supplier: supplier },
         { dateRecieved: dateRecieved },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -127,6 +135,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
           price,
           supplier,
           dateRecieved,
+          expiryDate
         },
         {
           new: true,
@@ -148,32 +157,21 @@ currentStockService.editCurrentStock = async (currentStockData) => {
   }
 };
 
-
-currentStockService.removeCurrentStock = async (
-  currentStockId
-) => {
+currentStockService.removeCurrentStock = async (currentStockId) => {
   try {
-    const currentStock = await CurrentStock.findByIdAndDelete(
-      currentStockId
-    );
- if(currentStock){
-  return {
-    status: 201,
-    message: "current stock deleted successfully",
-    token: "sampleToken",
-  };
- }
-
+    const currentStock = await CurrentStock.findByIdAndDelete(currentStockId);
+    if (currentStock) {
+      return {
+        status: 201,
+        message: "current stock deleted successfully",
+        token: "sampleToken",
+      };
+    }
   } catch (error) {
-    console.log(
-      "An error occured at current stock remove",
-      error.message
-    );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in current Stock remove in current stock services",
-      });
+    console.log("An error occured at current stock remove", error.message);
+    res.status(500).json({
+      info: "An error occured in current Stock remove in current stock services",
+    });
   }
 };
 

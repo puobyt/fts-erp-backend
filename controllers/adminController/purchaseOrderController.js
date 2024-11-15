@@ -13,6 +13,7 @@ purchaseOrderController.fetchPurchaseOrderCreation = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      firms:result.firms,
       userToken: "",
     });
   } catch (error) {
@@ -24,25 +25,25 @@ purchaseOrderController.fetchPurchaseOrderCreation = async (req, res) => {
   }
 };
 
-purchaseOrderController.fetchFirms = async (req, res) => {
-  try {
-    console.log("loading Firms...");
+// purchaseOrderController.fetchFirms = async (req, res) => {
+//   try {
+//     console.log("loading Firms...");
 
-    const result = await purchaseOrderService.fetchFirms();
+//     const result = await purchaseOrderService.fetchFirms();
 
-    res.status(result.status).json({
-      message: result.message,
-      data: result.data,
-      userToken: "",
-    });
-  } catch (error) {
-    console.log( 
-      "An error occurred while fetching fetch Firms in admin controller:",
-      error.message
-    );
-    res.status(500).json({ info: "An error occurred in server" });
-  }
-};
+//     res.status(result.status).json({
+//       message: result.message,
+//       data: result.data,
+//       userToken: "",
+//     });
+//   } catch (error) {
+//     console.log( 
+//       "An error occurred while fetching fetch Firms in admin controller:",
+//       error.message
+//     );
+//     res.status(500).json({ info: "An error occurred in server" });
+//   }
+// };
 
 purchaseOrderController.newPurchaseOrderCreation = async (req, res) => {
   try {

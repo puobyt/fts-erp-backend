@@ -5,6 +5,12 @@ const schema = new mongoose.Schema(
     assignmentNumber: {
       type: String,
     },
+    batchNumber: {
+      type: String,
+    },
+    processOrderNumber: {
+      type: String,
+    },
     materialName: {
       type: String,
     },

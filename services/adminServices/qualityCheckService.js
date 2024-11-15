@@ -1,6 +1,6 @@
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const QualityCheck = require("../../models/qualityCheck");
-
+const CurrentStock = require("../../models/currentStock");
 let qualityCheckService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -22,12 +22,14 @@ qualityCheckService.fetchQualityCheck = async () => {
         },
       },
     ]);
+    const products = await CurrentStock.distinct('productName')
 
     console.log(batches);
     return {
       status: 200,
       data: data,
       batches: batches,
+      products:products
     };
   } catch (error) {
     console.log(

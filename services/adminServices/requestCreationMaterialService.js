@@ -1,5 +1,6 @@
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
+const FinishedGoods = require('../../models/finishedGoods')
 let requestCreationMaterialService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -9,12 +10,14 @@ requestCreationMaterialService.fetchRequestCreationForMaterials = async () => {
     const data = await RequestCreationForMaterials.find({}).sort({
       createdAt: -1,
     });
-    const materials = await PurchaseOrderCreation.distinct('productName');
+    const products = await PurchaseOrderCreation.distinct('productName');
+    const finishedGoods = await FinishedGoods.distinct('finishedGoodsName');
 
     return {
       status: 200,
       data: data,
-      materials:materials
+      products:products,
+      finishedGoods:finishedGoods
     };
   } catch (error) {
     console.log(
@@ -32,7 +35,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber, materialName, quantity, requiredDate } =
+    const { requestNumber,batchNumber, materialName, quantity, requiredDate } =
       requestCreationData;
 
     const existing = await RequestCreationForMaterials.findOne({
@@ -41,6 +44,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
         { materialName: materialName },
         { quantity: quantity },
         { requiredDate: requiredDate },
+        { batchNumber: batchNumber },
       ],
     });
 
@@ -54,6 +58,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
 
     const newData = new RequestCreationForMaterials({
       requestNumber,
+      batchNumber,
       materialName,
       quantity,
       requiredDate,
@@ -87,6 +92,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       authPassword,
       requestMaterialsId,
       requestNumber,
+      batchNumber,
       materialName,
       quantity,
       requiredDate,
@@ -103,6 +109,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         { materialName: materialName },
         { quantity: quantity },
         { requiredDate: requiredDate },
+        { batchNumber: batchNumber },
       ],
     });
     const currentRequestMaterialsOrder =
@@ -113,6 +120,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           { materialName: materialName },
           { quantity: quantity },
           { requiredDate: requiredDate },
+          { batchNumber: batchNumber },
         ],
       });
     if (existing && !currentRequestMaterialsOrder) {
@@ -127,6 +135,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           requestMaterialsId,
           {
             requestNumber,
+            batchNumber,
             materialName,
             quantity,
             requiredDate,

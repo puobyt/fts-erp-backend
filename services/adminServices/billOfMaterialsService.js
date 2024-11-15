@@ -26,13 +26,14 @@ billOfMaterialsService.fetchbillOfMaterials = async () => {
 };
 billOfMaterialsService.newBillOfMaterials = async (bomData) => {
   try {
-    const { bomNumber, productName, materialsList } = bomData;
+    const { bomNumber, productName, materialsList,quantity } = bomData;
 
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },
         { productName: productName },
         { materialsList: materialsList },
+        { quantity: quantity },
       ],
     });
 
@@ -47,6 +48,7 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
       bomNumber,
       productName,
       materialsList,
+      quantity
     });
 
     await newData.save();
@@ -75,6 +77,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
       bomNumber,
       productName,
       materialsList,
+      quantity
     } = billOfMaterialsData;
 
     if (adminAuthPassword !== authPassword) {
@@ -88,6 +91,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         { bomNumber: bomNumber },
         { productName: productName },
         { materialsList: materialsList },
+        { quantity: quantity },
       ],
     });
 
@@ -97,6 +101,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         { bomNumber: bomNumber },
         { productName: productName },
         { materialsList: materialsList },
+        { quantity: quantity },
       ],
     });
 
@@ -113,6 +118,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
           bomNumber,
           productName,
           materialsList,
+          quantity
         },
         {
           new: true,

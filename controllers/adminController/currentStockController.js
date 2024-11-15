@@ -28,7 +28,7 @@ currentStockController.newCurrentStock = async (req, res) => {
   try {
     console.log("Adding new current stock ");
 
-    const { productName, quantity, price, supplier, dateRecieved } = req.body;
+    const { productName, quantity, price, supplier, dateRecieved,expiryDate } = req.body;
 
     const result = await currentStockService.newCurrentStock({
       productName,
@@ -36,6 +36,7 @@ currentStockController.newCurrentStock = async (req, res) => {
       price,
       supplier,
       dateRecieved,
+      expiryDate
     });
 
     res.status(result.status).json({
@@ -64,6 +65,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       price,
       supplier,
       dateRecieved,
+      expiryDate
     } = req.body;
 
     // Pass the extracted data to the service function
@@ -75,6 +77,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       price,
       supplier,
       dateRecieved,
+      expiryDate
     });
 
     res.status(result.status).json({

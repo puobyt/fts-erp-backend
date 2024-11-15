@@ -1,21 +1,34 @@
 const mongoose = require("mongoose");
 
+
 const schema = new mongoose.Schema(
   {
-    requestNumber: {
+    producedQuantity: {
       type: String,
     },
-    batchNumber: {
-      type: String,
-    },
-    materialName: {
-      type: String,
-    },
-    quantity: {
-      type: String,
-    },
-    requiredDate: {
+    productionCompletionDate: {
       type: Date,
+    },
+    qualityCheckStatus: {
+      type: String,
+    },
+    storageLocationforOutput: {
+      type: String,
+    },
+    batchNumberforOutput: {
+      type: String,
+    },
+    productionNotes: {
+      type: String,
+    },
+    Yield: {
+      type: String,
+    },
+    outputQualityRating: {
+      type: String,
+    },
+    outputHandlingInstructions: {
+      type: String,
     },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
@@ -33,4 +46,4 @@ const schema = new mongoose.Schema(
 
 schema.plugin(require("mongoose-autopopulate"));
 
-module.exports = mongoose.model("RequestCreationForMaterials", schema);
+module.exports = mongoose.model("ProductionOrderCreationOutput", schema);
