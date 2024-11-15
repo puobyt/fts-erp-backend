@@ -52,7 +52,7 @@ adminService.signUp = async (userName, email, password) => {
     const OTP = otpGenerator(6);
     const text = `Your OTP is:${OTP}. Please use this code to verify your identity.`;
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    sendMail(email, text);
+    sendMail(email, OTP);
     console.log("sendMail executed");
 
     const pendingAdmin = new PendingAdmin({
