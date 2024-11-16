@@ -22,21 +22,15 @@ adminController.signIn = async (req, res) => {
   }
 };
 
-
-
-
-
 adminController.signUp = async (req, res) => {
   try {
-    const { userName,email,password  } = req.body;
+    const { userName, email, password } = req.body;
 
-
-    const result = await adminService.signUp(userName, email,password);
-
+    const result = await adminService.signUp(userName, email, password);
 
     res.status(result.status).json({
       message: result.message,
-      success:result.success,
+      success: result.success,
     });
   } catch (err) {
     console.error("Error occurred in sign up data", err);
@@ -46,16 +40,16 @@ adminController.signUp = async (req, res) => {
 
 adminController.verifyOtp = async (req, res) => {
   try {
-    const { otp,email} = req.body;
-console.log('otp,email:',otp,email);
-    const result = await adminService.verifyOtp(otp,email);
+    const { otp, email } = req.body;
+    console.log("otp,email:", otp, email);
+    const result = await adminService.verifyOtp(otp, email);
 
     console.log("token after generated", result.token);
 
     res.status(result.status).json({
       message: result.message,
       userToken: result.token,
-      success:result.success
+      success: result.success,
     });
   } catch (err) {
     console.error("Error occurred in login data", err);

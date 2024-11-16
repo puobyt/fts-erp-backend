@@ -1,9 +1,9 @@
-const {Admin} = require("../../models/admin");
+const { Admin } = require("../../models/admin");
 const { GenerateTokenAdmin } = require("../../configs/adminAuth");
 const bcrypt = require("bcrypt");
 const otpGenerator = require("../../configs/otpGenerator");
 const sendMail = require("../../configs/otpMailer");
-const {PendingAdmin} = require("../../models/admin");
+const { PendingAdmin } = require("../../models/admin");
 let adminService = {};
 
 adminService.signIn = async (email, password) => {
@@ -75,27 +75,31 @@ adminService.signUp = async (userName, email, password) => {
   }
 };
 
-adminService.verifyOtp = async (otp,email) => {
-
-  const pendingAdmin =  await PendingAdmin.findOne({ email,OTP:otp });
+adminService.verifyOtp = async (otp, email) => {
+  const pendingAdmin = await PendingAdmin.findOne({ email, OTP: otp });
   if (!pendingAdmin) {
     console.log("not verified");
-    return { status: 400, message: " OTP is invalid" ,success:false };
+    return { status: 400, message: " OTP is invalid", success: false };
   }
 
   if (new Date() > pendingAdmin.otpExpiresAt) {
     await PendingAdmin.deleteMany({ email });
     return { status: 400, message: "OTP expired" };
   }
-const newAdmin = new Admin({
-  fullname: pendingAdmin.userName,
-  email: pendingAdmin.email,
-  password: pendingAdmin.password,
-})
+  const newAdmin = new Admin({
+    userName: pendingAdmin.userName,
+    email: pendingAdmin.email,
+    password: pendingAdmin.password,
+  });
 
-await newAdmin.save();
-await PendingAdmin.deleteMany({ email });
-  return { status: 201, success: true,userToken:'' ,message: "Sign up successfull" };
+  await newAdmin.save();
+  await PendingAdmin.deleteMany({ email });
+  return {
+    status: 201,
+    success: true,
+    userToken: "",
+    message: "Sign up successfull",
+  };
 };
 
 module.exports = adminService;

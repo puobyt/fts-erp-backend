@@ -7,7 +7,6 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({})
-      .sort({ createdAt: -1 })
       const firms = await VendorManagement.find({});
 
     return {

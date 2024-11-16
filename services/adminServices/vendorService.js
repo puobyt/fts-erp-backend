@@ -6,7 +6,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 vendorService.vendorManagement = async (newVendorData) => {
   try {
-    const vendors = await VendorManagement.find({}).sort({ createdAt: -1 });
+    const vendors = await VendorManagement.find({})
 
     return {
       status: 200,

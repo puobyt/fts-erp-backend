@@ -7,7 +7,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 qualityCheckService.fetchQualityCheck = async () => {
   try {
-    const data = await QualityCheck.find({}).sort({ createdAt: -1 });
+    const data = await QualityCheck.find({})
     const batches = await PurchaseOrderCreation.aggregate([
       {
         $group: {

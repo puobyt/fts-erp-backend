@@ -6,7 +6,7 @@ require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
-    const data = await CurrentStock.find({}).sort({ createdAt: -1 });
+    const data = await CurrentStock.find({})
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},
       "price quantity productName"

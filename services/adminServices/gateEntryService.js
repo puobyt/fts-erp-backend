@@ -6,7 +6,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 gateEntryService.fetchGateEntry = async () => {
   try {
-    const gateEntry = await GateEntry.find({}).sort({ createdAt: -1 });
+    const gateEntry = await GateEntry.find({})
     const firmNames = await VendorManagement.distinct("nameOfTheFirm");
     return {
       status: 200,

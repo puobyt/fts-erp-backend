@@ -6,13 +6,18 @@ const adminSchema = new mongoose.Schema(
       type: String,
       unique: true,
       trim: true,
+      required: [true, "User name is required"], // Add this line
     },
     email: {
       type: String,
       unique: true,
       trim: true,
+      required: [true, "Email is required"], // Add this line
     },
-    password: String,
+    password: {
+      type: String,
+      required: [true, "Password is required"], // Add this line
+    },
   },
   { timestamps: true }
 );
