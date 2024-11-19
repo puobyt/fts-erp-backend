@@ -13,12 +13,16 @@ const billOfMaterialsController = require('../controllers/adminController/billOf
 const qualityInspectionController = require('../controllers/adminController/qualityInspectionController');
 const finishedGoodsController = require('../controllers/adminController/finishedGoodsController');
 const invoiceCreationController = require('../controllers/adminController/invoiceCreationController');
-const adminController = require('../controllers/adminController/adminController')
+const adminController = require('../controllers/adminController/adminController');
+const mainStockController = require('../controllers/adminController/mainStockController');
+
+
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);
 adminRouter.get('/gateEntry',gateEntryController.fetchGateEntry);
 adminRouter.get('/currentStock',currentStockController.fetchCurrentStock);
 adminRouter.get('/qualityCheck',qualityCheckController.fetchQualityCheck);
+adminRouter.get('/mainStock',mainStockController.fetchMainStock);
 adminRouter.get('/rework',reworkController.fetchRework);
 adminRouter.get('/productionOrderCreation',productionOrderCreationController.fetchProductOrderCreation);
 adminRouter.get('/productionOrderCreationOutput',productionOrderCreationController.fetchProductOrderCreationOutput);
@@ -35,6 +39,7 @@ adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchase
 adminRouter.post('/newGateEntry',gateEntryController.newGateEntry);
 adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
+adminRouter.post('/newMainStock',mainStockController.newMainStock);
 adminRouter.post('/newRework',reworkController.newRework);
 adminRouter.post('/newProductionOrderCreation',productionOrderCreationController.newProductionOrderCreation);
 adminRouter.post('/newProductionOrderCreationOutput',productionOrderCreationController.newProductionOrderCreationOutput);
@@ -51,6 +56,7 @@ adminRouter.put('/editPurchaseOrderCreation',purchaseOrderController.editPurchas
 adminRouter.put('/editGateEntry',gateEntryController.editGateEntry);
 adminRouter.put('/editCurrentStock',currentStockController.editCurrentStock);
 adminRouter.put('/editQualityCheck',qualityCheckController.editQualityCheck);
+adminRouter.put('/editMainStock',mainStockController.editMainStock);
 adminRouter.put('/editRework',reworkController.editRework);
 adminRouter.put('/editProductionOrderCreation',productionOrderCreationController.editProductionOrderCreation);
 adminRouter.put('/editProductionOrderCreationOutput',productionOrderCreationController.editProductionOrderCreationOutput);
@@ -65,6 +71,7 @@ adminRouter.delete('/removePurchaseOrderCreation',purchaseOrderController.remove
 adminRouter.delete('/removeGateEntry',gateEntryController.removeGateEntry);
 adminRouter.delete('/removeCurrentStock',currentStockController.removeCurrentStock);
 adminRouter.delete('/removeQualityCheck',qualityCheckController.removeQualityCheck);
+adminRouter.delete('/removeMainStock',mainStockController.removeMainStock);
 adminRouter.delete('/removeRework',reworkController.removeRework);
 adminRouter.delete('/removeProductionOrderCreation',productionOrderCreationController.removeProductionOrderCreation);
 adminRouter.delete('/removeProductionOrderCreationOutput',productionOrderCreationController.removeProductionOrderCreationOutput);

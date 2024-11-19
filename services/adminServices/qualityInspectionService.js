@@ -8,7 +8,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 qualityInspectionService.fetchQualityInspection = async () => {
     try {
-      const data = await FinalQualityInspection.find({}).sort({createdAt:-1})
+      const data = await FinalQualityInspection.find({})
       const productNames = await PurchaseOrderCreation.distinct('productName');
       return {
         status: 200,

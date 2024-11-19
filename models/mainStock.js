@@ -2,22 +2,27 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    bomNumber: {
-      type: String,
-    },
     productName: {
       type: String,
     },
-    materials: [
-      {
-        materialsList: {
-          type: String,
-        },
-        quantity: {
-          type: String,
-        },
+    quantity: {
+      type: Number,
+    },
+    price: {
+      type: String,
+    },
+    storageLocation: {
+        type: String,
       },
-    ],
+    supplier: {
+      type: String,
+    },
+    dateRecieved: {
+      type: Date,
+    },
+    expiryDate: {
+      type: Date,
+    },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
@@ -34,4 +39,4 @@ const schema = new mongoose.Schema(
 
 schema.plugin(require("mongoose-autopopulate"));
 
-module.exports = mongoose.model("BillOfMaterials", schema);
+module.exports = mongoose.model("MainStock", schema);

@@ -9,9 +9,9 @@ const schema = new mongoose.Schema(
     productionCompletionDate: {
       type: Date,
     },
-    qualityCheckStatus: {
-      type: String,
-    },
+    // qualityCheckStatus: {
+    //   type: String,
+    // },
     storageLocationforOutput: {
       type: String,
     },

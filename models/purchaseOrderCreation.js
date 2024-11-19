@@ -32,9 +32,9 @@ const PurchaseOrderCreationSchema = new mongoose.Schema(
     productName: {
       type: String,
     },
-    batchNumber: {
-      type: String,
-    },
+    // batchNumber: {
+    //   type: String,
+    // },
     mfgDate: {
       type: Date,
     },

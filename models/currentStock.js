@@ -2,11 +2,14 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    productName: {
+    materialName: {
+      type: String,
+    },
+    batchNumber: {
       type: String,
     },
     quantity: {
-      type: String,
+      type: Number,
     },
     price: {
       type: String,

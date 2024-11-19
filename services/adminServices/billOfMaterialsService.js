@@ -7,7 +7,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 billOfMaterialsService.fetchbillOfMaterials = async () => {
   try {
-    const data = await BillOfMaterials.find({}).sort({ createdAt: -1 });
+    const data = await BillOfMaterials.find({})
     const productNames = await PurchaseOrderCreation.distinct('productName');
     return {
       status: 200,
@@ -26,14 +26,20 @@ billOfMaterialsService.fetchbillOfMaterials = async () => {
 };
 billOfMaterialsService.newBillOfMaterials = async (bomData) => {
   try {
-    const { bomNumber, productName, materialsList,quantity } = bomData;
+    const { bomNumber, productName, materials } = bomData;
+
+    if (!Array.isArray(materials) || materials.length === 0) {
+      return {
+        status: 400,
+        message: "Materials list is required.",
+      };
+    }
 
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },
         { productName: productName },
-        { materialsList: materialsList },
-        { quantity: quantity },
+        { materials : materials  },
       ],
     });
 
@@ -47,8 +53,7 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
     const newData = new BillOfMaterials({
       bomNumber,
       productName,
-      materialsList,
-      quantity
+      materials 
     });
 
     await newData.save();

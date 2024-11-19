@@ -1,5 +1,6 @@
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const VendorManagement = require("../../models/vendorManagement");
+const crypto = require("crypto");
 let purchaseOrderService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -60,7 +61,7 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       contactPersonDetails,
       vendorId,
       productName,
-      batchNumber,
+      // batchNumber,
       mfgDate,
       quantity,
       price,
@@ -79,7 +80,7 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
         { contactPersonDetails: contactPersonDetails },
         { vendorId: vendorId },
         { productName: productName },
-        { batchNumber: batchNumber },
+        // { batchNumber: batchNumber },
         { mfgDate: mfgDate },
         { quantity: quantity },
         { price: price },
@@ -95,17 +96,44 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       };
     }
 
+let newVendorId;
+    let isUnique = false;
+    while (!isUnique) {
+      newVendorId = `VND-${crypto.randomInt(100000, 999999)}`;
+
+   
+      const existingVendor = await PurchaseOrderCreation.findOne({ vendorId });
+      if (!existingVendor) {
+        isUnique = true; 
+      }
+    }
+
+    let assignedPurchaseOrderNumber = purchaseOrderNumber;
+
+    if (!purchaseOrderNumber) {
+
+      const lastOrder = await PurchaseOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("purchaseOrderNumber");
+
+      if (lastOrder && lastOrder.purchaseOrderNumber) {
+        const lastNumber = parseInt(lastOrder.purchaseOrderNumber.match(/\d+$/), 10);
+        assignedPurchaseOrderNumber = `PUR-ORD-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedPurchaseOrderNumber = "PUR-ORD-1";
+      }
+    }
     const newPurchaseOrder = new PurchaseOrderCreation({
-      purchaseOrderNumber,
+      purchaseOrderNumber:assignedPurchaseOrderNumber,
       date,
       address,
       nameOfTheFirm,
       contact,
       contactPersonName,
       contactPersonDetails,
-      vendorId,
+      vendorId:newVendorId,
       productName,
-      batchNumber,
+      // batchNumber,
       mfgDate,
       quantity,
       price,
@@ -145,7 +173,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       contactPersonDetails,
       vendorId,
       productName,
-      batchNumber,
+      // batchNumber,
       mfgDate,
       quantity,
       price,
@@ -171,7 +199,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         { contactPersonDetails: contactPersonDetails },
         { vendorId: vendorId },
         { productName: productName },
-        { batchNumber: batchNumber },
+        // { batchNumber: batchNumber },
         { mfgDate: mfgDate },
         { quantity: quantity },
         { price: price },
@@ -192,7 +220,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         { contactPersonDetails: contactPersonDetails },
         { vendorId: vendorId },
         { productName: productName },
-        { batchNumber: batchNumber },
+        // { batchNumber: batchNumber },
         { mfgDate: mfgDate },
         { quantity: quantity },
         { price: price },
@@ -200,7 +228,37 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         { gst: gst },
       ],
     });
+    let newVendorId = vendorId;
 
+    if(!vendorId){
+      let isUnique = false;
+      while (!isUnique) {
+        newVendorId = `VND-${crypto.randomInt(100000, 999999)}`;
+  
+     
+        const existingVendor = await PurchaseOrderCreation.findOne({ vendorId });
+        if (!existingVendor) {
+          isUnique = true; 
+        }
+      }
+    }
+
+
+    let assignedPurchaseOrderNumber = purchaseOrderNumber;
+
+    if (!purchaseOrderNumber) {
+
+      const lastOrder = await PurchaseOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("purchaseOrderNumber");
+
+      if (lastOrder && lastOrder.purchaseOrderNumber) {
+        const lastNumber = parseInt(lastOrder.purchaseOrderNumber.match(/\d+$/), 10);
+        assignedPurchaseOrderNumber = `PUR-ORD-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedPurchaseOrderNumber = "PUR-ORD-1";
+      }
+    }
     if (existing && !currentVendor) {
       return {
         status: 409,
@@ -210,16 +268,16 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       const order = await PurchaseOrderCreation.findByIdAndUpdate(
         orderId,
         {
-          purchaseOrderNumber,
+          purchaseOrderNumber:assignedPurchaseOrderNumber,
           date,
           address,
           nameOfTheFirm,
           contact,
           contactPersonName,
           contactPersonDetails,
-          vendorId,
+          vendorId:newVendorId,
           productName,
-          batchNumber,
+          // batchNumber,
           mfgDate,
           quantity,
           price,

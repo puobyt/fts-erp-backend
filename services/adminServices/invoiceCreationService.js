@@ -5,7 +5,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 invoiceCreationService.fetchInvoiceCreations = async () => {
   try {
-    const data = await InvoiceCreation.find({}).sort({ createdAt: -1 });
+    const data = await InvoiceCreation.find({})
 
     return {
       status: 200,

@@ -15,7 +15,7 @@ const schema = new mongoose.Schema(
       type: String,
     },
     assignedQuantity: {
-      type: String,
+      type: Number,
     },
     assignedTo: {
       type: String,

@@ -1,21 +1,55 @@
 const MaterialAssignment = require("../../models/materialAssignment");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
-const FinishedGoods = require('../../models/finishedGoods')
+const FinishedGoods = require("../../models/finishedGoods");
+const VendorManagement = require("../../models/vendorManagement");
+const CurrentStock = require("../../models/currentStock");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 materialAssignmentService.fetchMaterialAssignment = async () => {
   try {
-    const data = await MaterialAssignment.find({}).sort({ createdAt: -1 });
+    const data = await MaterialAssignment.find({});
 
-    const products = await PurchaseOrderCreation.distinct('productName');
-    const finishedGoods = await FinishedGoods.distinct('finishedGoodsName');
+    // const materials = await CurrentStock.aggregate([
+    //   {
+    //     $group: {
+    //       _id: "$materialName",
+    //       batchNumbers: { $addToSet: "$batchNumber" },
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       materialName: "$_id",
+    //       batchNumbers: 1,
+    //       _id: 0,
+    //     },
+    //   },
+    // ]);
+    const materials = await CurrentStock.aggregate([
+      {
+        $group: {
+          _id: "$materialName",
+          batchNumber: { $first: "$batchNumber" } // Use $first instead of $addToSet
+        }
+      },
+      {
+        $project: {
+          materialName: "$_id",
+          batchNumber: 1,
+          _id: 0
+        }
+      }
+    ]);
+    const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
+    const batchNumber = await CurrentStock.distinct("batchNumber");
+
     return {
       status: 200,
       data: data,
-      products:products,
-      finishedGoods:finishedGoods
+      batchNumber: batchNumber,
+      materials: materials,
+      finishedGoods: finishedGoods,
     };
   } catch (error) {
     console.log(
@@ -50,6 +84,28 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       ],
     });
 
+    const currentStock = await CurrentStock.findOne({ materialName });
+
+    if (!currentStock) {
+      return {
+        status: 409,
+        message: `Material "${materialName}" not found in Current Stock.`,
+      };
+    }
+
+    if (currentStock.quantity < assignedQuantity) {
+      return {
+        status: 409,
+        message: `Insufficient stock for material: ${materialName}`,
+      };
+    }
+
+    await CurrentStock.findOneAndUpdate(
+      { materialName },
+      { $inc: { quantity: -assignedQuantity } },
+      { new: true }
+    );
+
     if (existing) {
       return {
         status: 409,
@@ -68,7 +124,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
     await newData.save();
     return {
-      status: 201,
+      status: 200,
       message: "New Material Assignment added successfully",
       data: newData,
       token: "sampleToken",

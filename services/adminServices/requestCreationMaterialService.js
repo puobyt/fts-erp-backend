@@ -1,41 +1,53 @@
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
-const FinishedGoods = require('../../models/finishedGoods')
+const FinishedGoods = require("../../models/finishedGoods");
+const VendorManagement = require("../../models/vendorManagement");
+const CurrentStock = require("../../models/currentStock");
 let requestCreationMaterialService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 requestCreationMaterialService.fetchRequestCreationForMaterials = async () => {
   try {
-    const data = await RequestCreationForMaterials.find({}).sort({
-      createdAt: -1,
-    });
-    const products = await PurchaseOrderCreation.distinct('productName');
-    const finishedGoods = await FinishedGoods.distinct('finishedGoodsName');
+    const data = await RequestCreationForMaterials.find({});
+    const materials = await CurrentStock.aggregate([
+      {
+        $group: {
+          _id: "$materialName",
+          batchNumber: { $first: "$batchNumber" }, // Use $first instead of $addToSet
+        },
+      },
+      {
+        $project: {
+          materialName: "$_id",
+          batchNumber: 1,
+          _id: 0,
+        },
+      },
+    ]);
+    const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
 
     return {
       status: 200,
       data: data,
-      products:products,
-      finishedGoods:finishedGoods
+      materials: materials,
+      finishedGoods: finishedGoods,
     };
   } catch (error) {
     console.log(
       "An error occured at fetching Request Creation For Materials in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in fetching Request Creation For Materials in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in fetching Request Creation For Materials in admin services",
+    });
   }
 };
 requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber,batchNumber, materialName, quantity, requiredDate } =
+    const { requestNumber, batchNumber, materialName, quantity, requiredDate } =
       requestCreationData;
 
     const existing = await RequestCreationForMaterials.findOne({
@@ -76,11 +88,9 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
       "An error occured at adding Request Creation For Materials in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in adding Request Creatio nFor Materials in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in adding Request Creatio nFor Materials in admin services",
+    });
   }
 };
 
@@ -153,48 +163,46 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       token: "sampleToken",
     };
   } catch (error) {
-    console.log("An error occured at editing Request Materials Order", error.message);
+    console.log(
+      "An error occured at editing Request Materials Order",
+      error.message
+    );
     res.status(500).json({
       info: "An error occured in editing Request Materials Order services",
     });
   }
 };
 
-
-
 requestCreationMaterialService.removeRequestCreationForMaterials = async (
   requestCreationId
 ) => {
   try {
-    const requestCreationForMaterials = await RequestCreationForMaterials.findByIdAndDelete(
-      requestCreationId
-    );
+    const requestCreationForMaterials =
+      await RequestCreationForMaterials.findByIdAndDelete(requestCreationId);
 
-    if(!requestCreationForMaterials){
+    if (!requestCreationForMaterials) {
       return {
         status: 201,
-        message: "Request creation for materials not found or can't able to delete right now,Please try again later",
+        message:
+          "Request creation for materials not found or can't able to delete right now,Please try again later",
         token: "sampleToken",
       };
     }
-if(requestCreationForMaterials){
-return {
-  status: 201,
-  message: "Request creation for materials deleted successfully",
-  token: "sampleToken",
-};
-}
-
+    if (requestCreationForMaterials) {
+      return {
+        status: 201,
+        message: "Request creation for materials deleted successfully",
+        token: "sampleToken",
+      };
+    }
   } catch (error) {
     console.log(
       "An error occured at request creation for materials remove",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in request creation for materials remove in current stock services",
-      });
+    res.status(500).json({
+      info: "An error occured in request creation for materials remove in current stock services",
+    });
   }
 };
 module.exports = requestCreationMaterialService;

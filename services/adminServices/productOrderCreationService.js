@@ -7,7 +7,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 productOrderCreationService.fetchProductOrderCreation = async () => {
   try {
-    const data = await ProductionOrderCreation.find({}).sort({ createdAt: -1 });
+    const data = await ProductionOrderCreation.find({})
     const batches = await PurchaseOrderCreation.distinct("batchNumber");
     return {
       status: 200,
@@ -84,9 +84,24 @@ productOrderCreationService.newProductionOrderCreation = async (
         message: "Production Order already exists with the same details",
       };
     }
+    let assignedProcessOrder = processOrder;
 
+    if (!processOrder) {
+
+      const lastOrder = await ProductionOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("processOrder");
+
+      if (lastOrder && lastOrder.processOrder) {
+        const lastNumber = parseInt(lastOrder.processOrder.match(/\d+$/), 10);
+        assignedProcessOrder = `PO-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedProcessOrder = "PO-1";
+      }
+    }
+    
     const newData = new ProductionOrderCreation({
-      processOrder,
+      processOrder:assignedProcessOrder,
       plant,
       materialCode,
       productDescription,
@@ -123,7 +138,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
     const {
       producedQuantity,
       productionCompletionDate,
-      qualityCheckStatus,
+      // qualityCheckStatus,
       storageLocationforOutput,
       batchNumberforOutput,
       productionNotes,
@@ -136,7 +151,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       $and: [
         { producedQuantity: producedQuantity },
         { productionCompletionDate: productionCompletionDate },
-        { qualityCheckStatus: qualityCheckStatus },
+        // { qualityCheckStatus: qualityCheckStatus },
         { storageLocationforOutput: storageLocationforOutput },
         { batchNumberforOutput: batchNumberforOutput },
         { productionNotes: productionNotes },
@@ -152,13 +167,29 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
         message: "Production Order Output already exists with the same details",
       };
     }
+    let assignedBatchNumber= batchNumberforOutput;
 
+    if (!batchNumberforOutput) {
+
+      const lastOrder = await PurchaseOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("batchNumberforOutput");
+
+        if (lastOrder && lastOrder.batchNumberforOutput) {
+  
+          const lastNumber = parseInt(lastOrder.batchNumberforOutput.match(/\d+$/), 10);
+          const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
+          assignedBatchNumber = `FN${nextNumber}`;
+        } else {
+          assignedBatchNumber = "FN001";
+        }
+    }
     const newData = new ProductionOrderCreationOutput({
       producedQuantity,
       productionCompletionDate,
-      qualityCheckStatus,
+      // qualityCheckStatus,
       storageLocationforOutput,
-      batchNumberforOutput,
+      batchNumberforOutput:assignedBatchNumber,
       productionNotes,
       Yield,
       outputQualityRating,
@@ -239,6 +270,21 @@ productOrderCreationService.editProductionOrderCreation = async (
         { endDate: endDate },
       ],
     });
+    let assignedProcessOrder = processOrder;
+
+    if (!processOrder) {
+
+      const lastOrder = await ProductionOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("processOrder");
+
+      if (lastOrder && lastOrder.processOrder) {
+        const lastNumber = parseInt(lastOrder.processOrder.match(/\d+$/), 10);
+        assignedProcessOrder = `PO-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedProcessOrder = "PO-1";
+      }
+    }
 
     if (existing && !currentProductionOrder) {
       return {
@@ -250,7 +296,7 @@ productOrderCreationService.editProductionOrderCreation = async (
         await ProductionOrderCreation.findByIdAndUpdate(
           productionOrderId,
           {
-            processOrder,
+            processOrder:assignedProcessOrder,
             plant,
             materialCode,
             productDescription,
@@ -290,7 +336,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       productionOrderoutputId,
       producedQuantity,
       productionCompletionDate,
-      qualityCheckStatus,
+      // qualityCheckStatus,
       storageLocationforOutput,
       batchNumberforOutput,
       productionNotes,
@@ -310,7 +356,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       $and: [
         { producedQuantity: producedQuantity },
         { productionCompletionDate: productionCompletionDate },
-        { qualityCheckStatus: qualityCheckStatus },
+        // { qualityCheckStatus: qualityCheckStatus },
         { storageLocationforOutput: storageLocationforOutput },
         { batchNumberforOutput: batchNumberforOutput },
         { productionNotes: productionNotes },
@@ -326,7 +372,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           { _id: productionOrderoutputId },
           { producedQuantity: producedQuantity },
           { productionCompletionDate: productionCompletionDate },
-          { qualityCheckStatus: qualityCheckStatus },
+          // { qualityCheckStatus: qualityCheckStatus },
           { storageLocationforOutput: storageLocationforOutput },
           { batchNumberforOutput: batchNumberforOutput },
           { productionNotes: productionNotes },
@@ -335,7 +381,23 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           { outputHandlingInstructions: outputHandlingInstructions },
         ],
       });
+      let assignedBatchNumber= batchNumberforOutput;
 
+      if (!batchNumberforOutput) {
+  
+        const lastOrder = await PurchaseOrderCreation.findOne()
+          .sort({ createdAt: -1 }) 
+          .select("batchNumberforOutput");
+  
+          if (lastOrder && lastOrder.batchNumberforOutput) {
+    
+            const lastNumber = parseInt(lastOrder.batchNumberforOutput.match(/\d+$/), 10);
+            const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
+            assignedBatchNumber = `FN${nextNumber}`;
+          } else {
+            assignedBatchNumber = "FN001";
+          }
+      }
     if (existing && !currentProductionOrderOutput) {
       return {
         status: 409,
@@ -348,9 +410,9 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           {
             producedQuantity,
             productionCompletionDate,
-            qualityCheckStatus,
+            // qualityCheckStatus,
             storageLocationforOutput,
-            batchNumberforOutput,
+            batchNumberforOutput:assignedBatchNumber,
             productionNotes,
             Yield,
             outputQualityRating,

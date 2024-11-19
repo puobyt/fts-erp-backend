@@ -5,7 +5,7 @@ require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 reworkService.fetchRework = async () => {
     try {
-      const data = await Rework.find({}).sort({createdAt:-1})
+      const data = await Rework.find({})
   
       return {
         status: 200,

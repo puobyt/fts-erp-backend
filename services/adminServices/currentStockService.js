@@ -1,12 +1,15 @@
 const CurrentStock = require("../../models/currentStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
+const VendorManagement = require("../../models/vendorManagement");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
+
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({})
+    const materials = await VendorManagement.distinct('material');
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},
       "price quantity productName"
@@ -16,6 +19,7 @@ currentStockService.fetchCurrentStock = async () => {
       status: 200,
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
+      materials:materials
     };
   } catch (error) {
     console.log(
@@ -30,12 +34,13 @@ currentStockService.fetchCurrentStock = async () => {
 
 currentStockService.newCurrentStock = async (newStockData) => {
   try {
-    const { productName, quantity, price, supplier, dateRecieved, expiryDate } =
+    const { materialName,batchNumber, quantity, price, supplier, dateRecieved, expiryDate } =
       newStockData;
 
     const existing = await CurrentStock.findOne({
       $and: [
-        { productName: productName },
+        { materialName: materialName },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { supplier: supplier },
@@ -50,9 +55,10 @@ currentStockService.newCurrentStock = async (newStockData) => {
         message: "Current stock already exists with the same details",
       };
     }
-
+    const batchNumberValue = batchNumber || 'NIL';
     const newStock = new CurrentStock({
-      productName,
+      materialName,
+      batchNumber:batchNumberValue,
       quantity,
       price,
       supplier,
@@ -83,7 +89,8 @@ currentStockService.editCurrentStock = async (currentStockData) => {
     const {
       authPassword,
       currentStockId,
-      productName,
+      materialName,
+      batchNumber,
       quantity,
       price,
       supplier,
@@ -100,7 +107,8 @@ currentStockService.editCurrentStock = async (currentStockData) => {
 
     const existing = await CurrentStock.findOne({
       $and: [
-        { productName: productName },
+        { materialName: materialName },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { supplier: supplier },
@@ -112,7 +120,8 @@ currentStockService.editCurrentStock = async (currentStockData) => {
     const currentStockExist = await CurrentStock.findOne({
       $and: [
         { _id: currentStockId },
-        { productName: productName },
+        { materialName: materialName },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { supplier: supplier },
@@ -120,6 +129,8 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { expiryDate: expiryDate },
       ],
     });
+
+    const batchNumberValue = batchNumber || 'NIL';
 
     if (existing && !currentStockExist) {
       return {
@@ -130,7 +141,8 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       const currentStock = await CurrentStock.findByIdAndUpdate(
         currentStockId,
         {
-          productName,
+          materialName,
+          batchNumber:batchNumberValue,
           quantity,
           price,
           supplier,

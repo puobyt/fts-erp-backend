@@ -5,7 +5,7 @@ require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 finishedGoodsService.fetchFinishedGoods = async () => {
   try {
-    const data = await FinishedGoods.find({}).sort({ createdAt: -1 });
+    const data = await FinishedGoods.find({})
 
     return {
       status: 200,

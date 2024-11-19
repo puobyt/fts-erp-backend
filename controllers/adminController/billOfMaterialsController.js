@@ -13,7 +13,7 @@ billOfMaterialsController.fetchbillOfMaterials = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      productNames:result.productNames,
+      productNames: result.productNames,
       userToken: "",
     });
   } catch (error) {
@@ -29,13 +29,12 @@ billOfMaterialsController.newBillOfMaterials = async (req, res) => {
   try {
     console.log("Adding new Bill Of Materials ");
 
-    const { bomNumber, productName, materialsList,quantity } = req.body;
+    const { bomNumber, productName, materials } = req.body;
 
     const result = await billOfMaterialsService.newBillOfMaterials({
       bomNumber,
       productName,
-      materialsList,
-      quantity
+      materials,
     });
 
     res.status(result.status).json({
@@ -52,7 +51,6 @@ billOfMaterialsController.newBillOfMaterials = async (req, res) => {
   }
 };
 
-
 billOfMaterialsController.editBillOfMaterials = async (req, res) => {
   try {
     console.log("editing Bill Of Materials..");
@@ -63,18 +61,17 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       bomNumber,
       productName,
       materialsList,
-      quantity
+      quantity,
     } = req.body;
 
-    const result =
-      await billOfMaterialsService.editBillOfMaterials({
-        authPassword,
-        billOfMaterialsId,
-        bomNumber,
-        productName,
-        materialsList,
-        quantity
-      });
+    const result = await billOfMaterialsService.editBillOfMaterials({
+      authPassword,
+      billOfMaterialsId,
+      bomNumber,
+      productName,
+      materialsList,
+      quantity,
+    });
 
     res.status(result.status).json({
       message: result.message,
@@ -93,9 +90,11 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
 billOfMaterialsController.removeBillOfMaterials = async (req, res) => {
   try {
     console.log("deleting Rework...");
-const {billOfMaterialsId} = req.query;
+    const { billOfMaterialsId } = req.query;
 
-    const result = await billOfMaterialsService.removeBillOfMaterials(billOfMaterialsId);
+    const result = await billOfMaterialsService.removeBillOfMaterials(
+      billOfMaterialsId
+    );
 
     res.status(result.status).json({
       message: result.message,
