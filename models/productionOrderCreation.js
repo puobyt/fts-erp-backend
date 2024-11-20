@@ -11,10 +11,11 @@ const schema = new mongoose.Schema(
     materialCode: {
       type: String,
     },
-    productDescription: {
+    productName: {
       type: String,
     },
-    storageLocation: {
+
+    productDescription: {
       type: String,
     },
     batch: {

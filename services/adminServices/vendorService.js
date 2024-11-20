@@ -23,7 +23,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
     const {
       nameOfTheFirm,
       address,
-      contact,
+      contactNumber,
       contactPersonName,
       contactPersonDetails,
       material,
@@ -36,7 +36,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
       $and: [
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
-        { contact: contact },
+        { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
         { material: material },
@@ -56,7 +56,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
     const newVendor = new VendorManagement({
       nameOfTheFirm,
       address,
-      contact,
+      contactNumber,
       contactPersonName,
       contactPersonDetails,
       material,
@@ -87,7 +87,7 @@ vendorService.editVendorManagement = async (VendorData) => {
       vendorId,
       nameOfTheFirm,
       address,
-      contact,
+      contactNumber,
       contactPersonName,
       contactPersonDetails,
       material,
@@ -107,7 +107,7 @@ vendorService.editVendorManagement = async (VendorData) => {
       $and: [
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
-        { contact: contact },
+        { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
         { material: material },
@@ -122,7 +122,7 @@ vendorService.editVendorManagement = async (VendorData) => {
         { _id: vendorId },
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
-        { contact: contact },
+        { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
         { material: material },
@@ -143,7 +143,7 @@ vendorService.editVendorManagement = async (VendorData) => {
         {
           nameOfTheFirm,
           address,
-          contact,
+          contactNumber,
           contactPersonName,
           contactPersonDetails,
           material,

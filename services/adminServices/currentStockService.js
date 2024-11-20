@@ -8,8 +8,8 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 currentStockService.fetchCurrentStock = async () => {
   try {
-    const data = await CurrentStock.find({})
-    const materials = await VendorManagement.distinct('material');
+    const data = await CurrentStock.find({});
+    const materials = await VendorManagement.distinct("material");
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},
       "price quantity productName"
@@ -19,7 +19,7 @@ currentStockService.fetchCurrentStock = async () => {
       status: 200,
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
-      materials:materials
+      materials: materials,
     };
   } catch (error) {
     console.log(
@@ -34,8 +34,16 @@ currentStockService.fetchCurrentStock = async () => {
 
 currentStockService.newCurrentStock = async (newStockData) => {
   try {
-    const { materialName,batchNumber, quantity, price, supplier, dateRecieved, expiryDate } =
-      newStockData;
+    const {
+      materialName,
+      batchNumber,
+      quantity,
+      price,
+      storageLocation,
+      supplier,
+      dateRecieved,
+      expiryDate,
+    } = newStockData;
 
     const existing = await CurrentStock.findOne({
       $and: [
@@ -43,6 +51,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
         { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
+        { storageLocation: storageLocation },
         { supplier: supplier },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
@@ -55,12 +64,30 @@ currentStockService.newCurrentStock = async (newStockData) => {
         message: "Current stock already exists with the same details",
       };
     }
-    const batchNumberValue = batchNumber || 'NIL';
+    // const batchNumberValue = batchNumber || "NIL";
+    let assignedBatchNumber= batchNumber;
+
+    if (!batchNumber) {
+
+      const lastOrder = await CurrentStock.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("batchNumber");
+
+        if (lastOrder && lastOrder.batchNumber) {
+  
+          const lastNumber = parseInt(lastOrder.batchNumber.match(/\d+$/), 10);
+          const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
+          assignedBatchNumber = `FRN/MT/${nextNumber}`;
+        } else {
+          assignedBatchNumber = "FRN/MT/1";
+        }
+    }
     const newStock = new CurrentStock({
       materialName,
-      batchNumber:batchNumberValue,
-      quantity,
+      batchNumber: assignedBatchNumber,
+      quantity:`${quantity} KG`,
       price,
+      storageLocation,
       supplier,
       dateRecieved,
       expiryDate,
@@ -93,6 +120,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       batchNumber,
       quantity,
       price,
+      storageLocation,
       supplier,
       dateRecieved,
       expiryDate,
@@ -124,13 +152,14 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
+        { storageLocation: storageLocation },
         { supplier: supplier },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
     });
 
-    const batchNumberValue = batchNumber || 'NIL';
+    const batchNumberValue = batchNumber || "NIL";
 
     if (existing && !currentStockExist) {
       return {
@@ -142,12 +171,13 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         currentStockId,
         {
           materialName,
-          batchNumber:batchNumberValue,
-          quantity,
+          batchNumber: batchNumberValue,
+          quantity:`${quantity} KG`,
           price,
           supplier,
+          storageLocation,
           dateRecieved,
-          expiryDate
+          expiryDate,
         },
         {
           new: true,

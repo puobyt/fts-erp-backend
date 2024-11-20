@@ -68,8 +68,23 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
       };
     }
 
+    let assignedRequestNumber = requestNumber;
+
+    if (!requestNumber) {
+
+      const lastOrder = await RequestCreationForMaterials.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("requestNumber");
+
+      if (lastOrder && lastOrder.requestNumber) {
+        const lastNumber = parseInt(lastOrder.requestNumber.match(/\d+$/), 10);
+        assignedRequestNumber = `FRN/RCM/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedRequestNumber = "FRN/RCM/1";
+      }
+    }
     const newData = new RequestCreationForMaterials({
-      requestNumber,
+      requestNumber:assignedRequestNumber,
       batchNumber,
       materialName,
       quantity,
@@ -133,6 +148,22 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           { batchNumber: batchNumber },
         ],
       });
+
+      let assignedRequestNumber = requestNumber;
+
+      if (!requestNumber) {
+  
+        const lastOrder = await RequestCreationForMaterials.findOne()
+          .sort({ createdAt: -1 }) 
+          .select("requestNumber");
+  
+        if (lastOrder && lastOrder.requestNumber) {
+          const lastNumber = parseInt(lastOrder.requestNumber.match(/\d+$/), 10);
+          assignedRequestNumber = `FRN/RCM/${(lastNumber || 0) + 1}`;
+        } else {
+          assignedRequestNumber = "FRN/RCM/1";
+        }
+      }
     if (existing && !currentRequestMaterialsOrder) {
       return {
         status: 409,
@@ -144,7 +175,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         await RequestCreationForMaterials.findByIdAndUpdate(
           requestMaterialsId,
           {
-            requestNumber,
+            requestNumber:assignedRequestNumber,
             batchNumber,
             materialName,
             quantity,

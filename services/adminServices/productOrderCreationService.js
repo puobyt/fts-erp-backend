@@ -1,6 +1,7 @@
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
+const CurrentStock = require("../../models/currentStock");
 let productOrderCreationService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -8,7 +9,21 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 productOrderCreationService.fetchProductOrderCreation = async () => {
   try {
     const data = await ProductionOrderCreation.find({})
-    const batches = await PurchaseOrderCreation.distinct("batchNumber");
+
+    const batches = await CurrentStock.aggregate([
+      {
+        $group: {
+          _id: { batchNumber: "$batchNumber", materialName: "$materialName" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          batchNumber: "$_id.batchNumber",
+          materialName: "$_id.materialName",
+        },
+      },
+    ]);
     return {
       status: 200,
       data: data,
@@ -30,7 +45,7 @@ productOrderCreationService.fetchProductOrderCreationOutput = async () => {
     const data = await ProductionOrderCreationOutput.find({}).sort({
       createdAt: -1,
     });
-    const batches = await PurchaseOrderCreation.distinct("batchNumber");
+    const batches = await ProductionOrderCreation.distinct("batch");
     return {
       status: 200,
       data: data,
@@ -54,8 +69,8 @@ productOrderCreationService.newProductionOrderCreation = async (
       processOrder,
       plant,
       materialCode,
+      productName,
       productDescription,
-      storageLocation,
       batch,
       requiredQuantity,
       instructions,
@@ -68,8 +83,8 @@ productOrderCreationService.newProductionOrderCreation = async (
         { processOrder: processOrder },
         { plant: plant },
         { materialCode: materialCode },
+        { productName: productName },
         { productDescription: productDescription },
-        { storageLocation: storageLocation },
         { batch: batch },
         { requiredQuantity: requiredQuantity },
         { instructions: instructions },
@@ -94,9 +109,25 @@ productOrderCreationService.newProductionOrderCreation = async (
 
       if (lastOrder && lastOrder.processOrder) {
         const lastNumber = parseInt(lastOrder.processOrder.match(/\d+$/), 10);
-        assignedProcessOrder = `PO-${(lastNumber || 0) + 1}`;
+        assignedProcessOrder = `FRN/PO/${(lastNumber || 0) + 1}`;
       } else {
-        assignedProcessOrder = "PO-1";
+        assignedProcessOrder = "FRN/PO/1";
+      }
+    }
+
+    let assignedBatch = batch;
+
+    if (!batch) {
+
+      const lastOrder = await ProductionOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("batch");
+
+      if (lastOrder && lastOrder.batch) {
+        const lastNumber = parseInt(lastOrder.batch.match(/\d+$/), 10);
+        assignedBatch = `FRN/Btch/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedBatch = "FRN/Btch/1";
       }
     }
     
@@ -104,9 +135,9 @@ productOrderCreationService.newProductionOrderCreation = async (
       processOrder:assignedProcessOrder,
       plant,
       materialCode,
+      productName,
       productDescription,
-      storageLocation,
-      batch,
+      batch:assignedBatch,
       requiredQuantity,
       instructions,
       startDate,
@@ -179,9 +210,9 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
   
           const lastNumber = parseInt(lastOrder.batchNumberforOutput.match(/\d+$/), 10);
           const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
-          assignedBatchNumber = `FN${nextNumber}`;
+          assignedBatchNumber = `FRN/BNO/${nextNumber}`;
         } else {
-          assignedBatchNumber = "FN001";
+          assignedBatchNumber = "FRN/BNO/1";
         }
     }
     const newData = new ProductionOrderCreationOutput({
@@ -224,8 +255,8 @@ productOrderCreationService.editProductionOrderCreation = async (
       processOrder,
       plant,
       materialCode,
+      productName,
       productDescription,
-      storageLocation,
       batch,
       requiredQuantity,
       instructions,
@@ -245,8 +276,8 @@ productOrderCreationService.editProductionOrderCreation = async (
         { processOrder: processOrder },
         { plant: plant },
         { materialCode: materialCode },
+        { productName: productName },
         { productDescription: productDescription },
-        { storageLocation: storageLocation },
         { batch: batch },
         { requiredQuantity: requiredQuantity },
         { instructions: instructions },
@@ -261,8 +292,8 @@ productOrderCreationService.editProductionOrderCreation = async (
         { processOrder: processOrder },
         { plant: plant },
         { materialCode: materialCode },
+        { productName: productName },
         { productDescription: productDescription },
-        { storageLocation: storageLocation },
         { batch: batch },
         { requiredQuantity: requiredQuantity },
         { instructions: instructions },
@@ -285,7 +316,21 @@ productOrderCreationService.editProductionOrderCreation = async (
         assignedProcessOrder = "PO-1";
       }
     }
+    let assignedBatch = batch;
 
+    if (!batch) {
+
+      const lastOrder = await ProductionOrderCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("batch");
+
+      if (lastOrder && lastOrder.batch) {
+        const lastNumber = parseInt(lastOrder.batch.match(/\d+$/), 10);
+        assignedBatch = `FRN/Btch/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedBatch = "FRN/Btch/1";
+      }
+    }
     if (existing && !currentProductionOrder) {
       return {
         status: 409,
@@ -299,9 +344,9 @@ productOrderCreationService.editProductionOrderCreation = async (
             processOrder:assignedProcessOrder,
             plant,
             materialCode,
+            productName,
             productDescription,
-            storageLocation,
-            batch,
+            batch:assignedBatch,
             requiredQuantity,
             instructions,
             startDate,

@@ -5,7 +5,7 @@ const schema = new mongoose.Schema(
     batchNumber: {
       type: String,
     },
-    productName: {
+    materialName: {
       type: String,
     },
     inspectionDate: {

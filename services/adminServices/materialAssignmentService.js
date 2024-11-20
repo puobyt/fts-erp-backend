@@ -1,5 +1,6 @@
 const MaterialAssignment = require("../../models/materialAssignment");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const FinishedGoods = require("../../models/finishedGoods");
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
@@ -43,13 +44,14 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     ]);
     const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
     const batchNumber = await CurrentStock.distinct("batchNumber");
-
+const processOrderNumber = await ProductionOrderCreation.distinct('processOrder')
     return {
       status: 200,
       data: data,
       batchNumber: batchNumber,
       materials: materials,
       finishedGoods: finishedGoods,
+      processOrderNumber:processOrderNumber
     };
   } catch (error) {
     console.log(
@@ -92,17 +94,24 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         message: `Material "${materialName}" not found in Current Stock.`,
       };
     }
+    const numericQuantity = parseFloat(currentStock.quantity.replace(/\D/g, ''));
 
-    if (currentStock.quantity < assignedQuantity) {
+
+    if (isNaN(numericQuantity)) {
+      throw new Error(`Invalid quantity format for material: ${materialName}`);
+    }
+  
+    const updatedQuantity = numericQuantity - assignedQuantity;
+    if (numericQuantity < assignedQuantity) {
       return {
         status: 409,
         message: `Insufficient stock for material: ${materialName}`,
       };
     }
 
-    await CurrentStock.findOneAndUpdate(
+    const updatedStock = await CurrentStock.findOneAndUpdate(
       { materialName },
-      { $inc: { quantity: -assignedQuantity } },
+      { quantity: `${updatedQuantity} KG` },
       { new: true }
     );
 
@@ -112,9 +121,23 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         message: " Material Assignment already exists with the same details",
       };
     }
+    let assignedAssignmentNumber = assignmentNumber;
 
+    if (!assignmentNumber) {
+
+      const lastOrder = await MaterialAssignment.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("assignmentNumber");
+
+      if (lastOrder && lastOrder.assignmentNumber) {
+        const lastNumber = parseInt(lastOrder.assignmentNumber.match(/\d+$/), 10);
+        assignedAssignmentNumber = `FRN/AN/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedAssignmentNumber = "FRN/AN/1";
+      }
+    }
     const newData = new MaterialAssignment({
-      assignmentNumber,
+      assignmentNumber:assignedAssignmentNumber,
       batchNumber,
       processOrderNumber,
       materialName,
@@ -186,7 +209,21 @@ materialAssignmentService.editMaterialAssignment = async (
         { batchNumber: batchNumber },
       ],
     });
+    let assignedAssignmentNumber = assignmentNumber;
 
+    if (!assignmentNumber) {
+
+      const lastOrder = await MaterialAssignment.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("assignmentNumber");
+
+      if (lastOrder && lastOrder.assignmentNumber) {
+        const lastNumber = parseInt(lastOrder.assignmentNumber.match(/\d+$/), 10);
+        assignedAssignmentNumber = `FRN/AN/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedAssignmentNumber = "FRN/AN/1";
+      }
+    }
     if (existing && !materialAssignmentCurrent) {
       return {
         status: 409,
@@ -198,7 +235,7 @@ materialAssignmentService.editMaterialAssignment = async (
         await MaterialAssignment.findByIdAndUpdate(
           materialAssignmentId,
           {
-            assignmentNumber,
+            assignmentNumber:assignedAssignmentNumber,
             batchNumber,
             processOrderNumber,
             materialName,

@@ -8,7 +8,7 @@ const vendorManagementSchema = new mongoose.Schema(
     address: {
       type: String,
     },
-    contact: {
+    contactNumber: {
       type: String,
     },
     contactPersonName: {

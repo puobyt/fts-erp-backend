@@ -49,9 +49,24 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
         message: " Bill of materials already exists with the same details",
       };
     }
+    let assignedBomNUmber = bomNumber;
+
+    if (!bomNumber) {
+
+      const lastOrder = await BillOfMaterials.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("processOrder");
+
+      if (lastOrder && lastOrder.bomNumber) {
+        const lastNumber = parseInt(lastOrder.bomNumber.match(/\d+$/), 10);
+        assignedBomNUmber = `FRN/BOM/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedBomNUmber = "FRN/BOM/1";
+      }
+    }
 
     const newData = new BillOfMaterials({
-      bomNumber,
+      bomNumber:assignedBomNUmber,
       productName,
       materials 
     });
@@ -109,7 +124,21 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         { quantity: quantity },
       ],
     });
+    let assignedBomNUmber = bomNumber;
 
+    if (!bomNumber) {
+
+      const lastOrder = await BillOfMaterials.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("processOrder");
+
+      if (lastOrder && lastOrder.bomNumber) {
+        const lastNumber = parseInt(lastOrder.bomNumber.match(/\d+$/), 10);
+        assignedBomNUmber = `FRN/BOM/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedBomNUmber = "FRN/BOM/1";
+      }
+    }
     if (existing && !currentBillOfMaterials) {
       return {
         status: 409,
@@ -120,7 +149,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         billOfMaterialsId,
         {
 
-          bomNumber,
+          bomNumber:assignedBomNUmber,
           productName,
           materialsList,
           quantity

@@ -16,6 +16,7 @@ materialAssignmentController.fetchMaterialAssignment = async (req, res) => {
       data: result.data,
       materials:result.materials,
       finishedGoods:result.finishedGoods,
+      processOrderNumber:result.processOrderNumber,
       userToken: "",
     });
   } catch (error) {

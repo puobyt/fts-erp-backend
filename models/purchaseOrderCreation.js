@@ -29,7 +29,7 @@ const PurchaseOrderCreationSchema = new mongoose.Schema(
       ref: 'VendorManagement', 
     },
     
-    productName: {
+    materialName: {
       type: String,
     },
     // batchNumber: {

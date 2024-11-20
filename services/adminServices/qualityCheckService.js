@@ -1,53 +1,52 @@
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const QualityCheck = require("../../models/qualityCheck");
 const CurrentStock = require("../../models/currentStock");
+const MainStock = require("../../models/mainStock");
 let qualityCheckService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 qualityCheckService.fetchQualityCheck = async () => {
   try {
-    const data = await QualityCheck.find({})
-    const batches = await PurchaseOrderCreation.aggregate([
+    const data = await QualityCheck.find({});
+    const batches = await CurrentStock.aggregate([
       {
         $group: {
-          _id: { batchNumber: "$batchNumber", productName: "$productName" },
+          _id: { batchNumber: "$batchNumber", materialName: "$materialName" },
         },
       },
       {
         $project: {
           _id: 0,
           batchNumber: "$_id.batchNumber",
-          productName: "$_id.productName",
+          materialName: "$_id.materialName",
         },
       },
     ]);
-    const products = await CurrentStock.distinct('productName')
+    const products = await CurrentStock.distinct("materialName");
 
     console.log(batches);
     return {
       status: 200,
       data: data,
       batches: batches,
-      products:products
+      products: products,
     };
   } catch (error) {
     console.log(
       "An error occured at fetching quality checks in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in fetching quality checks in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in fetching quality checks in admin services",
+    });
   }
 };
 qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
   try {
     const {
       batchNumber,
-      productName,
+      materialName,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -57,7 +56,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
     const existing = await QualityCheck.findOne({
       $and: [
         { batchNumber: batchNumber },
-        { productName: productName },
+        { materialName: materialName },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -74,7 +73,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
 
     const newData = new QualityCheck({
       batchNumber,
-      productName,
+      materialName,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -82,6 +81,25 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
     });
 
     await newData.save();
+    if (qualityStatus === "Accepted") {
+      const currentStock = await CurrentStock.findOne({ batchNumber });
+      if (!currentStock) {
+        return {
+          status: 409,
+          message: "Current stock not found",
+        };
+      }
+      const mainStock = new MainStock({
+        productName: currentStock.materialName,
+        quantity: `${currentStock.quantity} KG`,
+        price: currentStock.price,
+        supplier: currentStock.supplier,
+        storageLocation: currentStock.storageLocation,
+        dateRecieved: currentStock.dateRecieved,
+        expiryDate: currentStock.expiryDate,
+      });
+      await mainStock.save();
+    }
     return {
       status: 201,
       message: " New quality check added successfully",
@@ -93,11 +111,9 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       "An error occured at adding quality check in admin service",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in adding new current stock in admin services",
-      });
+    res.status(500).json({
+      info: "An error occured in adding new current stock in admin services",
+    });
   }
 };
 
@@ -107,7 +123,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       authPassword,
       qualityCheckId,
       batchNumber,
-      productName,
+      materialName,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -124,7 +140,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
     const existing = await QualityCheck.findOne({
       $and: [
         { batchNumber: batchNumber },
-        { productName: productName },
+        { materialName: materialName },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -136,7 +152,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       $and: [
         { _id: qualityCheckId },
         { batchNumber: batchNumber },
-        { productName: productName },
+        { materialName: materialName },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -154,7 +170,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         qualityCheckId,
         {
           batchNumber,
-          productName,
+          materialName,
           inspectionDate,
           inspectorName,
           qualityStatus,
@@ -165,6 +181,28 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
           runValidators: true,
         }
       );
+    }
+    const mainStockExist = await MainStock.findOne({ batchNumber });
+    if (!mainStockExist) {
+      if (qualityStatus === "Accepted") {
+        const currentStock = await CurrentStock.findOne({ batchNumber });
+        if (!currentStock) {
+          return {
+            status: 409,
+            message: "Current stock not found",
+          };
+        }
+        const mainStock = new MainStock({
+          productName: currentStock.materialName,
+          quantity: `${currentStock.quantity} KG`,
+          price: currentStock.price,
+          supplier: currentStock.supplier,
+          storageLocation: currentStock.storageLocation,
+          dateRecieved: currentStock.dateRecieved,
+          expiryDate: currentStock.expiryDate,
+        });
+        await mainStock.save();
+      }
     }
 
     return {

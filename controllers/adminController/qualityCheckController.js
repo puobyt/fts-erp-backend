@@ -31,7 +31,7 @@ qualityCheckController.newQualityCheck = async (req, res) => {
 
     const {
       batchNumber,
-      productName,
+      materialName,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -40,7 +40,7 @@ qualityCheckController.newQualityCheck = async (req, res) => {
 
     const result = await qualityCheckService.newQualityCheck({
       batchNumber,
-      productName,
+      materialName,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -70,7 +70,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
         authPassword,
         qualityCheckId,
         batchNumber,
-        productName,
+        materialName,
         inspectionDate,
         inspectorName,
         qualityStatus,
@@ -82,7 +82,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
         authPassword,
         qualityCheckId,
         batchNumber,
-        productName,
+        materialName,
         inspectionDate,
         inspectorName,
         qualityStatus,
