@@ -8,9 +8,16 @@ const schema = new mongoose.Schema(
     plant: {
       type: String,
     },
-    materialName: {
-      type: String,
-    },
+    materials: [
+      {
+        materialsList: {
+          type: String,
+        },
+        requiredQuantity: {
+          type: String,
+        },
+      },
+    ],
     productName: {
       type: String,
     },
@@ -19,9 +26,6 @@ const schema = new mongoose.Schema(
       type: String,
     },
     batch: {
-      type: String,
-    },
-    requiredQuantity: {
       type: String,
     },
     instructions: {

@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-
+require("dotenv").config();
 // const transporter = nodemailer.createTransport({
 //   service: "gmail",
 //   auth: {
@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "jishnuanil255@gmail.com",
-    pass: "ytdi bmwq kals piha",
+    user: process.env.MAIL_USER, 
+    pass: process.env.MAIL_PASS, 
   },
   tls: {
     rejectUnauthorized: false,
