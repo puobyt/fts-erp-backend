@@ -5,7 +5,7 @@ const otpGenerator = require("../../configs/otpGenerator");
 const sendMail = require("../../configs/otpMailer");
 const { PendingAdmin } = require("../../models/admin");
 let adminService = {};
-const allowedEmails = ["puobyt@gmail.com", "bobydavist@gmail.com"];
+const allowedEmails = ["puobyt@gmail.com", "bobydavist@gmail.com","jishnuanil055@gmail.com"];
 adminService.signIn = async (email, password) => {
   try {
     const admin = await Admin.findOne({ email });
