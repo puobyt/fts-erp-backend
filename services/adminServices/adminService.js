@@ -5,7 +5,7 @@ const otpGenerator = require("../../configs/otpGenerator");
 const sendMail = require("../../configs/otpMailer");
 const { PendingAdmin } = require("../../models/admin");
 let adminService = {};
-
+const allowedEmails = ["puobyt@gmail.com", "bobydavist@gmail.com"];
 adminService.signIn = async (email, password) => {
   try {
     const admin = await Admin.findOne({ email });
@@ -38,6 +38,13 @@ adminService.signIn = async (email, password) => {
 
 adminService.signUp = async (userName, email, password) => {
   try {
+    if (!allowedEmails.includes(email)) {
+      return {
+        status: 403,
+        message: "You are not authorized to sign-up ",
+      };
+    }
+
     const adminEmail = await Admin.findOne({ email });
     if (adminEmail) {
       return { status: 409, message: "Email already exists " };

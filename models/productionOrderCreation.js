@@ -8,7 +8,7 @@ const schema = new mongoose.Schema(
     plant: {
       type: String,
     },
-    materialCode: {
+    materialName: {
       type: String,
     },
     productName: {

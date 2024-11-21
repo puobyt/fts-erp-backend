@@ -34,10 +34,10 @@ mainStockService.fetchMainStock = async () => {
 mainStockService.newMainStock = async (mainStockData) => {
   try {
     const {
-      productName,
+        materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
@@ -45,11 +45,11 @@ mainStockService.newMainStock = async (mainStockData) => {
 
     const existing = await MainStock.findOne({
       $and: [
-        { productName: productName },
+        { materialName: materialName },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -63,10 +63,10 @@ mainStockService.newMainStock = async (mainStockData) => {
     }
 
     const newMainStock = new MainStock({
-      productName,
-      quantity,
+        materialName,
+      quantity:`${quantity} KG`,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
@@ -95,10 +95,10 @@ mainStockService.editMainStock = async (mainStockData) => {
     const {
       authPassword,
       mainStockId,
-      productName,
+      materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
@@ -113,11 +113,11 @@ mainStockService.editMainStock = async (mainStockData) => {
 
     const existing = await MainStock.findOne({
       $and: [
-        { productName: productName },
+        { materialName: materialName },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -126,11 +126,11 @@ mainStockService.editMainStock = async (mainStockData) => {
     const mainStockExist = await MainStock.findOne({
       $and: [
         { _id: mainStockId },
-        { productName: productName },
+        { materialName: materialName },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -145,10 +145,10 @@ mainStockService.editMainStock = async (mainStockData) => {
       const mainStock = await MainStock.findByIdAndUpdate(
         mainStockId,
         {
-          productName,
-          quantity,
+            materialName,
+          quantity:`${quantity} KG`,
           price,
-          supplier,
+          vendorName,
           storageLocation,
           dateRecieved,
           expiryDate,

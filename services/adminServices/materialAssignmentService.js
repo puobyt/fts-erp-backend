@@ -4,6 +4,7 @@ const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const FinishedGoods = require("../../models/finishedGoods");
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
+const MainStock = require("../../models/mainStock");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -31,27 +32,29 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
       {
         $group: {
           _id: "$materialName",
-          batchNumber: { $first: "$batchNumber" } // Use $first instead of $addToSet
-        }
+          batchNumber: { $first: "$batchNumber" }, // Use $first instead of $addToSet
+        },
       },
       {
         $project: {
           materialName: "$_id",
           batchNumber: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
     const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
     const batchNumber = await CurrentStock.distinct("batchNumber");
-const processOrderNumber = await ProductionOrderCreation.distinct('processOrder')
+    const processOrderNumber = await ProductionOrderCreation.distinct(
+      "processOrder"
+    );
     return {
       status: 200,
       data: data,
       batchNumber: batchNumber,
       materials: materials,
       finishedGoods: finishedGoods,
-      processOrderNumber:processOrderNumber
+      processOrderNumber: processOrderNumber,
     };
   } catch (error) {
     console.log(
@@ -82,25 +85,27 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         { materialName: materialName },
         { assignedQuantity: assignedQuantity },
         { assignedTo: assignedTo },
-        { batchNumber: batchNumber },
       ],
     });
 
-    const currentStock = await CurrentStock.findOne({ materialName });
-
+    const currentStock = await CurrentStock.findOne({
+      materialName: materialName,
+    });
     if (!currentStock) {
       return {
-        status: 409,
-        message: `Material "${materialName}" not found in Current Stock.`,
+        status: 404,
+        message: `Current stock for material "${materialName}" not found.`,
       };
     }
-    const numericQuantity = parseFloat(currentStock.quantity.replace(/\D/g, ''));
 
+    const numericQuantity = parseFloat(
+      currentStock.quantity.replace(/\D/g, "")
+    );
 
     if (isNaN(numericQuantity)) {
       throw new Error(`Invalid quantity format for material: ${materialName}`);
     }
-  
+
     const updatedQuantity = numericQuantity - assignedQuantity;
     if (numericQuantity < assignedQuantity) {
       return {
@@ -109,7 +114,14 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       };
     }
 
-    const updatedStock = await CurrentStock.findOneAndUpdate(
+    await CurrentStock.findOneAndUpdate(
+      { materialName },
+      { quantity: `${updatedQuantity} KG` },
+      { new: true }
+    );
+
+ 
+    await MainStock.findOneAndUpdate(
       { materialName },
       { quantity: `${updatedQuantity} KG` },
       { new: true }
@@ -124,20 +136,22 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     let assignedAssignmentNumber = assignmentNumber;
 
     if (!assignmentNumber) {
-
       const lastOrder = await MaterialAssignment.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("assignmentNumber");
 
       if (lastOrder && lastOrder.assignmentNumber) {
-        const lastNumber = parseInt(lastOrder.assignmentNumber.match(/\d+$/), 10);
+        const lastNumber = parseInt(
+          lastOrder.assignmentNumber.match(/\d+$/),
+          10
+        );
         assignedAssignmentNumber = `FRN/AN/${(lastNumber || 0) + 1}`;
       } else {
         assignedAssignmentNumber = "FRN/AN/1";
       }
     }
     const newData = new MaterialAssignment({
-      assignmentNumber:assignedAssignmentNumber,
+      assignmentNumber: assignedAssignmentNumber,
       batchNumber,
       processOrderNumber,
       materialName,
@@ -209,16 +223,81 @@ materialAssignmentService.editMaterialAssignment = async (
         { batchNumber: batchNumber },
       ],
     });
+    const currentStock = await CurrentStock.findOne({ materialName });
+
+    if (!currentStock) {
+      return {
+        status: 409,
+        message: `Material "${materialName}" not found in Current Stock.`,
+      };
+    }
+
+    const numericQuantity = parseFloat(
+      currentStock.quantity.replace(/\D/g, "")
+    );
+
+    if (isNaN(numericQuantity)) {
+      throw new Error(`Invalid quantity format for material: ${materialName}`);
+    }
+
+    const updatedQuantity = numericQuantity - assignedQuantity;
+    if (numericQuantity < assignedQuantity) {
+      return {
+        status: 409,
+        message: `Insufficient stock for material: ${materialName}`,
+      };
+    }
+
+    const updatedStock = await CurrentStock.findOneAndUpdate(
+      { materialName },
+      { quantity: `${updatedQuantity} KG` },
+      { new: true }
+    );
+
+    const mainStock = await MainStock.findOne({ materialName });
+
+    if (!mainStock) {
+      return {
+        status: 409,
+        message: `Material "${materialName}" not found in Current Stock.`,
+      };
+    }
+
+    const numericQuantityForMStock = parseFloat(
+      mainStock.quantity.replace(/\D/g, "")
+    );
+
+    if (isNaN(numericQuantityForMStock)) {
+      throw new Error(`Invalid quantity format for material: ${materialName}`);
+    }
+
+    const updatedQuantityForMStock =
+      numericQuantityForMStock - assignedQuantity;
+    if (numericQuantity < assignedQuantity) {
+      return {
+        status: 409,
+        message: `Insufficient stock for material: ${materialName}`,
+      };
+    }
+
+    const updatedStockForMStock = await MainStock.findOneAndUpdate(
+      { materialName },
+      { quantity: `${updatedQuantityForMStock} KG` },
+      { new: true }
+    );
+
     let assignedAssignmentNumber = assignmentNumber;
 
     if (!assignmentNumber) {
-
       const lastOrder = await MaterialAssignment.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("assignmentNumber");
 
       if (lastOrder && lastOrder.assignmentNumber) {
-        const lastNumber = parseInt(lastOrder.assignmentNumber.match(/\d+$/), 10);
+        const lastNumber = parseInt(
+          lastOrder.assignmentNumber.match(/\d+$/),
+          10
+        );
         assignedAssignmentNumber = `FRN/AN/${(lastNumber || 0) + 1}`;
       } else {
         assignedAssignmentNumber = "FRN/AN/1";
@@ -235,7 +314,7 @@ materialAssignmentService.editMaterialAssignment = async (
         await MaterialAssignment.findByIdAndUpdate(
           materialAssignmentId,
           {
-            assignmentNumber:assignedAssignmentNumber,
+            assignmentNumber: assignedAssignmentNumber,
             batchNumber,
             processOrderNumber,
             materialName,

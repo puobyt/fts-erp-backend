@@ -14,6 +14,9 @@ const schema = new mongoose.Schema(
     invoiceNumber: {
       type: String,
     },
+    customerId: {
+      type: String,
+    },
     invoiceDate: {
       type: Date,
     },

@@ -28,6 +28,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
   try {
     const {
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -39,6 +40,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
     const existingInvoice = await InvoiceCreation.findOne({
       $and: [
         { invoiceNumber: invoiceNumber },
+        { customerId: customerId },
         { invoiceDate: invoiceDate },
         { customerName: customerName },
         { customerAddress: customerAddress },
@@ -55,8 +57,40 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       };
     }
 
+    let assignedCustomerId = customerId;
+
+    if (!customerId) {
+
+      const lastOrder = await InvoiceCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("customerId");
+
+      if (lastOrder && lastOrder.customerId) {
+        const lastNumber = parseInt(lastOrder.customerId.match(/\d+$/), 10);
+        assignedCustomerId = `FRN/CID/-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedCustomerId = "FRN/CID/1";
+      }
+    }
+
+    let assignedInvoiceNumber = invoiceNumber;
+
+    if (!invoiceNumber) {
+
+      const lastOrder = await InvoiceCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("invoiceNumber");
+
+      if (lastOrder && lastOrder.invoiceNumber) {
+        const lastNumber = parseInt(lastOrder.invoiceNumber.match(/\d+$/), 10);
+        assignedInvoiceNumber = `FRN/IV/-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedInvoiceNumber = "FRN/IV/1";
+      }
+    }
     const newInvoice = new InvoiceCreation({
-      invoiceNumber,
+      invoiceNumber:assignedInvoiceNumber,
+      customerId:assignedCustomerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -85,6 +119,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       authPassword,
       invoiceId,
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -103,6 +138,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
     const existing = await InvoiceCreation.findOne({
       $and: [
         { invoiceNumber: invoiceNumber },
+        { customerId: customerId },
         { invoiceDate: invoiceDate },
         { customerName: customerName },
         { customerAddress: customerAddress },
@@ -116,6 +152,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       $and: [
         { _id: invoiceId },
         { invoiceNumber: invoiceNumber },
+        { customerId: customerId },
         { invoiceDate: invoiceDate },
         { customerName: customerName },
         { customerAddress: customerAddress },
@@ -125,6 +162,37 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       ],
     });
 
+    let assignedCustomerId = customerId;
+
+    if (!customerId) {
+
+      const lastOrder = await InvoiceCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("customerId");
+
+      if (lastOrder && lastOrder.customerId) {
+        const lastNumber = parseInt(lastOrder.customerId.match(/\d+$/), 10);
+        assignedCustomerId = `FRN/CID/-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedCustomerId = "FRN/CID/1";
+      }
+    }
+
+    let assignedInvoiceNumber = invoiceNumber;
+
+    if (!invoiceNumber) {
+
+      const lastOrder = await InvoiceCreation.findOne()
+        .sort({ createdAt: -1 }) 
+        .select("invoiceNumber");
+
+      if (lastOrder && lastOrder.invoiceNumber) {
+        const lastNumber = parseInt(lastOrder.invoiceNumber.match(/\d+$/), 10);
+        assignedInvoiceNumber = `FRN/IV/-${(lastNumber || 0) + 1}`;
+      } else {
+        assignedInvoiceNumber = "FRN/IV/1";
+      }
+    }
     if (existing && !currentInvoice) {
       return {
         status: 409,
@@ -134,8 +202,9 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       const InvoiceUpdate = await InvoiceCreation.findByIdAndUpdate(
         invoiceId,
         {
-          invoiceNumber,
+          invoiceNumber:assignedInvoiceNumber,
           invoiceDate,
+          customerId:assignedCustomerId,
           customerName,
           customerAddress,
           itemName,

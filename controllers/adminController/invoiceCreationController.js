@@ -29,6 +29,7 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
 
     const {
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -40,6 +41,7 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
     // Pass the extracted data to the service function
     const result = await invoiceCreationService.newInvoiceCreation({
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -70,6 +72,7 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       authPassword,
       invoiceId,
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -82,6 +85,7 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       authPassword,
       invoiceId,
       invoiceNumber,
+      customerId,
       invoiceDate,
       customerName,
       customerAddress,

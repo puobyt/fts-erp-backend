@@ -27,20 +27,20 @@ mainStockController.newMainStock = async (req, res) => {
     console.log("Adding new main stock ");
 
     const {
-      productName,
+        materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
     } = req.body;
 
     const result = await mainStockService.newMainStock({
-      productName,
+        materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
@@ -67,10 +67,10 @@ mainStockController.editMainStock = async (req, res) => {
     const {
       authPassword,
       mainStockId,
-      productName,
+      materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,
@@ -80,10 +80,10 @@ mainStockController.editMainStock = async (req, res) => {
     const result = await mainStockService.editMainStock({
       authPassword,
       mainStockId,
-      productName,
+      materialName,
       quantity,
       price,
-      supplier,
+      vendorName,
       storageLocation,
       dateRecieved,
       expiryDate,

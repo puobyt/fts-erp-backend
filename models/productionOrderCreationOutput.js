@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
+    productName: {
+        type: String,
+      },
     producedQuantity: {
       type: String,
     },

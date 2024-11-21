@@ -81,7 +81,14 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
     });
 
     await newData.save();
+    const mainStockExist = await MainStock.findOne({ materialName });
     if (qualityStatus === "Accepted") {
+      if(mainStockExist){
+        return {
+          status: 409,
+          message: "Material stock already exists",
+        };
+      }
       const currentStock = await CurrentStock.findOne({ batchNumber });
       if (!currentStock) {
         return {
@@ -90,10 +97,10 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
         };
       }
       const mainStock = new MainStock({
-        productName: currentStock.materialName,
-        quantity: `${currentStock.quantity} KG`,
+        materialName: currentStock.materialName,
+        quantity: currentStock.quantity,
         price: currentStock.price,
-        supplier: currentStock.supplier,
+        vendorName: currentStock.vendorName,
         storageLocation: currentStock.storageLocation,
         dateRecieved: currentStock.dateRecieved,
         expiryDate: currentStock.expiryDate,
@@ -182,28 +189,34 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         }
       );
     }
-    const mainStockExist = await MainStock.findOne({ batchNumber });
-    if (!mainStockExist) {
+    const mainStockExist = await MainStock.findOne({ materialName });
       if (qualityStatus === "Accepted") {
-        const currentStock = await CurrentStock.findOne({ batchNumber });
-        if (!currentStock) {
-          return {
-            status: 409,
-            message: "Current stock not found",
-          };
+        if(!mainStockExist){
+          const currentStock = await CurrentStock.findOne({ batchNumber });
+          if (!currentStock) {
+            return {
+              status: 409,
+              message: "Current stock not found",
+            };
+          }
+          const mainStock = new MainStock({
+            materialName: currentStock.materialName,
+            quantity: `${currentStock.quantity} KG`,
+            price: currentStock.price,
+            vendorName: currentStock.vendorName,
+            storageLocation: currentStock.storageLocation,
+            dateRecieved: currentStock.dateRecieved,
+            expiryDate: currentStock.expiryDate,
+          });
+          await mainStock.save();
         }
-        const mainStock = new MainStock({
-          productName: currentStock.materialName,
-          quantity: `${currentStock.quantity} KG`,
-          price: currentStock.price,
-          supplier: currentStock.supplier,
-          storageLocation: currentStock.storageLocation,
-          dateRecieved: currentStock.dateRecieved,
-          expiryDate: currentStock.expiryDate,
-        });
-        await mainStock.save();
+     
+      }else if(qualityStatus==='Quarantine || Rejected '){
+        if(mainStockExist){
+          await MainStock.findOneAndDelete({batchNumber})
+        }
       }
-    }
+    
 
     return {
       status: 201,

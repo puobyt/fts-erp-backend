@@ -60,8 +60,7 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materialsList,
-      quantity,
+      materials
     } = req.body;
 
     const result = await billOfMaterialsService.editBillOfMaterials({
@@ -69,8 +68,7 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materialsList,
-      quantity,
+      materials
     });
 
     res.status(result.status).json({

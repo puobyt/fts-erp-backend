@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    productName: {
+    materialName: {
       type: String,
     },
     quantity: {
-      type: Number,
+      type: String,
     },
     price: {
       type: String,
@@ -14,7 +14,7 @@ const schema = new mongoose.Schema(
     storageLocation: {
         type: String,
       },
-    supplier: {
+      vendorName: {
       type: String,
     },
     dateRecieved: {

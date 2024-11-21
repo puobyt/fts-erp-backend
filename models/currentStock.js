@@ -17,7 +17,7 @@ const schema = new mongoose.Schema(
     storageLocation: {
       type: String,
     },
-    supplier: {
+    vendorName: {
       type: String,
     },
     dateRecieved: {

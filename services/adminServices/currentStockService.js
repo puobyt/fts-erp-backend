@@ -9,7 +9,8 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({});
-    const materials = await VendorManagement.distinct("material");
+    const materials = await PurchaseOrderCreation.distinct("materialName");
+    const vendors = await PurchaseOrderCreation.distinct("nameOfTheFirm");
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},
       "price quantity productName"
@@ -20,6 +21,7 @@ currentStockService.fetchCurrentStock = async () => {
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
       materials: materials,
+      vendors:vendors
     };
   } catch (error) {
     console.log(
@@ -40,7 +42,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       quantity,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate,
     } = newStockData;
@@ -52,7 +54,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -88,7 +90,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       quantity:`${quantity} KG`,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate,
     });
@@ -121,7 +123,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       quantity,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate,
     } = currentStockData;
@@ -139,7 +141,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -153,7 +155,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
-        { supplier: supplier },
+        { vendorName: vendorName },
         { dateRecieved: dateRecieved },
         { expiryDate: expiryDate },
       ],
@@ -174,7 +176,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
           batchNumber: batchNumberValue,
           quantity:`${quantity} KG`,
           price,
-          supplier,
+          vendorName,
           storageLocation,
           dateRecieved,
           expiryDate,

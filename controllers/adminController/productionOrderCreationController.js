@@ -17,7 +17,8 @@ productionOrderCreationController.fetchProductOrderCreation = async (
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      batches: result.batches,
+
+      materials:result.materials,
       userToken: "",
     });
   } catch (error) {
@@ -43,6 +44,7 @@ productionOrderCreationController.fetchProductOrderCreationOutput = async (
       message: result.message,
       data: result.data,
       batches: result.batches,
+      products:result.products,
       userToken: "",
     });
   } catch (error) {
@@ -63,7 +65,7 @@ productionOrderCreationController.newProductionOrderCreation = async (
     const {
       processOrder,
       plant,
-      materialCode,
+      materialName,
       productName,
       productDescription,
       batch,
@@ -77,7 +79,7 @@ productionOrderCreationController.newProductionOrderCreation = async (
       {
         processOrder,
         plant,
-        materialCode,
+        materialName,
         productName,
         productDescription,
         batch,
@@ -110,6 +112,7 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
     console.log("Adding new production order creation ");
 
     const {
+      productName,
       producedQuantity,
       productionCompletionDate,
       // qualityCheckStatus,
@@ -123,6 +126,7 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
 
     const result =
       await productOrderCreationService.newProductionOrderCreationOutput({
+        productName,
         producedQuantity,
         productionCompletionDate,
         // qualityCheckStatus,
@@ -160,7 +164,7 @@ productionOrderCreationController.editProductionOrderCreation = async (
       productionOrderId,
       processOrder,
       plant,
-      materialCode,
+      materialName,
       productName,
       productDescription,
       storageLocation,
@@ -177,7 +181,7 @@ productionOrderCreationController.editProductionOrderCreation = async (
         productionOrderId,
         processOrder,
         plant,
-        materialCode,
+        materialName,
         productName,
         productDescription,
         storageLocation,
@@ -212,6 +216,7 @@ productionOrderCreationController.editProductionOrderCreationOutput = async (
     const {
       authPassword,
       productionOrderoutputId,
+      productName,
       producedQuantity,
       productionCompletionDate,
       // qualityCheckStatus,
@@ -227,6 +232,7 @@ productionOrderCreationController.editProductionOrderCreationOutput = async (
       await productOrderCreationService.editProductionOrderCreationOutput({
         authPassword,
         productionOrderoutputId,
+        productName,
         producedQuantity,
         productionCompletionDate,
         // qualityCheckStatus,

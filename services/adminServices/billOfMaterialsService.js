@@ -1,6 +1,6 @@
 const BillOfMaterials = require("../../models/billOfMaterials");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
- 
+const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 let billOfMaterialsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -8,7 +8,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 billOfMaterialsService.fetchbillOfMaterials = async () => {
   try {
     const data = await BillOfMaterials.find({})
-    const productNames = await PurchaseOrderCreation.distinct('productName');
+    const productNames = await ProductionOrderCreationOutput.distinct('productName');
     return {
       status: 200,
       data: data,
@@ -96,8 +96,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materialsList,
-      quantity
+      materials
     } = billOfMaterialsData;
 
     if (adminAuthPassword !== authPassword) {
@@ -110,8 +109,8 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
       $and: [
         { bomNumber: bomNumber },
         { productName: productName },
-        { materialsList: materialsList },
-        { quantity: quantity },
+        { materials: materials },
+       
       ],
     });
 
@@ -120,8 +119,8 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         { _id: billOfMaterialsId },
         { bomNumber: bomNumber },
         { productName: productName },
-        { materialsList: materialsList },
-        { quantity: quantity },
+        { materials: materials },
+        
       ],
     });
     let assignedBomNUmber = bomNumber;
@@ -151,8 +150,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
 
           bomNumber:assignedBomNUmber,
           productName,
-          materialsList,
-          quantity
+          materials
         },
         {
           new: true,

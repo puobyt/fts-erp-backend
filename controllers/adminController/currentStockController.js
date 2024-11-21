@@ -15,6 +15,7 @@ currentStockController.fetchCurrentStock = async (req, res) => {
       data: result.data,
       purchaseOrderCreationData:result.purchaseOrderCreationData,
       materials:result.materials,
+      vendors:result.vendors,
       userToken: "",
     });
   } catch (error) {
@@ -29,7 +30,7 @@ currentStockController.newCurrentStock = async (req, res) => {
   try {
     console.log("Adding new current stock ");
 
-    const { materialName,batchNumber, quantity, price,storageLocation, supplier, dateRecieved,expiryDate } = req.body;
+    const { materialName,batchNumber, quantity, price,storageLocation, vendorName, dateRecieved,expiryDate } = req.body;
 
     const result = await currentStockService.newCurrentStock({
       materialName,
@@ -37,7 +38,7 @@ currentStockController.newCurrentStock = async (req, res) => {
       quantity,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate
     });
@@ -68,7 +69,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       quantity,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate
     } = req.body;
@@ -82,7 +83,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       quantity,
       price,
       storageLocation,
-      supplier,
+      vendorName,
       dateRecieved,
       expiryDate
     });
