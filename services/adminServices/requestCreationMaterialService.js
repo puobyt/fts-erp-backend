@@ -47,14 +47,13 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber, batchNumber, materialName, quantity, requiredDate } =
+    const { requestNumber, batchNumber, materials, requiredDate } =
       requestCreationData;
 
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
         { requestNumber: requestNumber },
-        { materialName: materialName },
-        { quantity: quantity },
+        { materials: materials },
         { requiredDate: requiredDate },
         { batchNumber: batchNumber },
       ],
@@ -86,8 +85,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
     const newData = new RequestCreationForMaterials({
       requestNumber:assignedRequestNumber,
       batchNumber,
-      materialName,
-      quantity,
+      materials,
       requiredDate,
     });
 
@@ -118,8 +116,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       requestMaterialsId,
       requestNumber,
       batchNumber,
-      materialName,
-      quantity,
+      materials,
       requiredDate,
     } = requestCreationData;
     if (adminAuthPassword !== authPassword) {
@@ -131,8 +128,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
         { requestNumber: requestNumber },
-        { materialName: materialName },
-        { quantity: quantity },
+        { materials: materials },
         { requiredDate: requiredDate },
         { batchNumber: batchNumber },
       ],
@@ -141,9 +137,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       await RequestCreationForMaterials.findOne({
         $and: [
           { _id: requestMaterialsId },
-          { requestNumber: requestNumber },
-          { materialName: materialName },
-          { quantity: quantity },
+          { requestNumber: requestNumber},
+          {materials: materials},
           { requiredDate: requiredDate },
           { batchNumber: batchNumber },
         ],
@@ -177,8 +172,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           {
             requestNumber:assignedRequestNumber,
             batchNumber,
-            materialName,
-            quantity,
+            materials,
             requiredDate,
           },
           {

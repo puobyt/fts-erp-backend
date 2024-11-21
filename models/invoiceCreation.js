@@ -35,6 +35,9 @@ const schema = new mongoose.Schema(
     price: {
       type: String,
     },
+    invoicePreparedBy: {
+      type: String,
+    },
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
   },

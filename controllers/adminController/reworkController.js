@@ -13,6 +13,7 @@ reworkController.fetchRework = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      batches:result.batches,
       userToken: "",
     });
   } catch (error) {

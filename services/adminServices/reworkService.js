@@ -1,4 +1,4 @@
-
+const CurrentStock = require("../../models/currentStock");
 const Rework = require('../../models/rework');
 let reworkService = {};
 require("dotenv").config();
@@ -6,10 +6,24 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 reworkService.fetchRework = async () => {
     try {
       const data = await Rework.find({})
-  
+      const batches = await CurrentStock.aggregate([
+        {
+          $group: {
+            _id: { batchNumber: "$batchNumber", materialName: "$materialName" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            batchNumber: "$_id.batchNumber",
+            materialName: "$_id.materialName",
+          },
+        },
+      ]);
       return {
         status: 200,
         data: data,
+        batches:batches
       };
     } catch (error) {
       console.log("An error occured at fetching reworks in admin service", error.message);
@@ -65,7 +79,7 @@ reworkService.fetchRework = async () => {
         proposedReworkAction, 
         reworkStartDate, 
         reworkCompletionDate, 
-        quantityForRework, 
+        quantityForRework:`${quantityForRework} KG`, 
         reworkStatus, 
         comments
       });
@@ -160,7 +174,7 @@ reworkService.fetchRework = async () => {
             proposedReworkAction,
             reworkStartDate,
             reworkCompletionDate,
-            quantityForRework,
+            quantityForRework:`${quantityForRework} KG`,
             reworkStatus,
             comments
           },

@@ -8,9 +8,16 @@ const schema = new mongoose.Schema(
     batchNumber: {
       type: String,
     },
-    materialName: {
-      type: String,
-    },
+    materials: [
+      {
+        materialsList: {
+          type: String,
+        },
+        quantity: {
+          type: String,
+        },
+      },
+    ],
     quantity: {
       type: String,
     },

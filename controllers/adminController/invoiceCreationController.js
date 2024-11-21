@@ -11,6 +11,7 @@ invoiceCreationController.fetchInvoiceCreations = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
+      itemNames:result.itemNames,
       userToken: "",
     }); 
 
@@ -36,6 +37,7 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     } = req.body;
 
     // Pass the extracted data to the service function
@@ -48,6 +50,7 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     });
 
     res.status(result.status).json({
@@ -79,6 +82,7 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     } = req.body;
 
     const result = await invoiceCreationService.editInvoiceCreation({
@@ -92,6 +96,7 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     });
 
     res.status(result.status).json({

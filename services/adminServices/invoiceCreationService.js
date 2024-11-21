@@ -1,15 +1,17 @@
 let invoiceCreationService = {};
 const InvoiceCreation = require("../../models/invoiceCreation");
+const FinishedGoods = require("../../models/finishedGoods");
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 invoiceCreationService.fetchInvoiceCreations = async () => {
   try {
     const data = await InvoiceCreation.find({})
-
+const itemNames = await FinishedGoods.distinct('finishedGoodsName')
     return {
       status: 200,
       data: data,
+      itemNames:itemNames
     };
   } catch (error) {
     console.log(
@@ -35,6 +37,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     } = invoiceData;
 
     const existingInvoice = await InvoiceCreation.findOne({
@@ -47,6 +50,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
         { itemName: itemName },
         { quantity: quantity },
         { price: price },
+        { invoicePreparedBy: invoicePreparedBy },
       ],
     });
 
@@ -95,8 +99,9 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       customerName,
       customerAddress,
       itemName,
-      quantity,
+      quantity:`${quantity} KG`,
       price,
+      invoicePreparedBy
     });
 
     await newInvoice.save();
@@ -126,6 +131,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       itemName,
       quantity,
       price,
+      invoicePreparedBy
     } = invoiceData;
 
     if (adminAuthPassword !== authPassword) {
@@ -145,6 +151,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
         { itemName: itemName },
         { quantity: quantity },
         { price: price },
+        { invoicePreparedBy: invoicePreparedBy },
       ],
     });
 
@@ -159,6 +166,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
         { itemName: itemName },
         { quantity: quantity },
         { price: price },
+        { invoicePreparedBy: invoicePreparedBy },
       ],
     });
 
@@ -208,8 +216,9 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
           customerName,
           customerAddress,
           itemName,
-          quantity,
+          quantity:`${quantity} KG`,
           price,
+          invoicePreparedBy
         },
         {
           new: true,

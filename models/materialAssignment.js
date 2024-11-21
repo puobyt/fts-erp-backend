@@ -11,12 +11,16 @@ const schema = new mongoose.Schema(
     processOrderNumber: {
       type: String,
     },
-    materialName: {
-      type: String,
-    },
-    assignedQuantity: {
-      type: Number,
-    },
+    materials: [
+      {
+        materialsList: {
+          type: String,
+        },
+        assignedQuantity: {
+          type: String,
+        },
+      },
+    ],
     assignedTo: {
       type: String,
     },

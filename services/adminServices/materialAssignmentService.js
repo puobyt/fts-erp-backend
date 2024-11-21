@@ -72,8 +72,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       assignmentNumber,
       batchNumber,
       processOrderNumber,
-      materialName,
-      assignedQuantity,
+      materials,
       assignedTo,
     } = materialData;
 
@@ -82,50 +81,61 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         { assignmentNumber: assignmentNumber },
         { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
-        { materialName: materialName },
-        { assignedQuantity: assignedQuantity },
+        { materials: materials },
         { assignedTo: assignedTo },
       ],
     });
 
-    const currentStock = await CurrentStock.findOne({
-      materialName: materialName,
-    });
-    if (!currentStock) {
-      return {
-        status: 404,
-        message: `Current stock for material "${materialName}" not found.`,
-      };
+    for (let i = 0; i < materials.length; i++) {
+      const { materialsList, assignedQuantity } = materials[i];
+
+      // const assignedQuantityy = parseFloat(assignedQuantity);
+
+      // if (isNaN(assignedQuantityy)) {
+      //   throw new Error(
+      //     `Invalid assigned ttttt quantity for material: ${materialsList}`
+      //   );
+      // }
+
+      const currentStock = await CurrentStock.findOne({
+        materialName: materialsList,
+      });
+
+      if (!currentStock) {
+        throw new Error(`Material ${materialsList} not found in current stock`);
+      }
+
+      let currentStockQuantity = parseFloat(
+        currentStock.quantity.replace(/\D/g, "")
+      );
+
+      // if (isNaN(currentStockQuantity)) {
+      //   throw new Error(
+      //     `Invalid quantity format for material: ${materialsList}`
+      //   );
+      // }
+
+      if (currentStockQuantity < assignedQuantity) {
+        return {
+          status: 409,
+          message: `Insufficient stock for material: ${materialsList}`,
+        };
+      }
+
+      const updatedQuantity = currentStockQuantity - assignedQuantity;
+
+      await CurrentStock.findOneAndUpdate(
+        { materialName: materialsList },
+        { quantity: `${updatedQuantity} KG` },
+        { new: true }
+      );
+
+      await MainStock.findOneAndUpdate(
+        { materialName: materialsList },
+        { quantity: `${updatedQuantity} KG` },
+        { new: true }
+      );
     }
-
-    const numericQuantity = parseFloat(
-      currentStock.quantity.replace(/\D/g, "")
-    );
-
-    if (isNaN(numericQuantity)) {
-      throw new Error(`Invalid quantity format for material: ${materialName}`);
-    }
-
-    const updatedQuantity = numericQuantity - assignedQuantity;
-    if (numericQuantity < assignedQuantity) {
-      return {
-        status: 409,
-        message: `Insufficient stock for material: ${materialName}`,
-      };
-    }
-
-    await CurrentStock.findOneAndUpdate(
-      { materialName },
-      { quantity: `${updatedQuantity} KG` },
-      { new: true }
-    );
-
- 
-    await MainStock.findOneAndUpdate(
-      { materialName },
-      { quantity: `${updatedQuantity} KG` },
-      { new: true }
-    );
 
     if (existing) {
       return {
@@ -154,8 +164,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       assignmentNumber: assignedAssignmentNumber,
       batchNumber,
       processOrderNumber,
-      materialName,
-      assignedQuantity,
+      materials,
       assignedTo,
     });
 
@@ -187,8 +196,7 @@ materialAssignmentService.editMaterialAssignment = async (
       assignmentNumber,
       batchNumber,
       processOrderNumber,
-      materialName,
-      assignedQuantity,
+      materials,
       assignedTo,
     } = materialAssignmentData;
 
@@ -204,8 +212,7 @@ materialAssignmentService.editMaterialAssignment = async (
         { assignmentNumber: assignmentNumber },
         { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
-        { materialName: materialName },
-        { assignedQuantity: assignedQuantity },
+        { materials: materials },
         { assignedTo: assignedTo },
         { batchNumber: batchNumber },
       ],
@@ -217,74 +224,98 @@ materialAssignmentService.editMaterialAssignment = async (
         { assignmentNumber: assignmentNumber },
         { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
-        { materialName: materialName },
-        { assignedQuantity: assignedQuantity },
+        { materials: materials },
         { assignedTo: assignedTo },
         { batchNumber: batchNumber },
       ],
     });
-    const currentStock = await CurrentStock.findOne({ materialName });
 
-    if (!currentStock) {
+    const existingAssignment = await MaterialAssignment.findOne({
+      assignmentNumber,
+    });
+
+    if (!existingAssignment) {
       return {
-        status: 409,
-        message: `Material "${materialName}" not found in Current Stock.`,
+        status: 404,
+        message: "Material Assignment not found",
       };
     }
 
-    const numericQuantity = parseFloat(
-      currentStock.quantity.replace(/\D/g, "")
-    );
+    for (let i = 0; i < materials.length; i++) {
+      const { materialsList, assignedQuantity } = materials[i];
 
-    if (isNaN(numericQuantity)) {
-      throw new Error(`Invalid quantity format for material: ${materialName}`);
+      const assignedQuantityy = parseFloat(assignedQuantity);
+
+      if (isNaN(assignedQuantityy)) {
+        throw new Error(
+          `Invalid assigned quantity for material: ${materialsList}`
+        );
+      }
+
+      const oldMaterial = existingAssignment.materials.find(
+        (material) => material.materialsList === materialsList
+      );
+
+      if (!oldMaterial) {
+        throw new Error(
+          `Material ${materialsList} not found in the existing assignment`
+        );
+      }
+
+      const oldAssignedQuantity = parseFloat(oldMaterial.assignedQuantity);
+      const quantityDifference = assignedQuantityy - oldAssignedQuantity;
+
+      const currentStock = await CurrentStock.findOne({
+        materialName: materialsList,
+      });
+
+      if (!currentStock) {
+        throw new Error(`Material ${materialsList} not found in current stock`);
+      }
+
+      let currentStockQuantity = parseFloat(
+        currentStock.quantity.replace(/\D/g, "")
+      );
+
+      if (isNaN(currentStockQuantity)) {
+        throw new Error(
+          `Invalid quantity format for material: ${materialsList}`
+        );
+      }
+
+      if (quantityDifference > 0) {
+        if (currentStockQuantity < quantityDifference) {
+          return {
+            status: 409,
+            message: `Insufficient stock for material: ${materialsList}`,
+          };
+        }
+        currentStockQuantity -= quantityDifference;
+      } else if (quantityDifference < 0) {
+        currentStockQuantity += Math.abs(quantityDifference);
+      }
+
+      await CurrentStock.findOneAndUpdate(
+        { materialName: materialsList },
+        { quantity: `${currentStockQuantity} KG` },
+        { new: true }
+      );
+      await MainStock.findOneAndUpdate(
+        { materialName: materialsList },
+        { quantity: `${currentStockQuantity} KG` },
+        { new: true }
+      );
+      const updatedMaterials = existingAssignment.materials.map((material) => {
+        if (material.materialsList === materialsList) {
+          material.assignedQuantity = assignedQuantity;
+        }
+        return material;
+      });
+
+      existingAssignment.materials = updatedMaterials;
     }
 
-    const updatedQuantity = numericQuantity - assignedQuantity;
-    if (numericQuantity < assignedQuantity) {
-      return {
-        status: 409,
-        message: `Insufficient stock for material: ${materialName}`,
-      };
-    }
-
-    const updatedStock = await CurrentStock.findOneAndUpdate(
-      { materialName },
-      { quantity: `${updatedQuantity} KG` },
-      { new: true }
-    );
-
-    const mainStock = await MainStock.findOne({ materialName });
-
-    if (!mainStock) {
-      return {
-        status: 409,
-        message: `Material "${materialName}" not found in Current Stock.`,
-      };
-    }
-
-    const numericQuantityForMStock = parseFloat(
-      mainStock.quantity.replace(/\D/g, "")
-    );
-
-    if (isNaN(numericQuantityForMStock)) {
-      throw new Error(`Invalid quantity format for material: ${materialName}`);
-    }
-
-    const updatedQuantityForMStock =
-      numericQuantityForMStock - assignedQuantity;
-    if (numericQuantity < assignedQuantity) {
-      return {
-        status: 409,
-        message: `Insufficient stock for material: ${materialName}`,
-      };
-    }
-
-    const updatedStockForMStock = await MainStock.findOneAndUpdate(
-      { materialName },
-      { quantity: `${updatedQuantityForMStock} KG` },
-      { new: true }
-    );
+    await existingAssignment.save();
 
     let assignedAssignmentNumber = assignmentNumber;
 
@@ -317,8 +348,7 @@ materialAssignmentService.editMaterialAssignment = async (
             assignmentNumber: assignedAssignmentNumber,
             batchNumber,
             processOrderNumber,
-            materialName,
-            assignedQuantity,
+            materials,
             assignedTo,
           },
           {
