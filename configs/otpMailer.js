@@ -1,25 +1,25 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: "jishnuanil255@gmail.com",
-//     pass: "ytdi bmwq kals piha",
-//   },
-// });
-
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  service: "gmail",
   auth: {
-    user: 'jishnuanil255@gmail.com', 
-    pass: 'jvbp ugow zkll hjpg', 
-  },
-  tls: {
-    rejectUnauthorized: false,
+    user: "jishnuanil255@gmail.com",
+    pass: "jvbp ugow zkll hjpg",
   },
 });
+
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.gmail.com",
+//   port: 587,
+//   secure: false,
+//   auth: {
+//     user: 'jishnuanil255@gmail.com', 
+//     pass: 'jvbp ugow zkll hjpg', 
+//   },
+//   tls: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
 function sendMail(email, otp) {
   const mailOptions = {
