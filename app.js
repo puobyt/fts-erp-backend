@@ -3,7 +3,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-
+const helmet = require("helmet");
 const cors = require("cors");
 var adminRouter = require("./routes/admin");
 
@@ -15,13 +15,14 @@ require("dotenv").config();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 const PORT = process.env.PORT || 5000;
+app.use(helmet());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://fts-gamma.vercel.app", // Replace with your frontend URL
+    origin: "*", // Replace with your frontend URL
     methods: "GET,POST,PUT,DELETE", // Specify allowed HTTP methods
     allowedHeaders: "Content-Type,Authorization", // Specify allowed headers
   })
@@ -29,22 +30,26 @@ app.use(
 app.use(express.static(path.join(__dirname, "public")));
 dbConnect();
 app.use("/", adminRouter);
-// app.use('/users', usersRouter);
 
-// catch 404 and forward to error handler
+app.get("/", (req, res) => {
+  res.send("Server is up and running");
+});
+
+app.get("/api", (req, res) => {
+  res.send("FTS API Home Page");
+});
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
+  // Set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
+  // Render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.json({ error: err.message });
 });
 
 app.listen(PORT, () => {
