@@ -65,7 +65,7 @@ mainStockService.newMainStock = async (mainStockData) => {
     const newMainStock = new MainStock({
         materialName,
       quantity:`${quantity} KG`,
-      price,
+      price:`₹ ${price}`,
       vendorName,
       storageLocation,
       dateRecieved,
@@ -147,7 +147,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         {
             materialName,
           quantity:`${quantity} KG`,
-          price,
+          price:`₹ ${price}`,
           vendorName,
           storageLocation,
           dateRecieved,

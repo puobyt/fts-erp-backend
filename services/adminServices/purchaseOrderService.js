@@ -7,13 +7,13 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
-    const orders = await PurchaseOrderCreation.find({})
-      const firms = await VendorManagement.find({});
+    const orders = await PurchaseOrderCreation.find({});
+    const firms = await VendorManagement.find({});
 
     return {
       status: 200,
       data: orders,
-      firms:firms
+      firms: firms,
     };
   } catch (error) {
     console.log(
@@ -96,47 +96,48 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       };
     }
 
-let newVendorId;
+    let newVendorId;
     let isUnique = false;
     while (!isUnique) {
       newVendorId = `VND-${crypto.randomInt(100000, 999999)}`;
 
-   
       const existingVendor = await PurchaseOrderCreation.findOne({ vendorId });
       if (!existingVendor) {
-        isUnique = true; 
+        isUnique = true;
       }
     }
 
     let assignedPurchaseOrderNumber = purchaseOrderNumber;
 
     if (!purchaseOrderNumber) {
-
       const lastOrder = await PurchaseOrderCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("purchaseOrderNumber");
 
       if (lastOrder && lastOrder.purchaseOrderNumber) {
-        const lastNumber = parseInt(lastOrder.purchaseOrderNumber.match(/\d+$/), 10);
+        const lastNumber = parseInt(
+          lastOrder.purchaseOrderNumber.match(/\d+$/),
+          10
+        );
         assignedPurchaseOrderNumber = `PUR-ORD-${(lastNumber || 0) + 1}`;
       } else {
         assignedPurchaseOrderNumber = "PUR-ORD-1";
       }
     }
     const newPurchaseOrder = new PurchaseOrderCreation({
-      purchaseOrderNumber:assignedPurchaseOrderNumber,
+      purchaseOrderNumber: assignedPurchaseOrderNumber,
       date,
       address,
       nameOfTheFirm,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
-      vendorId:newVendorId,
+      vendorId: newVendorId,
       materialName,
       // batchNumber,
       mfgDate,
-     quantity: `${quantity} KG`,
-      price,
+      quantity: `${quantity} KG`,
+      price:`₹ ${price}`,
       pan,
       gst,
     });
@@ -230,30 +231,32 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
     });
     let newVendorId = vendorId;
 
-    if(!vendorId){
+    if (!vendorId) {
       let isUnique = false;
       while (!isUnique) {
         newVendorId = `VND-${crypto.randomInt(100000, 999999)}`;
-  
-     
-        const existingVendor = await PurchaseOrderCreation.findOne({ vendorId });
+
+        const existingVendor = await PurchaseOrderCreation.findOne({
+          vendorId,
+        });
         if (!existingVendor) {
-          isUnique = true; 
+          isUnique = true;
         }
       }
     }
 
-
     let assignedPurchaseOrderNumber = purchaseOrderNumber;
 
     if (!purchaseOrderNumber) {
-
       const lastOrder = await PurchaseOrderCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("purchaseOrderNumber");
 
       if (lastOrder && lastOrder.purchaseOrderNumber) {
-        const lastNumber = parseInt(lastOrder.purchaseOrderNumber.match(/\d+$/), 10);
+        const lastNumber = parseInt(
+          lastOrder.purchaseOrderNumber.match(/\d+$/),
+          10
+        );
         assignedPurchaseOrderNumber = `PUR-ORD-${(lastNumber || 0) + 1}`;
       } else {
         assignedPurchaseOrderNumber = "PUR-ORD-1";
@@ -268,19 +271,19 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       const order = await PurchaseOrderCreation.findByIdAndUpdate(
         orderId,
         {
-          purchaseOrderNumber:assignedPurchaseOrderNumber,
+          purchaseOrderNumber: assignedPurchaseOrderNumber,
           date,
           address,
           nameOfTheFirm,
           contactNumber,
           contactPersonName,
           contactPersonDetails,
-          vendorId:newVendorId,
+          vendorId: newVendorId,
           materialName,
           // batchNumber,
           mfgDate,
-          quantity:`${quantity} KG`,
-          price,
+          quantity: `${quantity} KG`,
+          price: `₹ ${price}`,
           pan,
           gst,
         },
@@ -301,17 +304,13 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       "An error occured at editing purchase order management",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in purchase order creation management services",
-      });
+    res.status(500).json({
+      info: "An error occured in purchase order creation management services",
+    });
   }
 };
 
-purchaseOrderService.removePurchaseOrderCreation = async (
-  purchaseOrderId
-) => {
+purchaseOrderService.removePurchaseOrderCreation = async (purchaseOrderId) => {
   try {
     const purchaseOrder = await PurchaseOrderCreation.findByIdAndDelete(
       purchaseOrderId
@@ -327,11 +326,9 @@ purchaseOrderService.removePurchaseOrderCreation = async (
       "An error occured at Purchase Order Creation remove",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in Purchase Order Creation remove in vendor services",
-      });
+    res.status(500).json({
+      info: "An error occured in Purchase Order Creation remove in vendor services",
+    });
   }
 };
 

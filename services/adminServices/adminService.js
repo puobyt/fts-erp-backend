@@ -24,7 +24,8 @@ adminService.signIn = async (email, password) => {
     if (!adminToken) {
       console.log("no admin token get in admin sign in service");
     }
-    return { status: 200, message: "Login successful", adminToken: adminToken };
+    const adminData = { email: admin.email, userName: admin.userName };
+    return { status: 200, message: "Login successful", adminToken: adminToken,adminData:adminData };
   } catch (err) {
     console.error(
       "Error occured in login admin in sign in controller",

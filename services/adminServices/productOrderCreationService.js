@@ -205,13 +205,13 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
     }
     const newData = new ProductionOrderCreationOutput({
       productName,
-      producedQuantity,
+      producedQuantity:`${producedQuantity} KG`,
       productionCompletionDate,
       // qualityCheckStatus,
       storageLocationforOutput,
       batchNumberforOutput: assignedBatchNumber,
       productionNotes,
-      Yield,
+      Yield:`${Yield} %`,
       outputQualityRating,
       outputHandlingInstructions,
     });
@@ -441,13 +441,13 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           productionOrderoutputId,
           {
             productName,
-            producedQuantity,
+            producedQuantity:`${producedQuantity} KG`,
             productionCompletionDate,
             // qualityCheckStatus,
             storageLocationforOutput,
             batchNumberforOutput: assignedBatchNumber,
             productionNotes,
-            Yield,
+            Yield:`${Yield} %`,
             outputQualityRating,
             outputHandlingInstructions,
           },

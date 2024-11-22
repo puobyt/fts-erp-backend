@@ -14,6 +14,7 @@ billOfMaterialsController.fetchbillOfMaterials = async (req, res) => {
       message: result.message,
       data: result.data,
       productNames: result.productNames,
+      materials:result.materials,
       userToken: "",
     });
   } catch (error) {

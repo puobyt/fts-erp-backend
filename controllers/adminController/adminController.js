@@ -15,6 +15,7 @@ adminController.signIn = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       adminToken: result.adminToken,
+      adminData:result.adminData
     });
   } catch (err) {
     console.error("Error occurred in login data", err);
