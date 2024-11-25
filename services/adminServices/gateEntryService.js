@@ -26,10 +26,11 @@ gateEntryService.fetchGateEntry = async () => {
 
 gateEntryService.newGateEntry = async (newGateEntry) => {
   try {
-    const { vehicleNumber, vendorName, date } = newGateEntry;
+    const { entryTime,vehicleNumber, vendorName, date } = newGateEntry;
 
     const existing = await GateEntry.findOne({
       $and: [
+        { entryTime: entryTime },
         { vehicleNumber: vehicleNumber },
         { vendorName: vendorName },
         { date: date },
@@ -44,6 +45,7 @@ gateEntryService.newGateEntry = async (newGateEntry) => {
     }
 
     const newEntry = new GateEntry({
+      entryTime,
       vehicleNumber,
       vendorName,
       date,
@@ -71,7 +73,7 @@ gateEntryService.newGateEntry = async (newGateEntry) => {
 
 gateEntryService.editGateEntry = async (gateEntryData) => {
   try {
-    const { authPassword, gateEntryId, vehicleNumber, vendorName, date } =
+    const { authPassword, gateEntryId,entryTime, vehicleNumber, vendorName, date } =
       gateEntryData;
 
     if (adminAuthPassword !== authPassword) {
@@ -83,6 +85,7 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
 
     const existing = await GateEntry.findOne({
       $and: [
+        { entryTime: entryTime },
         { vehicleNumber: vehicleNumber },
         { vendorName: vendorName },
         { date: date },
@@ -92,6 +95,7 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
     const currentGateEntry = await GateEntry.findOne({
       $and: [
         { _id: gateEntryId },
+        { entryTime: entryTime },
         { vehicleNumber: vehicleNumber },
         { vendorName: vendorName },
         { date: date },
@@ -107,6 +111,7 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
       const gateEntry = await GateEntry.findByIdAndUpdate(
         gateEntryId,
         {
+          entryTime,
           vehicleNumber,
           vendorName,
           date,

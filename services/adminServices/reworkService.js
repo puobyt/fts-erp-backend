@@ -79,7 +79,7 @@ reworkService.fetchRework = async () => {
         proposedReworkAction, 
         reworkStartDate, 
         reworkCompletionDate, 
-        quantityForRework:`${quantityForRework} KG`, 
+        quantityForRework, 
         reworkStatus, 
         comments
       });
@@ -174,7 +174,7 @@ reworkService.fetchRework = async () => {
             proposedReworkAction,
             reworkStartDate,
             reworkCompletionDate,
-            quantityForRework:`${quantityForRework} KG`,
+            quantityForRework,
             reworkStatus,
             comments
           },

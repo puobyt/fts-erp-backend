@@ -97,7 +97,9 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
         };
       }
       const mainStock = new MainStock({
+        currentStockId:currentStock.id,
         materialName: currentStock.materialName,
+        batchNumber:currentStock.batchNumber,
         quantity: currentStock.quantity,
         price: currentStock.price,
         vendorName: currentStock.vendorName,
@@ -106,6 +108,8 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
         expiryDate: currentStock.expiryDate,
       });
       await mainStock.save();
+      currentStock.mainStockId = mainStock.id;
+      await currentStock.save();
     }
     return {
       status: 201,

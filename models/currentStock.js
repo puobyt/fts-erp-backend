@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
+    mainStockId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "MainStock",
+    },
     materialName: {
       type: String,
     },

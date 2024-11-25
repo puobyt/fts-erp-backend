@@ -2,6 +2,7 @@ const CurrentStock = require("../../models/currentStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 const VendorManagement = require("../../models/vendorManagement");
+const MainStock = require("../../models/mainStock");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -87,8 +88,8 @@ currentStockService.newCurrentStock = async (newStockData) => {
     const newStock = new CurrentStock({
       materialName,
       batchNumber: assignedBatchNumber,
-      quantity:`${quantity} KG`,
-      price:`₹ ${price}`,
+      quantity,
+      price,
       storageLocation,
       vendorName,
       dateRecieved,
@@ -168,14 +169,14 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         status: 409,
         message: "Current Stock already exists with the same details",
       };
-    } else {
+    } 
       const currentStock = await CurrentStock.findByIdAndUpdate(
         currentStockId,
         {
           materialName,
           batchNumber: batchNumberValue,
-          quantity:`${quantity} KG`,
-          price:`₹ ${price}`,
+          quantity,
+          price,
           vendorName,
           storageLocation,
           dateRecieved,
@@ -186,7 +187,24 @@ currentStockService.editCurrentStock = async (currentStockData) => {
           runValidators: true,
         }
       );
-    }
+    const mainStockId = currentStock.mainStockId;
+      const mainStock = await MainStock.findByIdAndUpdate(
+        mainStockId,
+        {
+          materialName,
+          batchNumber: batchNumberValue,
+          quantity,
+          price,
+          vendorName,
+          storageLocation,
+          dateRecieved,
+          expiryDate,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
     return {
       status: 201,

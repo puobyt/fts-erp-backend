@@ -29,10 +29,11 @@ gateEntryController.newGateEntry = async (req, res) => {
   try {
     console.log("Adding new gate entry ");
 
-    const { vehicleNumber, vendorName, date } = req.body;
+    const {entryTime, vehicleNumber, vendorName, date } = req.body;
 
     // Pass the extracted data to the service function
     const result = await gateEntryService.newGateEntry({
+      entryTime,
       vehicleNumber,
       vendorName,
       date,
@@ -56,13 +57,14 @@ gateEntryController.editGateEntry = async (req, res) => {
   try {
     console.log("editing gate entry");
 
-    const { authPassword, gateEntryId, vehicleNumber, vendorName, date } =
+    const { authPassword, gateEntryId,entryTime, vehicleNumber, vendorName, date } =
       req.body;
 
     // Pass the extracted data to the service function
     const result = await gateEntryService.editGateEntry({
       authPassword,
       gateEntryId,
+      entryTime,
       vehicleNumber,
       vendorName,
       date,

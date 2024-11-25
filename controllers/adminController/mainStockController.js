@@ -76,7 +76,6 @@ mainStockController.editMainStock = async (req, res) => {
       expiryDate,
     } = req.body;
 
-    // Pass the extracted data to the service function
     const result = await mainStockService.editMainStock({
       authPassword,
       mainStockId,

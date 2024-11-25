@@ -99,8 +99,8 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       customerName,
       customerAddress,
       itemName,
-      quantity:`${quantity} KG`,
-      price:`Rs. ${price}`,
+      quantity,
+      price,
       invoicePreparedBy
     });
 
@@ -216,8 +216,8 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
           customerName,
           customerAddress,
           itemName,
-          quantity:`${quantity} KG`,
-          price:`Rs. ${price}`,
+          quantity,
+          price,
           invoicePreparedBy
         },
         {

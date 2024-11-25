@@ -1,5 +1,10 @@
 const FinishedGoods = require("../../models/finishedGoods");
-
+const ProductionOrderCreation = require("../../models/productionOrderCreation");
+const BillOfMaterials = require("../../models/billOfMaterials");
+const MainStock = require("../../models/mainStock");
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+const ProcessOrder = require("../../models/processOrder");
+const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 let finishedGoodsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -42,19 +47,87 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
         message: "Finished Goods already exists with the same details",
       };
     }
-
-    const newData = new FinishedGoods({
+    const productionOrderCreation = await ProductionOrderCreation.findOne({
+      productName: finishedGoodsName,
+    });
+    if (!productionOrderCreation) {
+      return {
+        status: 409,
+        message: "Product Not Found In Production Order Creation",
+      };
+    }
+    
+    const billOfMaterials = await BillOfMaterials.findOne({
+      productName: finishedGoodsName,
+    });
+    if (!billOfMaterials) {
+      return {
+        status: 409,
+        message: "Product Not Found In Bill Of Materials",
+      };
+    }
+    
+    const { materials } = billOfMaterials;
+    
+    const enrichedMaterials = [];
+    
+    for (const material of materials) {
+      const { materialsList, quantity } = material;
+    
+      const mainStockData = await MainStock.findOne({ materialName: materialsList });
+      if (!mainStockData) {
+        return {
+          status: 409,
+          message: `Batch not found for material: ${materialsList}`,
+        };
+      }
+    
+      const vendorData = await PurchaseOrderCreation.findOne({ materialName: materialsList });
+      if (!vendorData) {
+        return {
+          status: 409,
+          message: `Vendor not found for material: ${materialsList}`,
+        };
+      }
+    
+      enrichedMaterials.push({
+        materialsList,
+        quantity,
+        batchNumber: mainStockData.batchNumber,
+        vendorId: vendorData.vendorId,
+      });
+    }
+    const processOrder = await ProcessOrder.findOne({productName:finishedGoodsName});
+    if(!processOrder){
+      return {
+        status: 409,
+        message: `product Name not found in process Order`,
+      };
+    }
+const productionOrderCreationOutput = await ProductionOrderCreationOutput.findOne({productName:finishedGoodsName})
+if(!productionOrderCreationOutput){
+  return {
+    status: 409,
+    message: `product Name not found in production Order Creation Output`,
+  };
+}
+    const newFinishedGoods = new FinishedGoods({
       finishedGoodsName,
       batchNumber,
       productionDate,
+      plant: productionOrderCreation.plant,
+      materials: enrichedMaterials,
+      processOrderNo:processOrder.processOrderNumber,
+      description:processOrder.description,
+      storageLocation:productionOrderCreationOutput.storageLocationforOutput,
       quantityProduced,
     });
-
-    await newData.save();
+    
+    await newFinishedGoods.save();
     return {
       status: 201,
       message: "New Finished Goods added successfully",
-      data: newData,
+      data: newFinishedGoods,
       token: "sampleToken",
     };
   } catch (error) {
@@ -110,13 +183,31 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         status: 409,
         message: "Finished Goods already exists with the same details",
       };
-    } else {
+    } 
+
+    const productionOrderCreation = await ProductionOrderCreation.findOne({productName:finishedGoodsName});
+if(!productionOrderCreation){
+  return {
+    status: 409,
+    message: "Product Not Found In Production Order Creation",
+  };
+}
+
+const billOfMaterials = await BillOfMaterials.findOne({productName:finishedGoodsName});
+if(!billOfMaterials){
+  return {
+    status: 409,
+    message: "Product Not Found In Bill Of Materials",
+  };
+}
       const FinishedGoodsUpdate = await FinishedGoods.findByIdAndUpdate(
         finishedGoodsId,
         {
           finishedGoodsName,
           batchNumber,
           productionDate,
+          plant:productionOrderCreation.plant,
+          materials:billOfMaterials.materials,
           quantityProduced,
         },
         {
@@ -124,7 +215,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
           runValidators: true,
         }
       );
-    }
+    
 
     return {
       status: 201,

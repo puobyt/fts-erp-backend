@@ -9,7 +9,7 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({});
     const firms = await VendorManagement.find({});
-
+// const materials = await VendorManagement.find({nameOfTheFirm})
     return {
       status: 200,
       data: orders,
@@ -136,8 +136,8 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       materialName,
       // batchNumber,
       mfgDate,
-      quantity: `${quantity} KG`,
-      price:`₹ ${price}`,
+      quantity,
+      price,
       pan,
       gst,
     });
@@ -282,8 +282,8 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
           materialName,
           // batchNumber,
           mfgDate,
-          quantity: `${quantity} KG`,
-          price: `₹ ${price}`,
+          quantity,
+          price,
           pan,
           gst,
         },

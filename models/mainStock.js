@@ -2,7 +2,15 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
+    currentStockId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CurrentStock",
+    },
+
     materialName: {
+      type: String,
+    },
+    batchNumber: {
       type: String,
     },
     quantity: {
@@ -12,9 +20,9 @@ const schema = new mongoose.Schema(
       type: String,
     },
     storageLocation: {
-        type: String,
-      },
-      vendorName: {
+      type: String,
+    },
+    vendorName: {
       type: String,
     },
     dateRecieved: {

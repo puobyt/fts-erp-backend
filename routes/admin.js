@@ -15,7 +15,7 @@ const finishedGoodsController = require('../controllers/adminController/finished
 const invoiceCreationController = require('../controllers/adminController/invoiceCreationController');
 const adminController = require('../controllers/adminController/adminController');
 const mainStockController = require('../controllers/adminController/mainStockController');
-
+const processOrderController = require('../controllers/adminController/processOrderController')
 
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);
@@ -23,6 +23,7 @@ adminRouter.get('/gateEntry',gateEntryController.fetchGateEntry);
 adminRouter.get('/currentStock',currentStockController.fetchCurrentStock);
 adminRouter.get('/qualityCheck',qualityCheckController.fetchQualityCheck);
 adminRouter.get('/mainStock',mainStockController.fetchMainStock);
+adminRouter.get('/processOrder',processOrderController.fetchProcessOrder);
 adminRouter.get('/rework',reworkController.fetchRework);
 adminRouter.get('/productionOrderCreation',productionOrderCreationController.fetchProductOrderCreation);
 adminRouter.get('/productionOrderCreationOutput',productionOrderCreationController.fetchProductOrderCreationOutput);
@@ -40,6 +41,7 @@ adminRouter.post('/newGateEntry',gateEntryController.newGateEntry);
 adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
 adminRouter.post('/newMainStock',mainStockController.newMainStock);
+adminRouter.post('/newProcessOrder',processOrderController.newProcessOrder); 
 adminRouter.post('/newRework',reworkController.newRework);
 adminRouter.post('/newProductionOrderCreation',productionOrderCreationController.newProductionOrderCreation);
 adminRouter.post('/newProductionOrderCreationOutput',productionOrderCreationController.newProductionOrderCreationOutput);
@@ -57,6 +59,7 @@ adminRouter.put('/editGateEntry',gateEntryController.editGateEntry);
 adminRouter.put('/editCurrentStock',currentStockController.editCurrentStock);
 adminRouter.put('/editQualityCheck',qualityCheckController.editQualityCheck);
 adminRouter.put('/editMainStock',mainStockController.editMainStock);
+adminRouter.put('/editProcessOrder',processOrderController.editProcessOrder);
 adminRouter.put('/editRework',reworkController.editRework);
 adminRouter.put('/editProductionOrderCreation',productionOrderCreationController.editProductionOrderCreation);
 adminRouter.put('/editProductionOrderCreationOutput',productionOrderCreationController.editProductionOrderCreationOutput);

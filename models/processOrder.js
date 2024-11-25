@@ -2,26 +2,24 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
+    processOrderNumber: {
+      type: String,
+    },
+
+    productName: {
+      type: String,
+    },
+
+    description: {
+      type: String,
+    },
+    createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
+    assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
+
     removed: {
       type: Boolean,
       default: false,
     },
-    enabled: {
-      type: Boolean,
-      default: true,
-    },
-    entryTime: {
-      type: String,
-      required: true,
-    },
-    vehicleNumber: {
-      type: String,
-      required: true,
-    },
-    vendorName: String,
-    date: Date,
-    createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
-    assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
   },
   {
     timestamps: true,
@@ -30,4 +28,4 @@ const schema = new mongoose.Schema(
 
 schema.plugin(require("mongoose-autopopulate"));
 
-module.exports = mongoose.model("GateEntry", schema);
+module.exports = mongoose.model("ProcessOrder", schema);

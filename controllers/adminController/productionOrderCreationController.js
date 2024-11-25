@@ -17,7 +17,7 @@ productionOrderCreationController.fetchProductOrderCreation = async (
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-
+      processOrderNumbers:result.processOrderNumbers,
       materials:result.materials,
       userToken: "",
     });

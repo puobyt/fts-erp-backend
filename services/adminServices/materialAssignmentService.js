@@ -126,13 +126,13 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
       await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${updatedQuantity} KG` },
+        { quantity: `${updatedQuantity}` },
         { new: true }
       );
 
       await MainStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${updatedQuantity} KG` },
+        { quantity: `${updatedQuantity}` },
         { new: true }
       );
     }
@@ -297,12 +297,12 @@ materialAssignmentService.editMaterialAssignment = async (
 
       await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${currentStockQuantity} KG` },
+        { quantity: `${currentStockQuantity}` },
         { new: true }
       );
       await MainStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${currentStockQuantity} KG` },
+        { quantity: `${currentStockQuantity}` },
         { new: true }
       );
       const updatedMaterials = existingAssignment.materials.map((material) => {

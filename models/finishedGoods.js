@@ -7,6 +7,34 @@ const schema = new mongoose.Schema({
       batchNumber: {
         type: String,
       },
+      plant: {
+        type: String,
+      },
+      processOrderNo:{
+        type:String
+      },
+      description:{
+        type:String
+      },
+      storageLocation:{
+        type:String
+      },
+      materials: [
+        {
+          materialsList: {
+            type: String,
+          },
+          quantity: {
+            type: String,
+          },
+          batchNumber:{
+            type:String
+          },
+          vendorId:{
+            type:String
+          },
+        },
+      ],
       productionDate: {
         type: Date,
       }, quantityProduced: {

@@ -46,7 +46,7 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
     });
   } catch (error) {
     console.log(
-      "An error occurred while adding new Material Assignment in admin controller:",
+      "An error occurred while adding new finished goods in finished goods controller:",
       error.message
     );
     res.status(500).json({ info: "An error occurred in Server" });

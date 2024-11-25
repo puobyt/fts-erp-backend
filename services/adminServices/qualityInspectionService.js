@@ -2,6 +2,10 @@ const FinalQualityInspection = require("../../models/finalQualityInspection");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 const FinishedGoods = require("../../models/finishedGoods");
+const ProductionOrderCreation = require("../../models/productionOrderCreation");
+const BillOfMaterials = require("../../models/billOfMaterials");
+const MainStock = require("../../models/mainStock");
+const ProcessOrder = require("../../models/processOrder");
 let qualityInspectionService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -74,14 +78,89 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           message: " Finished Goods already exists",
         };
       }
+      const productionOrderCreation = await ProductionOrderCreation.findOne({
+        productName,
+      });
+      if (!productionOrderCreation) {
+        return {
+          status: 409,
+          message: "Product Not Found In Production Order Creation",
+        };
+      }
+
+      const billOfMaterials = await BillOfMaterials.findOne({
+        productName,
+      });
+      if (!billOfMaterials) {
+        return {
+          status: 409,
+          message: "Product Not Found In Bill Of Materials",
+        };
+      }
+
+      const { materials } = billOfMaterials;
+
+      const enrichedMaterials = [];
+
+      for (const material of materials) {
+        const { materialsList, quantity } = material;
+
+        const mainStockData = await MainStock.findOne({
+          materialName: materialsList,
+        });
+        if (!mainStockData) {
+          return {
+            status: 409,
+            message: `Batch not found for material: ${materialsList}`,
+          };
+        }
+
+        const vendorData = await PurchaseOrderCreation.findOne({
+          materialName: materialsList,
+        });
+        if (!vendorData) {
+          return {
+            status: 409,
+            message: `Vendor not found for material: ${materialsList}`,
+          };
+        }
+
+        enrichedMaterials.push({
+          materialsList,
+          quantity,
+          batchNumber: mainStockData.batchNumber,
+          vendorId: vendorData.vendorId,
+        });
+      }
+      const processOrder = await ProcessOrder.findOne({
+        productName
+      });
+      if (!processOrder) {
+        return {
+          status: 409,
+          message: `product Name not found in process Order`,
+        };
+      }
       const productionOrderCreationOutput =
         await ProductionOrderCreationOutput.findOne({ productName });
+      if (!productionOrderCreationOutput) {
+        return {
+          status: 409,
+          message: `product Name not found in production Order Creation Output`,
+        };
+      }
       const finishedGoods = new FinishedGoods({
         finishedGoodsName: productName,
         batchNumber: productionOrderCreationOutput.batchNumberforOutput,
         productionDate: productionOrderCreationOutput.productionCompletionDate,
+        plant: productionOrderCreation.plant,
+        materials: enrichedMaterials,
+        processOrderNo: processOrder.processOrderNumber,
+        description: processOrder.description,
+        storageLocation: productionOrderCreationOutput.storageLocationforOutput,
         quantityProduced: productionOrderCreationOutput.Yield,
       });
+
       await finishedGoods.save();
     }
     const newData = new FinalQualityInspection({

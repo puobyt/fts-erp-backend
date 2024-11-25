@@ -3,6 +3,7 @@ const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
+const ProcessOrder = require("../../models/processOrder");
 let productOrderCreationService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -11,11 +12,26 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
   try {
     const data = await ProductionOrderCreation.find({});
     const materials = await MainStock.distinct("materialName");
+    const processOrderNumbers = await ProcessOrder.aggregate([
+      {
+        $group: {
+          _id: { processOrderNumber: "$processOrderNumber", productName: "$productName" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          processOrderNumber: "$_id.processOrderNumber",
+          productName: "$_id.productName",
+        },
+      },
+    ]);
     console.log("materials in just", materials);
     return {
       status: 200,
       data: data,
       materials: materials,
+      processOrderNumbers:processOrderNumbers
     };
   } catch (error) {
     console.log(

@@ -2,6 +2,7 @@ const MainStock = require("../../models/mainStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 const VendorManagement = require("../../models/vendorManagement");
+const CurrentStock = require("../../models/currentStock");
 let mainStockService = {};
 require("dotenv").config();
 
@@ -34,7 +35,7 @@ mainStockService.fetchMainStock = async () => {
 mainStockService.newMainStock = async (mainStockData) => {
   try {
     const {
-        materialName,
+      materialName,
       quantity,
       price,
       vendorName,
@@ -63,9 +64,9 @@ mainStockService.newMainStock = async (mainStockData) => {
     }
 
     const newMainStock = new MainStock({
-        materialName,
-      quantity:`${quantity} KG`,
-      price:`₹ ${price}`,
+      materialName,
+      quantity,
+      price,
       vendorName,
       storageLocation,
       dateRecieved,
@@ -141,24 +142,40 @@ mainStockService.editMainStock = async (mainStockData) => {
         status: 409,
         message: "Main Stock already exists with the same details",
       };
-    } else {
-      const mainStock = await MainStock.findByIdAndUpdate(
-        mainStockId,
-        {
-            materialName,
-          quantity:`${quantity} KG`,
-          price:`₹ ${price}`,
-          vendorName,
-          storageLocation,
-          dateRecieved,
-          expiryDate,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
     }
+    const mainStock = await MainStock.findByIdAndUpdate(
+      mainStockId,
+      {
+        materialName,
+        quantity,
+        price,
+        vendorName,
+        storageLocation,
+        dateRecieved,
+        expiryDate,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    const currentStockId = mainStock.currentStockId;
+    const currentStockUpdate = await CurrentStock.findByIdAndUpdate(
+      currentStockId,
+      {
+        materialName,
+        quantity,
+        price,
+        vendorName,
+        storageLocation,
+        dateRecieved,
+        expiryDate,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     return {
       status: 201,
