@@ -23,6 +23,7 @@ adminRouter.get('/gateEntry',gateEntryController.fetchGateEntry);
 adminRouter.get('/currentStock',currentStockController.fetchCurrentStock);
 adminRouter.get('/qualityCheck',qualityCheckController.fetchQualityCheck);
 adminRouter.get('/mainStock',mainStockController.fetchMainStock);
+adminRouter.get('/outOfStock',mainStockController.fetchOutOfStock);
 adminRouter.get('/processOrder',processOrderController.fetchProcessOrder);
 adminRouter.get('/rework',reworkController.fetchRework);
 adminRouter.get('/productionOrderCreation',productionOrderCreationController.fetchProductOrderCreation);
@@ -76,6 +77,7 @@ adminRouter.delete('/removeCurrentStock',currentStockController.removeCurrentSto
 adminRouter.delete('/removeQualityCheck',qualityCheckController.removeQualityCheck);
 adminRouter.delete('/removeMainStock',mainStockController.removeMainStock);
 adminRouter.delete('/removeRework',reworkController.removeRework);
+adminRouter.delete('/removeProcessOrder',processOrderController.removeProcessOrder);
 adminRouter.delete('/removeProductionOrderCreation',productionOrderCreationController.removeProductionOrderCreation);
 adminRouter.delete('/removeProductionOrderCreationOutput',productionOrderCreationController.removeProductionOrderCreationOutput);
 adminRouter.delete('/removeRequestCreationForMaterials',requestCreationMaterialController.removeRequestCreationForMaterials);

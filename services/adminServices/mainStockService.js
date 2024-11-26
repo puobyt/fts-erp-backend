@@ -3,19 +3,34 @@ const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
+const OutOfStock = require("../../models/outOfStock");
 let mainStockService = {};
 require("dotenv").config();
 
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
+
+mainStockService.fetchOutOfStock = async () => {
+  try {
+    const data = await OutOfStock.find({});
+
+    return {
+      status: 200,
+      data: data,
+    };
+  } catch (error) {
+    console.log(
+      "An error occured at fetching main stocks in admin service",
+      error.message
+    );
+    res
+      .status(500)
+      .json({ info: "An error occured in main stocks in admin services" });
+  }
+};
 mainStockService.fetchMainStock = async () => {
   try {
     const data = await MainStock.find({});
-    // const materials = await VendorManagement.distinct('material');
-    // const purchaseOrderCreationData = await PurchaseOrderCreation.find(
-    //   {},
-    //   "price quantity productName"
-    // ).sort({ createdAt: -1 });
 
     return {
       status: 200,

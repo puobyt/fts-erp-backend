@@ -94,4 +94,24 @@ processOrderController.editProcessOrder = async (req, res) => {
     }
   };
 
+  processOrderController.removeProcessOrder = async (req, res) => {
+    try {
+      console.log("deleting process order...");
+  const {processOrderId} = req.query;
+      // Pass the extracted data to the service function
+      const result = await processOrderService.removeProcessOrder(processOrderId);
+  
+      res.status(result.status).json({
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing process order in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  };
+
 module.exports = processOrderController;

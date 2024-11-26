@@ -121,4 +121,40 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       .json({ info: "An error occured in Process Order services" });
   }
 };
+
+processOrderService.removeProcessOrder = async (
+  processOrderId
+) => {
+  try {
+    const processOrder = await ProcessOrder.findByIdAndDelete(
+      processOrderId
+    );
+
+    if(!processOrder){
+      return {
+        status: 201,
+        message: "Process Order not found or can't able to delete right now,Please try again later",
+        token: "sampleToken",
+      };
+    }
+
+return {
+  status: 201,
+  message: "process Order deleted successfully",
+  token: "sampleToken",
+};
+
+
+  } catch (error) {
+    console.log(
+      "An error occured at Process Order remove",
+      error.message
+    );
+    res
+      .status(500)
+      .json({
+        info: "An error occured in Process Order remove in Process Order services",
+      });
+  }
+};
 module.exports = processOrderService;

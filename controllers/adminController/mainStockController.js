@@ -4,6 +4,25 @@ const mainStockService = require("../../services/adminServices/mainStockService"
 
 let mainStockController = {};
 
+
+mainStockController.fetchOutOfStock = async (req, res) => {
+  try {
+    console.log("loading out of stocks...");
+
+    const result = await mainStockService.fetchOutOfStock();
+
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while fetching out of stocks in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
 mainStockController.fetchMainStock = async (req, res) => {
   try {
     console.log("loading main stocks...");
