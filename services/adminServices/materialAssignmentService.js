@@ -5,6 +5,7 @@ const FinishedGoods = require("../../models/finishedGoods");
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
+const OutOfStock = require("../../models/outOfStock");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -89,14 +90,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     for (let i = 0; i < materials.length; i++) {
       const { materialsList, assignedQuantity } = materials[i];
 
-      // const assignedQuantityy = parseFloat(assignedQuantity);
-
-      // if (isNaN(assignedQuantityy)) {
-      //   throw new Error(
-      //     `Invalid assigned ttttt quantity for material: ${materialsList}`
-      //   );
-      // }
-
       const currentStock = await CurrentStock.findOne({
         materialName: materialsList,
       });
@@ -109,12 +102,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         currentStock.quantity.replace(/\D/g, "")
       );
 
-      // if (isNaN(currentStockQuantity)) {
-      //   throw new Error(
-      //     `Invalid quantity format for material: ${materialsList}`
-      //   );
-      // }
-
       if (currentStockQuantity < assignedQuantity) {
         return {
           status: 409,
@@ -124,17 +111,33 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
       const updatedQuantity = currentStockQuantity - assignedQuantity;
 
-      await CurrentStock.findOneAndUpdate(
+    await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
         { quantity: `${updatedQuantity}` },
         { new: true }
       );
 
-      await MainStock.findOneAndUpdate(
+      const mainStock = await MainStock.findOneAndUpdate(
         { materialName: materialsList },
         { quantity: `${updatedQuantity}` },
         { new: true }
       );
+      if ( mainStock) {
+        if (updatedQuantity === 0) {
+          await MainStock.deleteOne({ materialName: materialsList });
+          await CurrentStock.deleteOne({ materialName: materialsList });
+          const newOutOfStock = new OutOfStock({
+            materialName: mainStock.materialName,
+            price: mainStock.price,
+            vendorName: mainStock.vendorName,
+            storageLocation: mainStock.storageLocation,
+            dateRecieved: mainStock.dateRecieved,
+            expiryDate: mainStock.expiryDate,
+          });
+
+          await newOutOfStock.save();
+        }
+      }
     }
 
     if (existing) {

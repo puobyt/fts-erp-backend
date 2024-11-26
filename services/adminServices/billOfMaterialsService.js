@@ -4,7 +4,7 @@ const ProductionOrderCreationOutput = require("../../models/productionOrderCreat
 const MainStock = require("../../models/mainStock");
 let billOfMaterialsService = {};
 require("dotenv").config();
-let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
+let adminAuthPassword = process.env.ADMIN_AUTH_PASS || 'admin@123';
 
 billOfMaterialsService.fetchbillOfMaterials = async () => {
   try {
