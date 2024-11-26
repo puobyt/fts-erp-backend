@@ -29,7 +29,7 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     //     },
     //   },
     // ]);
-    const materials = await CurrentStock.aggregate([
+    const materials = await MainStock.aggregate([
       {
         $group: {
           _id: "$materialName",
@@ -90,39 +90,39 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     for (let i = 0; i < materials.length; i++) {
       const { materialsList, assignedQuantity } = materials[i];
 
-      const currentStock = await CurrentStock.findOne({
+      const mainStock = await MainStock.findOne({
         materialName: materialsList,
       });
 
-      if (!currentStock) {
+      if (!mainStock) {
         throw new Error(`Material ${materialsList} not found in current stock`);
       }
 
-      let currentStockQuantity = parseFloat(
-        currentStock.quantity.replace(/\D/g, "")
+      let mainStockQuantity = parseFloat(
+        mainStock.quantity.replace(/\D/g, "")
       );
 
-      if (currentStockQuantity < assignedQuantity) {
+      if (mainStockQuantity < assignedQuantity) {
         return {
           status: 409,
           message: `Insufficient stock for material: ${materialsList}`,
         };
       }
 
-      const updatedQuantity = currentStockQuantity - assignedQuantity;
+      const updatedQuantity = mainStockQuantity - assignedQuantity;
 
-    await CurrentStock.findOneAndUpdate(
+      await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
         { quantity: `${updatedQuantity}` },
         { new: true }
       );
 
-      const mainStock = await MainStock.findOneAndUpdate(
+      const mainStockUpdate = await MainStock.findOneAndUpdate(
         { materialName: materialsList },
         { quantity: `${updatedQuantity}` },
         { new: true }
       );
-      if ( mainStock) {
+      if (mainStockUpdate) {
         if (updatedQuantity === 0) {
           await MainStock.deleteOne({ materialName: materialsList });
           await CurrentStock.deleteOne({ materialName: materialsList });
@@ -247,9 +247,9 @@ materialAssignmentService.editMaterialAssignment = async (
     for (let i = 0; i < materials.length; i++) {
       const { materialsList, assignedQuantity } = materials[i];
 
-      const assignedQuantityy = parseFloat(assignedQuantity);
+      const assignedQuantityValue = parseFloat(assignedQuantity);
 
-      if (isNaN(assignedQuantityy)) {
+      if (isNaN(assignedQuantityValue)) {
         throw new Error(
           `Invalid assigned quantity for material: ${materialsList}`
         );
@@ -259,63 +259,68 @@ materialAssignmentService.editMaterialAssignment = async (
         (material) => material.materialsList === materialsList
       );
 
-      if (!oldMaterial) {
-        throw new Error(
-          `Material ${materialsList} not found in the existing assignment`
-        );
-      }
-
-      const oldAssignedQuantity = parseFloat(oldMaterial.assignedQuantity);
-      const quantityDifference = assignedQuantityy - oldAssignedQuantity;
-
-      const currentStock = await CurrentStock.findOne({
+      const mainStock = await MainStock.findOne({
         materialName: materialsList,
       });
 
-      if (!currentStock) {
+      if (!mainStock) {
         throw new Error(`Material ${materialsList} not found in current stock`);
       }
 
-      let currentStockQuantity = parseFloat(
-        currentStock.quantity.replace(/\D/g, "")
+      let mainStockQuantity = parseFloat(
+        mainStock.quantity.replace(/\D/g, "")
       );
 
-      if (isNaN(currentStockQuantity)) {
+      if (isNaN(mainStockQuantity)) {
         throw new Error(
           `Invalid quantity format for material: ${materialsList}`
         );
       }
 
-      if (quantityDifference > 0) {
-        if (currentStockQuantity < quantityDifference) {
+      if (oldMaterial) {
+        const oldAssignedQuantity = parseFloat(oldMaterial.assignedQuantity);
+        const quantityDifference = assignedQuantityValue - oldAssignedQuantity;
+
+        if (quantityDifference > 0) {
+          if (mainStockQuantity < quantityDifference) {
+            return {
+              status: 409,
+              message: `Insufficient stock for material: ${materialsList}`,
+            };
+          }
+          mainStockQuantity -= quantityDifference;
+        } else if (quantityDifference < 0) {
+          mainStockQuantity += Math.abs(quantityDifference);
+        }
+
+        oldMaterial.assignedQuantity = assignedQuantity;
+      } else {
+        if (mainStockQuantity < assignedQuantityValue) {
           return {
             status: 409,
             message: `Insufficient stock for material: ${materialsList}`,
           };
         }
-        currentStockQuantity -= quantityDifference;
-      } else if (quantityDifference < 0) {
-        currentStockQuantity += Math.abs(quantityDifference);
+
+        mainStockQuantity -= assignedQuantityValue;
+
+        existingAssignment.materials.push({
+          materialsList,
+          assignedQuantity,
+        });
       }
 
       await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${currentStockQuantity}` },
+        { quantity: `${mainStockQuantity}` },
         { new: true }
       );
+
       await MainStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${currentStockQuantity}` },
+        { quantity: `${mainStockQuantity}` },
         { new: true }
       );
-      const updatedMaterials = existingAssignment.materials.map((material) => {
-        if (material.materialsList === materialsList) {
-          material.assignedQuantity = assignedQuantity;
-        }
-        return material;
-      });
-
-      existingAssignment.materials = updatedMaterials;
     }
 
     await existingAssignment.save();
