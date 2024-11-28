@@ -10,11 +10,18 @@ const schema = new mongoose.Schema(
     materialName: {
       type: String,
     },
+    materialCode: {
+      type: String,
+    },
     batchNumber: {
       type: String,
     },
     quantity: {
       type: String,
+    },
+    quantityUsed: {
+      type: String,
+
     },
     price: {
       type: String,

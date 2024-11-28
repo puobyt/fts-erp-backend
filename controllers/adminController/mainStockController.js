@@ -47,6 +47,7 @@ mainStockController.newMainStock = async (req, res) => {
 
     const {
         materialName,
+        materialCode,
       quantity,
       price,
       vendorName,
@@ -57,6 +58,7 @@ mainStockController.newMainStock = async (req, res) => {
 
     const result = await mainStockService.newMainStock({
         materialName,
+        materialCode,
       quantity,
       price,
       vendorName,
@@ -87,6 +89,7 @@ mainStockController.editMainStock = async (req, res) => {
       authPassword,
       mainStockId,
       materialName,
+      materialCode,
       quantity,
       price,
       vendorName,
@@ -99,6 +102,7 @@ mainStockController.editMainStock = async (req, res) => {
       authPassword,
       mainStockId,
       materialName,
+      materialCode,
       quantity,
       price,
       vendorName,

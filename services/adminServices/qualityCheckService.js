@@ -12,7 +12,11 @@ qualityCheckService.fetchQualityCheck = async () => {
     const batches = await CurrentStock.aggregate([
       {
         $group: {
-          _id: { batchNumber: "$batchNumber", materialName: "$materialName" },
+          _id: {
+            batchNumber: "$batchNumber",
+            materialName: "$materialName",
+            materialCode: "$materialCode",
+          },
         },
       },
       {
@@ -20,6 +24,7 @@ qualityCheckService.fetchQualityCheck = async () => {
           _id: 0,
           batchNumber: "$_id.batchNumber",
           materialName: "$_id.materialName",
+          materialCode: "$_id.materialCode",
         },
       },
     ]);
@@ -47,6 +52,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
     const {
       batchNumber,
       materialName,
+      materialCode,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -57,6 +63,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       $and: [
         { batchNumber: batchNumber },
         { materialName: materialName },
+        { materialCode: materialCode },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -71,19 +78,10 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       };
     }
 
-    const newData = new QualityCheck({
-      batchNumber,
-      materialName,
-      inspectionDate,
-      inspectorName,
-      qualityStatus,
-      comments,
-    });
-
-    await newData.save();
     const mainStockExist = await MainStock.findOne({ materialName });
+
     if (qualityStatus === "Accepted") {
-      if(mainStockExist){
+      if (mainStockExist) {
         return {
           status: 409,
           message: "Material stock already exists",
@@ -97,9 +95,10 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
         };
       }
       const mainStock = new MainStock({
-        currentStockId:currentStock.id,
+        currentStockId: currentStock.id,
         materialName: currentStock.materialName,
-        batchNumber:currentStock.batchNumber,
+        materialCode:currentStock.materialCode,
+        batchNumber: currentStock.batchNumber,
         quantity: currentStock.quantity,
         price: currentStock.price,
         vendorName: currentStock.vendorName,
@@ -111,6 +110,18 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       currentStock.mainStockId = mainStock.id;
       await currentStock.save();
     }
+
+    const newData = new QualityCheck({
+      batchNumber,
+      materialName,
+      materialCode,
+      inspectionDate,
+      inspectorName,
+      qualityStatus,
+      comments,
+    });
+
+    await newData.save();
     return {
       status: 201,
       message: " New quality check added successfully",
@@ -135,6 +146,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       qualityCheckId,
       batchNumber,
       materialName,
+      materialCode,
       inspectionDate,
       inspectorName,
       qualityStatus,
@@ -152,6 +164,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       $and: [
         { batchNumber: batchNumber },
         { materialName: materialName },
+        { materialCode: materialCode },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -164,6 +177,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         { _id: qualityCheckId },
         { batchNumber: batchNumber },
         { materialName: materialName },
+        { materialCode: materialCode },
         { inspectionDate: inspectionDate },
         { inspectorName: inspectorName },
         { qualityStatus: qualityStatus },
@@ -176,51 +190,53 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         status: 409,
         message: "Quality Check already exists with the same details",
       };
-    } else {
-      const qualityCheck = await QualityCheck.findByIdAndUpdate(
-        qualityCheckId,
-        {
-          batchNumber,
-          materialName,
-          inspectionDate,
-          inspectorName,
-          qualityStatus,
-          comments,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-    }
-    const mainStockExist = await MainStock.findOne({ materialName });
-      if (qualityStatus === "Accepted") {
-        if(!mainStockExist){
-          const currentStock = await CurrentStock.findOne({ batchNumber });
-          if (!currentStock) {
-            return {
-              status: 409,
-              message: "Current stock not found",
-            };
-          }
-          const mainStock = new MainStock({
-            materialName: currentStock.materialName,
-            quantity: `${currentStock.quantity} KG`,
-            price: currentStock.price,
-            vendorName: currentStock.vendorName,
-            storageLocation: currentStock.storageLocation,
-            dateRecieved: currentStock.dateRecieved,
-            expiryDate: currentStock.expiryDate,
-          });
-          await mainStock.save();
-        }
+    } 
      
-      }else if(qualityStatus==='Quarantine || Rejected '){
-        if(mainStockExist){
-          await MainStock.findOneAndDelete({batchNumber})
+    const mainStockExist = await MainStock.findOne({ materialName });
+    if (qualityStatus === "Accepted") {
+      if (!mainStockExist) {
+        const currentStock = await CurrentStock.findOne({ batchNumber });
+        if (!currentStock) {
+          return {
+            status: 409,
+            message: "Current stock not found",
+          };
         }
+        const mainStock = new MainStock({
+          currentStockId: currentStock.id,
+          materialCode:currentStock.materialCode,
+          materialName: currentStock.materialName,
+          quantity:currentStock.quantity,
+          price: currentStock.price,
+          vendorName: currentStock.vendorName,
+          storageLocation: currentStock.storageLocation,
+          dateRecieved: currentStock.dateRecieved,
+          expiryDate: currentStock.expiryDate,
+        });
+        await mainStock.save();
       }
-    
+    } else if (qualityStatus === "Quarantine || Rejected ") {
+      if (mainStockExist) {
+        await MainStock.findOneAndDelete({ batchNumber });
+      }
+    }
+
+    const qualityCheck = await QualityCheck.findByIdAndUpdate(
+      qualityCheckId,
+      {
+        batchNumber,
+        materialName,
+        materialCode,
+        inspectionDate,
+        inspectorName,
+        qualityStatus,
+        comments,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     return {
       status: 201,

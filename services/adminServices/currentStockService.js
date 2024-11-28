@@ -3,6 +3,7 @@ const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 const VendorManagement = require("../../models/vendorManagement");
 const MainStock = require("../../models/mainStock");
+const MaterialAssignment = require("../../models/materialAssignment");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -22,7 +23,7 @@ currentStockService.fetchCurrentStock = async () => {
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
       materials: materials,
-      vendors:vendors
+      vendors: vendors,
     };
   } catch (error) {
     console.log(
@@ -39,6 +40,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
   try {
     const {
       materialName,
+      materialCode,
       batchNumber,
       quantity,
       price,
@@ -51,6 +53,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
     const existing = await CurrentStock.findOne({
       $and: [
         { materialName: materialName },
+        { materialCode: materialCode },
         { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
@@ -68,30 +71,61 @@ currentStockService.newCurrentStock = async (newStockData) => {
       };
     }
     // const batchNumberValue = batchNumber || "NIL";
-    let assignedBatchNumber= batchNumber;
+    let assignedBatchNumber = batchNumber;
 
     if (!batchNumber) {
-
       const lastOrder = await CurrentStock.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("batchNumber");
 
-        if (lastOrder && lastOrder.batchNumber) {
-  
-          const lastNumber = parseInt(lastOrder.batchNumber.match(/\d+$/), 10);
-          const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
-          assignedBatchNumber = `FRN/MT/${nextNumber}`;
-        } else {
-          assignedBatchNumber = "FRN/MT/1";
-        }
+      if (lastOrder && lastOrder.batchNumber) {
+        const lastNumber = parseInt(lastOrder.batchNumber.match(/\d+$/), 10);
+        const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
+        assignedBatchNumber = `FRN/MT/${nextNumber}`;
+      } else {
+        assignedBatchNumber = "FRN/MT/1";
+      }
     }
+
+    const vendor = await PurchaseOrderCreation.findOne({
+      nameOfTheFirm: vendorName,
+    });
+  //  async function calculateAssignedQuantity(materialName) {
+  //     const materialAssignments = await MaterialAssignment.aggregate([
+  //       {
+  //         $unwind: "$materials",
+  //       },
+  //       {
+  //         $match: { "materials.materialsList": materialName },
+  //       },
+  //       {
+  //         $group: {
+  //           _id: null,
+  //           totalAssignedQuantity: {
+  //             $sum: { $toDouble: "$materials.assignedQuantity" },
+  //           },
+  //         },
+  //       },
+  //     ]);
+
+  //     return materialAssignments.length > 0
+  //       ? materialAssignments[0].totalAssignedQuantity.toString()
+  //       : "0"; 
+  //   }
+
+  //   const assignedQuantity = await calculateAssignedQuantity(materialName);
+  //   console.log('assigned quanitututuututu',assignedQuantity);
+
     const newStock = new CurrentStock({
       materialName,
+      materialCode,
       batchNumber: assignedBatchNumber,
       quantity,
+      quantityReceived:quantity,
       price,
       storageLocation,
       vendorName,
+      vendorId: vendor.vendorId,
       dateRecieved,
       expiryDate,
     });
@@ -120,6 +154,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       authPassword,
       currentStockId,
       materialName,
+      materialCode,
       batchNumber,
       quantity,
       price,
@@ -140,6 +175,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       $and: [
         { materialName: materialName },
         { batchNumber: batchNumber },
+        { materialCode: materialCode },
         { quantity: quantity },
         { price: price },
         { vendorName: vendorName },
@@ -152,6 +188,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       $and: [
         { _id: currentStockId },
         { materialName: materialName },
+        { materialCode: materialCode },
         { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
@@ -169,42 +206,44 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         status: 409,
         message: "Current Stock already exists with the same details",
       };
-    } 
-      const currentStock = await CurrentStock.findByIdAndUpdate(
-        currentStockId,
-        {
-          materialName,
-          batchNumber: batchNumberValue,
-          quantity,
-          price,
-          vendorName,
-          storageLocation,
-          dateRecieved,
-          expiryDate,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+    }
+    const currentStock = await CurrentStock.findByIdAndUpdate(
+      currentStockId,
+      {
+        materialName,
+        materialCode,
+        batchNumber: batchNumberValue,
+        quantity,
+        price,
+        vendorName,
+        storageLocation,
+        dateRecieved,
+        expiryDate,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     const mainStockId = currentStock.mainStockId;
-      const mainStock = await MainStock.findByIdAndUpdate(
-        mainStockId,
-        {
-          materialName,
-          batchNumber: batchNumberValue,
-          quantity,
-          price,
-          vendorName,
-          storageLocation,
-          dateRecieved,
-          expiryDate,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
+    const mainStock = await MainStock.findByIdAndUpdate(
+      mainStockId,
+      {
+        materialName,
+        materialCode,
+        batchNumber: batchNumberValue,
+        quantity,
+        price,
+        vendorName,
+        storageLocation,
+        dateRecieved,
+        expiryDate,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     return {
       status: 201,

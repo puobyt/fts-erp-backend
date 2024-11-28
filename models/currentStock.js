@@ -9,6 +9,9 @@ const schema = new mongoose.Schema(
     materialName: {
       type: String,
     },
+    materialCode: {
+      type: String,
+    },
     batchNumber: {
       type: String,
     },
@@ -23,6 +26,16 @@ const schema = new mongoose.Schema(
     },
     vendorName: {
       type: String,
+    },
+    vendorId: {
+      type: String,
+      default: "Unknown",
+    },
+    quantityReceived: {
+      type: String,
+    },
+    quantityUsed: {
+      type: Number,
     },
     dateRecieved: {
       type: Date,

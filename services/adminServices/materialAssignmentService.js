@@ -69,12 +69,8 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
 };
 materialAssignmentService.newMaterialAssignment = async (materialData) => {
   try {
-    const {
-      assignmentNumber,
-      processOrderNumber,
-      materials,
-      assignedTo,
-    } = materialData;
+    const { assignmentNumber, processOrderNumber, materials, assignedTo } =
+      materialData;
 
     const existing = await MaterialAssignment.findOne({
       $and: [
@@ -92,13 +88,14 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         materialName: materialsList,
       });
 
+      const currentStock = await CurrentStock.findOne({
+        materialName: materialsList,
+      });
       if (!mainStock) {
         throw new Error(`Material ${materialsList} not found in current stock`);
       }
 
-      let mainStockQuantity = parseFloat(
-        mainStock.quantity.replace(/\D/g, "")
-      );
+      let mainStockQuantity = parseFloat(mainStock.quantity.replace(/\D/g, ""));
 
       if (mainStockQuantity < assignedQuantity) {
         return {
@@ -108,16 +105,43 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       }
 
       const updatedQuantity = mainStockQuantity - assignedQuantity;
+      let newAssignedQuantity;
+      if (
+        currentStock.quantityUsed &&
+        parseFloat(currentStock.quantityUsed) >= 0
+      ) {
+        newAssignedQuantity =
+          parseFloat(currentStock.quantityUsed) + assignedQuantity;
+      } else {
+        newAssignedQuantity = assignedQuantity;
+      }
 
-      await CurrentStock.findOneAndUpdate(
+      const finalResult = newAssignedQuantity
+        .toString()
+        .split("")
+        .filter((char) => !isNaN(char))
+        .map(Number)
+        .reduce((sum, digit) => sum + digit, 0);
+
+      const currentStockUpdate = await CurrentStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${updatedQuantity}` },
+        {
+          $set: {
+            quantity: `${updatedQuantity}`,
+            quantityUsed: `${finalResult}`,
+          },
+        },
         { new: true }
       );
 
       const mainStockUpdate = await MainStock.findOneAndUpdate(
         { materialName: materialsList },
-        { quantity: `${updatedQuantity}` },
+        {
+          $set: {
+            quantity: `${updatedQuantity}`,
+            quantityUsed: `${assignedQuantity}`,
+          },
+        },
         { new: true }
       );
       if (mainStockUpdate) {
@@ -126,6 +150,8 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
           await CurrentStock.deleteOne({ materialName: materialsList });
           const newOutOfStock = new OutOfStock({
             materialName: mainStock.materialName,
+            materialCode: mainStock.materialCode,
+            batchNumber: mainStock.batchNumber,
             price: mainStock.price,
             vendorName: mainStock.vendorName,
             storageLocation: mainStock.storageLocation,
@@ -261,9 +287,7 @@ materialAssignmentService.editMaterialAssignment = async (
         throw new Error(`Material ${materialsList} not found in current stock`);
       }
 
-      let mainStockQuantity = parseFloat(
-        mainStock.quantity.replace(/\D/g, "")
-      );
+      let mainStockQuantity = parseFloat(mainStock.quantity.replace(/\D/g, ""));
 
       if (isNaN(mainStockQuantity)) {
         throw new Error(

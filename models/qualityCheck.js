@@ -8,6 +8,9 @@ const schema = new mongoose.Schema(
     materialName: {
       type: String,
     },
+    materialCode: {
+      type: String,
+    },
     inspectionDate: {
       type: Date,
     },

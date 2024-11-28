@@ -51,6 +51,7 @@ mainStockService.newMainStock = async (mainStockData) => {
   try {
     const {
       materialName,
+      materialCode,
       quantity,
       price,
       vendorName,
@@ -62,6 +63,7 @@ mainStockService.newMainStock = async (mainStockData) => {
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
+        { materialCode: materialCode },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -80,6 +82,7 @@ mainStockService.newMainStock = async (mainStockData) => {
 
     const newMainStock = new MainStock({
       materialName,
+      materialCode,
       quantity,
       price,
       vendorName,
@@ -112,6 +115,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       authPassword,
       mainStockId,
       materialName,
+      materialCode,
       quantity,
       price,
       vendorName,
@@ -130,6 +134,7 @@ mainStockService.editMainStock = async (mainStockData) => {
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
+        { materialCode: materialCode },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -143,6 +148,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       $and: [
         { _id: mainStockId },
         { materialName: materialName },
+        { materialCode: materialCode },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -162,6 +168,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       mainStockId,
       {
         materialName,
+        materialCode,
         quantity,
         price,
         vendorName,
@@ -179,6 +186,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       currentStockId,
       {
         materialName,
+        materialCode,
         quantity,
         price,
         vendorName,

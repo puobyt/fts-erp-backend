@@ -46,9 +46,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
 
 productOrderCreationService.fetchProductOrderCreationOutput = async () => {
   try {
-    const data = await ProductionOrderCreationOutput.find({}).sort({
-      createdAt: -1,
-    });
+    const data = await ProductionOrderCreationOutput.find({})
     const batches = await ProductionOrderCreation.distinct("batch");
     const products = await ProductionOrderCreation.distinct("productName");
     return {
