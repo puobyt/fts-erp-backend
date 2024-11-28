@@ -71,7 +71,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
   try {
     const {
       assignmentNumber,
-      batchNumber,
       processOrderNumber,
       materials,
       assignedTo,
@@ -80,7 +79,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
-        { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -165,7 +163,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     }
     const newData = new MaterialAssignment({
       assignmentNumber: assignedAssignmentNumber,
-      batchNumber,
       processOrderNumber,
       materials,
       assignedTo,
@@ -197,7 +194,6 @@ materialAssignmentService.editMaterialAssignment = async (
       authPassword,
       materialAssignmentId,
       assignmentNumber,
-      batchNumber,
       processOrderNumber,
       materials,
       assignedTo,
@@ -213,7 +209,6 @@ materialAssignmentService.editMaterialAssignment = async (
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
-        { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -225,7 +220,6 @@ materialAssignmentService.editMaterialAssignment = async (
       $and: [
         { _id: materialAssignmentId },
         { assignmentNumber: assignmentNumber },
-        { batchNumber: batchNumber },
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -354,7 +348,6 @@ materialAssignmentService.editMaterialAssignment = async (
           materialAssignmentId,
           {
             assignmentNumber: assignedAssignmentNumber,
-            batchNumber,
             processOrderNumber,
             materials,
             assignedTo,

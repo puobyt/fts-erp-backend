@@ -47,7 +47,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber, batchNumber, materials, requiredDate } =
+    const { requestNumber, materials, requiredDate } =
       requestCreationData;
 
     const existing = await RequestCreationForMaterials.findOne({
@@ -55,7 +55,6 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
         { requestNumber: requestNumber },
         { materials: materials },
         { requiredDate: requiredDate },
-        { batchNumber: batchNumber },
       ],
     });
 
@@ -84,7 +83,6 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
     }
     const newData = new RequestCreationForMaterials({
       requestNumber:assignedRequestNumber,
-      batchNumber,
       materials,
       requiredDate,
     });
@@ -115,7 +113,6 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       authPassword,
       requestMaterialsId,
       requestNumber,
-      batchNumber,
       materials,
       requiredDate,
     } = requestCreationData;
@@ -130,7 +127,6 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         { requestNumber: requestNumber },
         { materials: materials },
         { requiredDate: requiredDate },
-        { batchNumber: batchNumber },
       ],
     });
     const currentRequestMaterialsOrder =
@@ -140,7 +136,6 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           { requestNumber: requestNumber},
           {materials: materials},
           { requiredDate: requiredDate },
-          { batchNumber: batchNumber },
         ],
       });
 
@@ -171,7 +166,6 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           requestMaterialsId,
           {
             requestNumber:assignedRequestNumber,
-            batchNumber,
             materials,
             requiredDate,
           },

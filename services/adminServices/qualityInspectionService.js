@@ -158,7 +158,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
         processOrderNo: processOrder.processOrderNumber,
         description: processOrder.description,
         storageLocation: productionOrderCreationOutput.storageLocationforOutput,
-        quantityProduced: productionOrderCreationOutput.Yield,
+        quantityProduced: productionOrderCreationOutput.producedQuantity,
       });
 
       await finishedGoods.save();
@@ -258,7 +258,7 @@ qualityInspectionService.editQualityInspection = async (
           batchNumber: productionOrderCreationOutput.batchNumberforOutput,
           productionDate:
             productionOrderCreationOutput.productionCompletionDate,
-          quantityProduced: productionOrderCreationOutput.Yield,
+          quantityProduced: productionOrderCreationOutput.producedQuantity,
         });
         await finishedGoods.save();
       }
