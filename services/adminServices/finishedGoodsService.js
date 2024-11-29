@@ -72,7 +72,7 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
     const enrichedMaterials = [];
     
     for (const material of materials) {
-      const { materialsList, quantity } = material;
+      const { materialsList, quantity,materialCode } = material;
     
       const mainStockData = await MainStock.findOne({ materialName: materialsList });
       if (!mainStockData) {
@@ -93,6 +93,7 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
       enrichedMaterials.push({
         materialsList,
         quantity,
+        materialCode,
         batchNumber: mainStockData.batchNumber,
         vendorId: vendorData.vendorId,
       });

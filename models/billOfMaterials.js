@@ -16,6 +16,9 @@ const schema = new mongoose.Schema(
         quantity: {
           type: String,
         },
+        materialCode: {
+          type: String,
+        },
       },
     ],
 

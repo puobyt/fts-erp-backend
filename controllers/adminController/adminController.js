@@ -58,4 +58,24 @@ adminController.verifyOtp = async (req, res) => {
   }
 };
 
+
+
+adminController.fetchPDFData = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log('id for current stock',id);
+    const result = await adminService.fetchPDFData(id);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+      success: result.success,
+    });
+  } catch (error) {
+    console.error("Error fetching pdf data in admin controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = adminController;

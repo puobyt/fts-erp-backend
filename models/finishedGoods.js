@@ -30,6 +30,9 @@ const schema = new mongoose.Schema({
           batchNumber:{
             type:String
           },
+          materialCode:{
+            type:String
+          },
           vendorId:{
             type:String
           },

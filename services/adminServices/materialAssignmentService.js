@@ -31,16 +31,10 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     // ]);
     const materials = await MainStock.aggregate([
       {
-        $group: {
-          _id: "$materialName",
-          batchNumber: { $first: "$batchNumber" }, // Use $first instead of $addToSet
-        },
-      },
-      {
         $project: {
-          materialName: "$_id",
-          batchNumber: 1,
-          _id: 0,
+          materialName: 1, 
+          materialCode: 1, 
+          _id: 0,         
         },
       },
     ]);
@@ -238,7 +232,7 @@ materialAssignmentService.editMaterialAssignment = async (
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
-        { batchNumber: batchNumber },
+
       ],
     });
 
@@ -249,7 +243,7 @@ materialAssignmentService.editMaterialAssignment = async (
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
-        { batchNumber: batchNumber },
+ 
       ],
     });
 

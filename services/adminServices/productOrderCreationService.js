@@ -11,7 +11,15 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 productOrderCreationService.fetchProductOrderCreation = async () => {
   try {
     const data = await ProductionOrderCreation.find({});
-    const materials = await MainStock.distinct("materialName");
+    const materials = await MainStock.aggregate([
+      {
+        $project: {
+          materialName: 1, 
+          materialCode: 1, 
+          _id: 0,         
+        },
+      },
+    ]);
     const processOrderNumbers = await ProcessOrder.aggregate([
       {
         $group: {

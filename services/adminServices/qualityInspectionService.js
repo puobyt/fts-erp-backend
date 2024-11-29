@@ -103,7 +103,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       const enrichedMaterials = [];
 
       for (const material of materials) {
-        const { materialsList, quantity } = material;
+        const { materialsList, quantity,materialCode } = material;
 
         const mainStockData = await MainStock.findOne({
           materialName: materialsList,
@@ -128,6 +128,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
         enrichedMaterials.push({
           materialsList,
           quantity,
+          materialCode,
           batchNumber: mainStockData.batchNumber,
           vendorId: vendorData.vendorId,
         });

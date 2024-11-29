@@ -2,6 +2,10 @@ const { Admin } = require("../../models/admin");
 const { GenerateTokenAdmin } = require("../../configs/adminAuth");
 const bcrypt = require("bcrypt");
 const otpGenerator = require("../../configs/otpGenerator");
+const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
+const CurrentStock = require("../../models/currentStock");
+const VendorManagement = require("../../models/vendorManagement");
 const sendMail = require("../../configs/otpMailer");
 const { PendingAdmin } = require("../../models/admin");
 let adminService = {};
@@ -108,6 +112,47 @@ adminService.verifyOtp = async (otp, email) => {
     userToken: "",
     message: "Sign up successfull",
   };
+};
+
+
+adminService.fetchPDFData = async (id) => {
+  try {
+
+    const currentStock = await CurrentStock.findById(id);
+    if (!currentStock) {
+      return { status: 404, message: "Current stock not found" };
+    }
+
+    const vendor = await VendorManagement.findOne({ nameOfTheFirm: currentStock.vendorName });
+    if (!vendor) {
+      return { status: 404, message: "Vendor details not found" };
+
+    }
+
+    // const storage = await ProductionOrderCreationOutput.findOne({ storageLocation: currentStock.storageLocation });
+    // if (!storage) {
+    //   return res.status(404).json({ error: "Storage details not found" });
+    // }
+
+// const production = await 
+    const pdfData = {
+      vendor: {
+        contactName: vendor.contactPersonName, 
+        contactPersonDetails:vendor.contactPersonDetails,
+        address: vendor.address,    
+      },
+      storage: {
+        id: storage.storageId,
+        location: storage.locationName, // Adjust based on schema
+        capacity: storage.capacity,    // Adjust based on schema
+      },
+    };
+
+    res.status(200).json(pdfData);
+  } catch (error) {
+    console.error("Error fetching data:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 module.exports = adminService;

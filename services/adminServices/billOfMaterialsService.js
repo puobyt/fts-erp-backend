@@ -10,7 +10,15 @@ billOfMaterialsService.fetchbillOfMaterials = async () => {
   try {
     const data = await BillOfMaterials.find({})
     const productNames = await ProductionOrderCreationOutput.distinct('productName');
-    const materials = await MainStock.distinct("materialName");
+    const materials = await MainStock.aggregate([
+      {
+        $project: {
+          materialName: 1, 
+          materialCode: 1, 
+          _id: 0,         
+        },
+      },
+    ]);
     return {
       status: 200,
       data: data,

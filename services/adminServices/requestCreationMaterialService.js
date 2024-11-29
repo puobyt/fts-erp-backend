@@ -3,6 +3,7 @@ const RequestCreationForMaterials = require("../../models/requestCreationForMate
 const FinishedGoods = require("../../models/finishedGoods");
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
+const MainStock = require("../../models/mainStock");
 let requestCreationMaterialService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -10,18 +11,12 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 requestCreationMaterialService.fetchRequestCreationForMaterials = async () => {
   try {
     const data = await RequestCreationForMaterials.find({});
-    const materials = await CurrentStock.aggregate([
-      {
-        $group: {
-          _id: "$materialName",
-          batchNumber: { $first: "$batchNumber" }, // Use $first instead of $addToSet
-        },
-      },
+    const materials = await MainStock.aggregate([
       {
         $project: {
-          materialName: "$_id",
-          batchNumber: 1,
-          _id: 0,
+          materialName: 1, 
+          materialCode: 1, 
+          _id: 0,         
         },
       },
     ]);

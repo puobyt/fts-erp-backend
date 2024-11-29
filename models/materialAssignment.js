@@ -19,6 +19,9 @@ const schema = new mongoose.Schema(
         assignedQuantity: {
           type: String,
         },
+        materialCode: {
+          type: String,
+        },
       },
     ],
     assignedTo: {

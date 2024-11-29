@@ -115,7 +115,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
   //   const assignedQuantity = await calculateAssignedQuantity(materialName);
   //   console.log('assigned quanitututuututu',assignedQuantity);
-
+// const vendor = VendorManagement.findOne({})
     const newStock = new CurrentStock({
       materialName,
       materialCode,
