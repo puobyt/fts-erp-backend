@@ -33,10 +33,11 @@ adminRouter.get('/materialAssignment',materialAssignmentController.fetchMaterial
 adminRouter.get('/billOfMaterials',billOfMaterialsController.fetchbillOfMaterials);
 adminRouter.get('/qualityInpsection',qualityInspectionController.fetchQualityInspection);
 adminRouter.get('/finishedGoods',finishedGoodsController.fetchFinishedGoods);
-adminRouter.get('/current-stock/:id/pdf-data',adminController.fetchPDFData);
+adminRouter.get('/search/materials',adminController.tracebilitySearch);
+adminRouter.get('/search/finishedGoods',adminController.tracebilityFinishedGoodsSearch);
 // adminRouter.get('/firms',purchaseOrderController.fetchFirms);
 adminRouter.get('/invoiceCreations',invoiceCreationController.fetchInvoiceCreations);
-
+adminRouter.get('/current-stock/:id/pdf-data',adminController.fetchPDFData);
 adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement); 
 adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchaseOrderCreation);
 adminRouter.post('/newGateEntry',gateEntryController.newGateEntry);

@@ -1,6 +1,7 @@
 const express = require("express");
 let adminController = {};
 const adminService = require("../../services/adminServices/adminService");
+const finishedGoods = require("../../models/finishedGoods");
 
 adminController.signIn = async (req, res) => {
   try {
@@ -74,6 +75,44 @@ adminController.fetchPDFData = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching pdf data in admin controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+adminController.tracebilitySearch = async (req, res) => {
+  try {
+    const { code } = req.query;
+
+    const result = await adminService.tracebilitySearch(code);
+
+    res.status(result.status).json({
+      message: result.message,
+      materials: result.materials,
+      success:result.success,
+      
+    });
+
+  } catch (error) {
+    console.error("Error tracebility search data in admin controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+adminController.tracebilityFinishedGoodsSearch = async (req, res) => {
+  try {
+    const { code } = req.query;
+
+    const result = await adminService.tracebilityFinishedGoodsSearch(code);
+
+    res.status(result.status).json({
+      message: result.message,
+      materials: result.materials,
+      success:result.success,
+      
+    });
+
+  } catch (error) {
+    console.error("Error tracebility search data in admin controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 }

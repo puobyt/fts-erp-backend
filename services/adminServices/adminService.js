@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const otpGenerator = require("../../configs/otpGenerator");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
+const FinishedGoods = require("../../models/finishedGoods");
 const CurrentStock = require("../../models/currentStock");
 const VendorManagement = require("../../models/vendorManagement");
 const sendMail = require("../../configs/otpMailer");
@@ -114,7 +115,7 @@ adminService.verifyOtp = async (otp, email) => {
   };
 };
 
-
+    
 adminService.fetchPDFData = async (id) => {
   try {
 
@@ -152,6 +153,59 @@ adminService.fetchPDFData = async (id) => {
   } catch (error) {
     console.error("Error fetching data:", error.message);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+adminService.tracebilitySearch = async (materialCode) => {
+  try {
+
+
+    const materials = await CurrentStock.find({ materialCode }); 
+
+    if (materials.length === 0) {
+      console.log('No materials found for search');
+      return { status: 404, message: "Material code not found", success: false };
+    }
+
+
+    return { status: 200, message: "Raw materials found", materials: materials,success:true };
+  } catch (err) {
+    console.error(
+      "Error occured in tracebility search in admin service",
+      err.message
+    );
+    res.status(500).json({ info: "An error tracebility search in admin service " });
+  }
+};
+
+
+adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
+  try {
+
+    const finishedGoods = await FinishedGoods.findOne({ finishedGoodsName });
+
+    if (!finishedGoods) {
+      return { status: 404, message: "Finished goods not found", success: false };
+    }
+
+    const materialCodes = finishedGoods.materials.map((item) => item.materialCode);
+
+    const materials = await CurrentStock.find({ materialCode: { $in: materialCodes } });
+
+    if (materials.length === 0) {
+      console.log('No finished goods found for search');
+      return { status: 404, message: "Finished goods materials not found", success: false };
+    }
+
+
+    return { status: 200, message: "Finished Goods found", materials: materials,success:true };
+  } catch (err) {
+    console.error(
+      "Error occured in tracebility search in admin service",
+      err.message
+    );
+    res.status(500).json({ info: "An error tracebility search in admin service " });
   }
 };
 
