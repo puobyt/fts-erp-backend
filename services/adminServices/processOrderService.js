@@ -22,13 +22,31 @@ processOrderService.fetchProcessOrder = async () => {
 
 processOrderService.newProcessOrder = async (processOrderData) => {
   try {
-    const { processOrderNumber, productName, description } = processOrderData;
+    const {
+      processOrderNumber,
+      plant,
+      equipment,
+      startDate,
+      finishDate,
+      productName,
+      productCode,
+      batch,
+      orderQuantity,
+      materialInput,
+    } = processOrderData;
 
     const existingProcessOrder = await ProcessOrder.findOne({
       $and: [
         { processOrderNumber: processOrderNumber },
+        { plant: plant },
+        { equipment: equipment },
+        { startDate: startDate },
+        { finishDate: finishDate },
         { productName: productName },
-        { description: description },
+        { productCode: productCode },
+        { batch: batch },
+        { orderQuantity: orderQuantity },
+        { materialInput: materialInput },
       ],
     });
 
@@ -41,8 +59,15 @@ processOrderService.newProcessOrder = async (processOrderData) => {
 
     const newProcessOrder = new ProcessOrder({
       processOrderNumber,
+      plant,
+      equipment,
+      startDate,
+      finishDate,
       productName,
-      description,
+      productCode,
+      batch,
+      orderQuantity,
+      materialInput,
     });
 
     await newProcessOrder.save();
@@ -62,8 +87,13 @@ processOrderService.newProcessOrder = async (processOrderData) => {
 
 processOrderService.editProcessOrder = async (processOrderData) => {
   try {
-    const { processOrderId,authPassword, processOrderNumber, productName, description } =
-      processOrderData;
+    const {
+      processOrderId,
+      authPassword,
+      processOrderNumber,
+      productName,
+      description,
+    } = processOrderData;
 
     if (adminAuthPassword !== authPassword) {
       return {
@@ -122,39 +152,133 @@ processOrderService.editProcessOrder = async (processOrderData) => {
   }
 };
 
-processOrderService.removeProcessOrder = async (
-  processOrderId
-) => {
+processOrderService.removeProcessOrder = async (processOrderId) => {
   try {
-    const processOrder = await ProcessOrder.findByIdAndDelete(
-      processOrderId
-    );
+    const processOrder = await ProcessOrder.findByIdAndDelete(processOrderId);
 
-    if(!processOrder){
+    if (!processOrder) {
       return {
         status: 201,
-        message: "Process Order not found or can't able to delete right now,Please try again later",
+        message:
+          "Process Order not found or can't able to delete right now,Please try again later",
         token: "sampleToken",
       };
     }
 
-return {
-  status: 201,
-  message: "process Order deleted successfully",
-  token: "sampleToken",
+    return {
+      status: 201,
+      message: "process Order deleted successfully",
+      token: "sampleToken",
+    };
+  } catch (error) {
+    console.log("An error occured at Process Order remove", error.message);
+    res.status(500).json({
+      info: "An error occured in Process Order remove in Process Order services",
+    });
+  }
 };
 
+processOrderService.excelImportData = async (sheetsData) => {
+  try {
+    const sheet1 = sheetsData.Sheet1; // Process Order Details
+    const sheet2 = sheetsData.Sheet2; // Material Input
+    const sheet3 = sheetsData.Sheet3; // Material Output
+    const sheet4 = sheetsData.Sheet4; // Operations
 
+    const materialInput = sheet2.map((item) => ({
+      materialCode: item["Material Code"],
+      batch: item.Batch,
+      quantity: item.Qty,
+      storageLocation: item["Storage Location"],
+    }));
+
+    const materialOutput = sheet3.map((item) => ({
+      materialCode: item["Material Code"],
+      description: item.Description,
+      batch: item.Batch,
+      quantity: item.Qty,
+      storageLocation: item["Storage Location"],
+      Yield: item.Yield,
+    }));
+
+    const operations = sheet4.map((item) => ({
+      operation: item.Operation,
+      equipment: item.Equipment,
+      startDate: item["Start Date"],
+      endDate: item["End Date"],
+      machineHrs: item["Machine Hrs"],
+      labourHrs: item["Labour Hrs"],
+      powerKwh: item["Power in Kwh"],
+      steamKg: item["Steam in Kg"],
+    }));
+
+    // Fetch Existing Process Orders Once
+    const processOrderNumbers = sheet1.map(
+      (order) => order["Process Order No"]
+    );
+    const existingOrders = await ProcessOrder.find({
+      processOrderNumber: { $in: processOrderNumbers },
+    });
+
+    // Create a Map for Existing Orders
+    const existingOrderMap = new Map(
+      existingOrders.map((order) => [order.processOrderNumber, order])
+    );
+
+    // Prepare Bulk Operations
+    const bulkOps = sheet1.map((order) => {
+      const processOrderNumber = order["Process Order No"];
+      const isExisting = existingOrderMap.has(processOrderNumber);
+
+      // Map Process Order Details
+      const data = {
+        processOrderNumber,
+        plant: order.Plant,
+        equipment: order.Equipment,
+        startDate: order["Start Date"],
+        finishDate: order["Finish Date"],
+        productCode: order["Product Code"],
+        productName: order["Product Description"],
+        batch: order.Batch,
+        orderQuantity: order["Order Qty"],
+        poIssueDate: order["PO Issue Date"],
+        materialInput,
+        materialOutput,
+        operations,
+      };
+
+      // Prepare Update or Insert Operation
+      if (isExisting) {
+        return {
+          updateOne: {
+            filter: { processOrderNumber },
+            update: { $set: data },
+          },
+        };
+      } else {
+        return { insertOne: { document: data } };
+      }
+    });
+
+    // Execute Bulk Operation
+    if (bulkOps.length > 0) {
+      await ProcessOrder.bulkWrite(bulkOps);
+    }
+
+    // Return Success Response
+    return {
+      status: 201,
+      message: "Process Orders added or updated successfully!",
+    };
   } catch (error) {
-    console.log(
-      "An error occured at Process Order remove",
+    console.error(
+      "An error occurred while adding process order:",
       error.message
     );
-    res
-      .status(500)
-      .json({
-        info: "An error occured in Process Order remove in Process Order services",
-      });
+    return {
+      status: 500,
+      message: "Internal Server Error",
+    };
   }
 };
 module.exports = processOrderService;

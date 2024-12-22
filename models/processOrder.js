@@ -6,13 +6,95 @@ const schema = new mongoose.Schema(
       type: String,
     },
 
-    productName: {
+    plant: {
       type: String,
     },
 
-    description: {
+    equipment: {
       type: String,
     },
+    startDate: {
+      type: String,
+    },
+    finishDate: {
+      type: String,
+    },
+    productName: {
+      type: String,
+    },
+    productCode: {
+      type: String,
+    },
+    batch: {
+      type: String,
+    },
+    orderQuantity: {
+      type: String,
+    },
+
+    materialInput: [
+      {
+        materialCode: {
+          type: String,
+        },
+        quantity: {
+          type: String,
+        },
+        batch: {
+          type: String,
+        },
+        storageLocation: {
+          type: String,
+        },
+      },
+    ],
+    materialOutput: [
+      {
+        materialCode: {
+          type: String,
+        },
+        quantity: {
+          type: String,
+        },
+        batch: {
+          type: String,
+        },
+        storageLocation: {
+          type: String,
+        },
+        Yield: {
+          type: String,
+        },
+      },
+    ],
+    operations: [
+      {
+        operation: {
+          type: String, // e.g., Loading, Mixing, etc.
+        },
+        equipment: {
+          type: String, // Equipment used
+        },
+        startDate: {
+          type: String, // Start Date
+        },
+        endDate: {
+          type: String, // End Date
+        },
+        machineHrs: {
+          type: Number, // Machine Hours
+        },
+        labourHrs: {
+          type: Number, // Labour Hours
+        },
+        powerKwh: {
+          type: Number, // Power in Kwh
+        },
+        steamKg: {
+          type: Number, // Steam in Kg
+        },
+      },
+    ],
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
 

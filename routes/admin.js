@@ -45,6 +45,7 @@ adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
 adminRouter.post('/newMainStock',mainStockController.newMainStock);
 adminRouter.post('/newProcessOrder',processOrderController.newProcessOrder); 
+adminRouter.post('/processOrder/import-data',processOrderController.excelImportData); 
 adminRouter.post('/newRework',reworkController.newRework);
 adminRouter.post('/newProductionOrderCreation',productionOrderCreationController.newProductionOrderCreation);
 adminRouter.post('/newProductionOrderCreationOutput',productionOrderCreationController.newProductionOrderCreationOutput);
