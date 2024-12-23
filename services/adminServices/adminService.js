@@ -200,6 +200,7 @@ adminService.tracebilitySearch = async (materialCode) => {
 
 adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
   try {
+
     const finishedGoods = await FinishedGoods.findOne({ finishedGoodsName });
 
     if (!finishedGoods) {
