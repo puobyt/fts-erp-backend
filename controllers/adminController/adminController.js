@@ -137,4 +137,25 @@ adminController.tracebilityProductionSearch =  async (req, res) => {
   }
 };
 
+
+adminController.tracebilityPackingAndShipping =  async (req, res) => {
+  const { processCode } = req.query; 
+
+  try {
+    
+    const result = await adminService.tracebilityPackingAndShipping(processCode);
+
+    res.status(result.status).json({
+      message: result.message,
+      shippingData: result.shippingData,
+      success:result.success,
+      
+    });
+
+  } catch (error) {
+    console.error("Error tracebility search packing and shipping data in admin controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = adminController;
