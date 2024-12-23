@@ -117,4 +117,24 @@ adminController.tracebilityFinishedGoodsSearch = async (req, res) => {
   }
 }
 
+adminController.tracebilityProductionSearch =  async (req, res) => {
+  const { materialCode } = req.query; 
+
+  try {
+    
+    const result = await adminService.tracebilityProductionSearch(materialCode);
+
+    res.status(result.status).json({
+      message: result.message,
+      productionData: result.productionData,
+      success:result.success,
+      
+    });
+
+  } catch (error) {
+    console.error("Error tracebility search production data in admin controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = adminController;

@@ -36,6 +36,8 @@ adminRouter.get('/finishedGoods',finishedGoodsController.fetchFinishedGoods);
 adminRouter.get('/search/materials',adminController.tracebilitySearch);
 adminRouter.get('/search/finishedGoods',adminController.tracebilityFinishedGoodsSearch);
 // adminRouter.get('/firms',purchaseOrderController.fetchFirms);
+adminRouter.get('/search/production',adminController.tracebilityProductionSearch);
+
 adminRouter.get('/invoiceCreations',invoiceCreationController.fetchInvoiceCreations);
 adminRouter.get('/current-stock/:id/pdf-data',adminController.fetchPDFData);
 adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement); 

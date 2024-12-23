@@ -1,6 +1,7 @@
 const { Admin } = require("../../models/admin");
 const { GenerateTokenAdmin } = require("../../configs/adminAuth");
 const bcrypt = require("bcrypt");
+const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const otpGenerator = require("../../configs/otpGenerator");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
@@ -9,6 +10,7 @@ const CurrentStock = require("../../models/currentStock");
 const VendorManagement = require("../../models/vendorManagement");
 const sendMail = require("../../configs/otpMailer");
 const { PendingAdmin } = require("../../models/admin");
+
 let adminService = {};
 const allowedEmails = ["puobyt@gmail.com", "bobydavist@gmail.com","jishnuanil055@gmail.com"];
 adminService.signIn = async (email, password) => {
@@ -208,5 +210,45 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
     res.status(500).json({ info: "An error tracebility search in admin service " });
   }
 };
+
+
+adminService.tracebilityProductionSearch = async (materialCode) => {
+  try {
+
+    const production = await ProductionOrderCreation.find({
+      materials: {
+        $elemMatch: { materialCode: materialCode }, 
+      },
+    });
+
+
+    if (!production || production.length === 0) {
+      return {
+        status: 404,
+        message: 'No production data found for the provided material code.',
+        success: false,
+      };
+    }
+
+
+    return {
+      status: 200,
+      message: 'Production data found successfully!',
+      productionData: production,
+      success: true,
+    };
+  } catch (err) {
+    console.error(
+      'Error occurred in traceability search in admin service:',
+      err.message
+    );
+    return {
+      status: 500,
+      message: 'An error occurred while fetching production data.',
+      success: false,
+    };
+  }
+};
+
 
 module.exports = adminService;
