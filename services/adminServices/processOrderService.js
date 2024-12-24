@@ -88,11 +88,18 @@ processOrderService.newProcessOrder = async (processOrderData) => {
 processOrderService.editProcessOrder = async (processOrderData) => {
   try {
     const {
-      processOrderId,
       authPassword,
+      processOrderId,
       processOrderNumber,
+      plant,
+      equipment,
+      startDate,
+      finishDate,
       productName,
-      description,
+      productCode,
+      batch,
+      orderQuantity,
+      materialInput
     } = processOrderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -105,8 +112,15 @@ processOrderService.editProcessOrder = async (processOrderData) => {
     const existingProcessOrder = await ProcessOrder.findOne({
       $and: [
         { processOrderNumber: processOrderNumber },
+        { plant: plant },
+        { equipment: equipment },
+        { startDate: startDate },
+        { finishDate: finishDate },
         { productName: productName },
-        { description: description },
+        { productCode: productCode },
+        { batch: batch },
+        { orderQuantity: orderQuantity },
+        { materialInput: materialInput },
       ],
     });
 
@@ -114,8 +128,15 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       $and: [
         { _id: processOrderId },
         { processOrderNumber: processOrderNumber },
+        { plant: plant },
+        { equipment: equipment },
+        { startDate: startDate },
+        { finishDate: finishDate },
         { productName: productName },
-        { description: description },
+        { productCode: productCode },
+        { batch: batch },
+        { orderQuantity: orderQuantity },
+        { materialInput: materialInput },
       ],
     });
 
@@ -129,8 +150,15 @@ processOrderService.editProcessOrder = async (processOrderData) => {
         processOrderId,
         {
           processOrderNumber,
+          plant,
+          equipment,
+          startDate,
+          finishDate,
           productName,
-          description,
+          productCode,
+          batch,
+          orderQuantity,
+          materialInput
         },
         {
           new: true,

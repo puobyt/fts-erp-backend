@@ -76,14 +76,21 @@ processOrderController.newProcessOrder = async (req, res) => {
 
 processOrderController.editProcessOrder = async (req, res) => {
     try {
-      console.log("Adding new vendor");
+      console.log("editing  process order");
   
       const {
         authPassword,
         processOrderId,
         processOrderNumber,
+        plant,
+        equipment,
+        startDate,
+        finishDate,
         productName,
-        description,
+        productCode,
+        batch,
+        orderQuantity,
+        materialInput
       } = req.body;
   
       // Pass the extracted data to the service function
@@ -91,8 +98,15 @@ processOrderController.editProcessOrder = async (req, res) => {
         authPassword,
         processOrderId,
         processOrderNumber,
+        plant,
+        equipment,
+        startDate,
+        finishDate,
         productName,
-        description,
+        productCode,
+        batch,
+        orderQuantity,
+        materialInput
       });
   
       res.status(result.status).json({
