@@ -14,16 +14,19 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
     const materials = await MainStock.aggregate([
       {
         $project: {
-          materialName: 1, 
-          materialCode: 1, 
-          _id: 0,         
+          materialName: 1,
+          materialCode: 1,
+          _id: 0,
         },
       },
     ]);
     const processOrderNumbers = await ProcessOrder.aggregate([
       {
         $group: {
-          _id: { processOrderNumber: "$processOrderNumber", productName: "$productName" },
+          _id: {
+            processOrderNumber: "$processOrderNumber",
+            productName: "$productName",
+          },
         },
       },
       {
@@ -39,7 +42,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
       status: 200,
       data: data,
       materials: materials,
-      processOrderNumbers:processOrderNumbers
+      processOrderNumbers: processOrderNumbers,
     };
   } catch (error) {
     console.log(
@@ -54,7 +57,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
 
 productOrderCreationService.fetchProductOrderCreationOutput = async () => {
   try {
-    const data = await ProductionOrderCreationOutput.find({})
+    const data = await ProductionOrderCreationOutput.find({});
     const batches = await ProductionOrderCreation.distinct("batch");
     const products = await ProductionOrderCreation.distinct("productName");
     return {
@@ -81,6 +84,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       processOrder,
       plant,
       productName,
+      productQuantity,
       productDescription,
       batch,
       materials,
@@ -88,12 +92,22 @@ productOrderCreationService.newProductionOrderCreation = async (
       startDate,
       endDate,
     } = productionOrderData;
+    const existingBatchNumber = await ProductionOrderCreation.findOne({
+      batch,
+    });
 
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await ProductionOrderCreation.findOne({
       $and: [
         { processOrder: processOrder },
         { plant: plant },
         { productName: productName },
+        { productQuantity: productQuantity },
         { productDescription: productDescription },
         { batch: batch },
         { materials: materials },
@@ -143,6 +157,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       processOrder: assignedProcessOrder,
       plant,
       productName,
+      productQuantity,
       productDescription,
       batch: assignedBatch,
       materials,
@@ -227,13 +242,13 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
     }
     const newData = new ProductionOrderCreationOutput({
       productName,
-      producedQuantity:producedQuantity,
+      producedQuantity: producedQuantity,
       productionCompletionDate,
       // qualityCheckStatus,
       storageLocationforOutput,
       batchNumberforOutput: assignedBatchNumber,
       productionNotes,
-      Yield:Yield,
+      Yield: Yield,
       outputQualityRating,
       outputHandlingInstructions,
     });
@@ -266,6 +281,7 @@ productOrderCreationService.editProductionOrderCreation = async (
       processOrder,
       plant,
       productName,
+      productQuantity,
       productDescription,
       batch,
       materials,
@@ -280,12 +296,23 @@ productOrderCreationService.editProductionOrderCreation = async (
         message: "Authorization Password is Invalid",
       };
     }
-
+    const existingBatchNumber = await ProductionOrderCreation.findOne({
+      batch,
+        _id: { $ne: productionOrderId }, 
+      });
+      
+      if (existingBatchNumber) {
+        return {
+          status: 409,
+          message: "Batch Number already exists",
+        };
+      }
     const existing = await ProductionOrderCreation.findOne({
       $and: [
         { processOrder: processOrder },
         { plant: plant },
         { productName: productName },
+        { productQuantity: productQuantity },
         { productDescription: productDescription },
         { batch: batch },
         { materials: materials },
@@ -301,6 +328,7 @@ productOrderCreationService.editProductionOrderCreation = async (
         { processOrder: processOrder },
         { plant: plant },
         { productName: productName },
+        { productQuantity: productQuantity },
         { productDescription: productDescription },
         { batch: batch },
         { materials: materials },
@@ -350,6 +378,7 @@ productOrderCreationService.editProductionOrderCreation = async (
             processOrder: assignedProcessOrder,
             plant,
             productName,
+            productQuantity,
             productDescription,
             batch: assignedBatch,
             materials,
@@ -463,13 +492,13 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           productionOrderoutputId,
           {
             productName,
-            producedQuantity:producedQuantity,
+            producedQuantity: producedQuantity,
             productionCompletionDate,
             // qualityCheckStatus,
             storageLocationforOutput,
             batchNumberforOutput: assignedBatchNumber,
             productionNotes,
-            Yield:Yield,
+            Yield: Yield,
             outputQualityRating,
             outputHandlingInstructions,
           },

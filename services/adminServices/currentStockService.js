@@ -4,6 +4,7 @@ const purchaseOrderService = require("../../services/adminServices/purchaseOrder
 const VendorManagement = require("../../models/vendorManagement");
 const MainStock = require("../../models/mainStock");
 const MaterialAssignment = require("../../models/materialAssignment");
+const QualityCheck = require("../../models/qualityCheck");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -50,6 +51,16 @@ currentStockService.newCurrentStock = async (newStockData) => {
       expiryDate,
     } = newStockData;
 
+    const existingBatchNumber = await CurrentStock.findOne({
+      batchNumber,
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await CurrentStock.findOne({
       $and: [
         { materialName: materialName },
@@ -70,6 +81,9 @@ currentStockService.newCurrentStock = async (newStockData) => {
         message: "Current stock already exists with the same details",
       };
     }
+
+
+
     // const batchNumberValue = batchNumber || "NIL";
     let assignedBatchNumber = batchNumber;
 
@@ -90,38 +104,38 @@ currentStockService.newCurrentStock = async (newStockData) => {
     const vendor = await PurchaseOrderCreation.findOne({
       nameOfTheFirm: vendorName,
     });
-  //  async function calculateAssignedQuantity(materialName) {
-  //     const materialAssignments = await MaterialAssignment.aggregate([
-  //       {
-  //         $unwind: "$materials",
-  //       },
-  //       {
-  //         $match: { "materials.materialsList": materialName },
-  //       },
-  //       {
-  //         $group: {
-  //           _id: null,
-  //           totalAssignedQuantity: {
-  //             $sum: { $toDouble: "$materials.assignedQuantity" },
-  //           },
-  //         },
-  //       },
-  //     ]);
+    //  async function calculateAssignedQuantity(materialName) {
+    //     const materialAssignments = await MaterialAssignment.aggregate([
+    //       {
+    //         $unwind: "$materials",
+    //       },
+    //       {
+    //         $match: { "materials.materialsList": materialName },
+    //       },
+    //       {
+    //         $group: {
+    //           _id: null,
+    //           totalAssignedQuantity: {
+    //             $sum: { $toDouble: "$materials.assignedQuantity" },
+    //           },
+    //         },
+    //       },
+    //     ]);
 
-  //     return materialAssignments.length > 0
-  //       ? materialAssignments[0].totalAssignedQuantity.toString()
-  //       : "0"; 
-  //   }
+    //     return materialAssignments.length > 0
+    //       ? materialAssignments[0].totalAssignedQuantity.toString()
+    //       : "0";
+    //   }
 
-  //   const assignedQuantity = await calculateAssignedQuantity(materialName);
-  //   console.log('assigned quanitututuututu',assignedQuantity);
-// const vendor = VendorManagement.findOne({})
+    //   const assignedQuantity = await calculateAssignedQuantity(materialName);
+    //   console.log('assigned quanitututuututu',assignedQuantity);
+    // const vendor = VendorManagement.findOne({})
     const newStock = new CurrentStock({
       materialName,
       materialCode,
       batchNumber: assignedBatchNumber,
       quantity,
-      quantityReceived:quantity,
+      quantityReceived: quantity,
       price,
       storageLocation,
       vendorName,
@@ -131,6 +145,18 @@ currentStockService.newCurrentStock = async (newStockData) => {
     });
 
     await newStock.save();
+
+        const newData = new QualityCheck({
+          batchNumber:assignedBatchNumber,
+          materialName,
+          materialCode,
+          inspectionDate:Date.now(),
+          inspectorName:'Nil',
+          qualityStatus:'Nil',
+          comments:'Nil',
+        });
+
+        await newData.save();
     return {
       status: 201,
       message: "New stock added successfully",
@@ -170,7 +196,17 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         message: "Authorization Password is Invalid",
       };
     }
-
+    const existingBatchNumber = await CurrentStock.findOne({
+      batchNumber,
+      _id: { $ne: currentStockId }, 
+    });
+    
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await CurrentStock.findOne({
       $and: [
         { materialName: materialName },

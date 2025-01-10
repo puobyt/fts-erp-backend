@@ -32,6 +32,16 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
     const { finishedGoodsName, batchNumber, productionDate, quantityProduced } =
       finishedGoodsData;
 
+          const existingBatchNumber= await FinishedGoods.findOne({
+            batchNumber,
+            });
+            
+            if (existingBatchNumber) {
+              return {
+                status: 409,
+                message: "Batch Number already exists",
+              };
+            }
     const existing = await FinishedGoods.findOne({
       $and: [
         { finishedGoodsName: finishedGoodsName },
@@ -159,6 +169,18 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         message: "Authorization Password is Invalid",
       };
     }
+
+    const existingBatchNumber= await FinishedGoods.findOne({
+      batchNumber,
+        _id: { $ne: finishedGoodsId }, 
+      });
+      
+      if (existingBatchNumber) {
+        return {
+          status: 409,
+          message: "Batch Number already exists",
+        };
+      }
 
     const existing = await FinishedGoods.findOne({
       $and: [

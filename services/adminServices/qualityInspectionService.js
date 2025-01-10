@@ -36,6 +36,17 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
   try {
     const { inspectionNumber, productName, inspectionResults } = inspectionData;
 
+    const existingInspectionNumber = await FinalQualityInspection.findOne({
+      inspectionNumber,
+        });
+        
+        if (existingInspectionNumber) {
+          return {
+            status: 409,
+            message: "Inspection Number already exists",
+          };
+        }
+
     const existing = await FinalQualityInspection.findOne({
       $and: [
         { inspectionNumber: inspectionNumber },
@@ -206,7 +217,17 @@ qualityInspectionService.editQualityInspection = async (
         message: "Authorization Password is Invalid",
       };
     }
-
+    const existingInspectionNumber = await FinalQualityInspection.findOne({
+      inspectionNumber,
+          _id: { $ne: qualityInspectionId }, 
+        });
+        
+        if (existingInspectionNumber) {
+          return {
+            status: 409,
+            message: "Inspection Number already exists",
+          };
+        }
     const existing = await FinalQualityInspection.findOne({
       $and: [
         { inspectionNumber: inspectionNumber },

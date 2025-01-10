@@ -40,6 +40,27 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       invoicePreparedBy
     } = invoiceData;
 
+    const existingInvoiceNumber = await InvoiceCreation.findOne({
+      $or: [
+        { invoiceNumber},
+        { customerId },
+      ],
+    });
+    
+    if (existingInvoiceNumber) {
+      if (existingInvoiceNumber.invoiceNumber === invoiceNumber) {
+        return {
+          status: 409,
+          message: "Invoice Number already exists",
+        };
+      }
+      if (existingInvoiceNumber.customerId === customerId) {
+        return {
+          status: 409,
+          message: "Customer ID already has an existing invoice",
+        };
+      }
+    }
     const existingInvoice = await InvoiceCreation.findOne({
       $and: [
         { invoiceNumber: invoiceNumber },
@@ -140,7 +161,27 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
         message: "Authorization Password is Invalid",
       };
     }
-
+    const existingInvoiceNumber = await InvoiceCreation.findOne({
+      $or: [
+        { invoiceNumber, _id: { $ne: invoiceId } },
+        { customerId, _id: { $ne: invoiceId } },
+      ],
+    });
+    
+    if (existingInvoiceNumber) {
+      if (existingInvoiceNumber.invoiceNumber === invoiceNumber) {
+        return {
+          status: 409,
+          message: "Invoice Number already exists",
+        };
+      }
+      if (existingInvoiceNumber.customerId === customerId) {
+        return {
+          status: 409,
+          message: "Customer ID already has an existing invoice",
+        };
+      }
+    }
     const existing = await InvoiceCreation.findOne({
       $and: [
         { invoiceNumber: invoiceNumber },

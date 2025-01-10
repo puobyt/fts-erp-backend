@@ -46,6 +46,17 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
       };
     }
 
+        const existingBomNumber= await BillOfMaterials.findOne({
+          bomNumber,
+          });
+          
+          if (existingBomNumber) {
+            return {
+              status: 409,
+              message: "Bom Number already exists",
+            };
+          }
+
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },
@@ -116,6 +127,18 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         message: "Authorization Password is Invalid",
       };
     }
+
+    const existingBomNumber= await BillOfMaterials.findOne({
+      bomNumber,
+        _id: { $ne: billOfMaterialsId }, 
+      });
+      
+      if (existingBomNumber) {
+        return {
+          status: 409,
+          message: "Bom Number already exists",
+        };
+      }
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },

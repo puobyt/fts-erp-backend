@@ -53,6 +53,7 @@ mainStockService.newMainStock = async (mainStockData) => {
       materialName,
       materialCode,
       quantity,
+      batchNumber,
       price,
       vendorName,
       storageLocation,
@@ -60,10 +61,21 @@ mainStockService.newMainStock = async (mainStockData) => {
       expiryDate,
     } = mainStockData;
 
+        const existingBatchNumber = await MainStock.findOne({
+          batchNumber,
+        });
+    
+        if (existingBatchNumber) {
+          return {
+            status: 409,
+            message: "Batch Number already exists",
+          };
+        }
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
         { materialCode: materialCode },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -84,6 +96,7 @@ mainStockService.newMainStock = async (mainStockData) => {
       materialName,
       materialCode,
       quantity,
+      batchNumber,
       price,
       vendorName,
       storageLocation,
@@ -116,6 +129,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       mainStockId,
       materialName,
       materialCode,
+      batchNumber,
       quantity,
       price,
       vendorName,
@@ -130,11 +144,22 @@ mainStockService.editMainStock = async (mainStockData) => {
         message: "Authorization Password is Invalid",
       };
     }
-
+    const existingBatchNumber = await MainStock.findOne({
+      batchNumber,
+      _id: { $ne: mainStockId }, 
+    });
+    
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
         { materialCode: materialCode },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -149,6 +174,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         { _id: mainStockId },
         { materialName: materialName },
         { materialCode: materialCode },
+        { batchNumber: batchNumber },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -169,6 +195,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       {
         materialName,
         materialCode,
+        batchNumber,
         quantity,
         price,
         vendorName,
@@ -187,6 +214,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       {
         materialName,
         materialCode,
+        batchNumber,
         quantity,
         price,
         vendorName,

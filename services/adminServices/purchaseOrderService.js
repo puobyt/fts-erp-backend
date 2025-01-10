@@ -68,7 +68,13 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       pan,
       gst,
     } = newPurchaseData;
-
+const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({purchaseOrderNumber});
+if(existingPurchaseOrderNumber){
+  return {
+    status: 409,
+    message: "Purchase Order Number already exists",
+  };
+}
     const existing = await PurchaseOrderCreation.findOne({
       $and: [
         { purchaseOrderNumber: purchaseOrderNumber },
@@ -188,7 +194,17 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         message: "Authorization Password is Invalid",
       };
     }
+    const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({
+      purchaseOrderNumber,
+      _id: { $ne: orderId }, // Exclude the current order being edited
+    });
 
+    if(existingPurchaseOrderNumber){
+      return {
+        status: 409,
+        message: "Purchase Order Number already exists",
+      };
+    }
     const existing = await PurchaseOrderCreation.findOne({
       $and: [
         { purchaseOrderNumber: purchaseOrderNumber },

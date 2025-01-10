@@ -24,6 +24,9 @@ const schema = new mongoose.Schema(
     productName: {
       type: String,
     },
+    productQuantity: {
+      type: String,
+    },
 
     productDescription: {
       type: String,

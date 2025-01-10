@@ -35,6 +35,28 @@ processOrderService.newProcessOrder = async (processOrderData) => {
       materialInput,
     } = processOrderData;
 
+    const existingProcessOrderNumber = await ProcessOrder.findOne({
+      $or: [
+        { processOrderNumber },
+        { batchNumber},
+      ],
+    });
+    
+    if (existingProcessOrderNumber) {
+      if (existingProcessOrderNumber.processOrderNumber === processOrderNumber) {
+        return {
+          status: 409,
+          message: "Process Order Number already exists",
+        };
+      }
+      if (existingProcessOrderNumber.batchNumber === batchNumber) {
+        return {
+          status: 409,
+          message: "Batch Number already exists",
+        };
+      }
+    }
+
     const existingProcessOrder = await ProcessOrder.findOne({
       $and: [
         { processOrderNumber: processOrderNumber },
@@ -109,6 +131,27 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       };
     }
 
+    const existingProcessOrderNumber = await ProcessOrder.findOne({
+      $or: [
+        { processOrderNumber, _id: { $ne: processOrderId } },
+        { batchNumber, _id: { $ne: processOrderId } },
+      ],
+    });
+    
+    if (existingProcessOrderNumber) {
+      if (existingProcessOrderNumber.processOrderNumber === processOrderNumber) {
+        return {
+          status: 409,
+          message: "Process Order Number already exists",
+        };
+      }
+      if (existingProcessOrderNumber.batchNumber === batchNumber) {
+        return {
+          status: 409,
+          message: "Batch Number already exists",
+        };
+      }
+    }
     const existingProcessOrder = await ProcessOrder.findOne({
       $and: [
         { processOrderNumber: processOrderNumber },

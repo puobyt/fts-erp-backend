@@ -45,6 +45,16 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
     const { requestNumber, materials, requiredDate } =
       requestCreationData;
 
+          const existingRequestNumber= await RequestCreationForMaterials.findOne({
+            requestNumber,
+            });
+            
+            if (existingRequestNumber) {
+              return {
+                status: 409,
+                message: "Request Number already exists",
+              };
+            }
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
         { requestNumber: requestNumber },
@@ -117,6 +127,19 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         message: "Authorization Password is Invalid",
       };
     }
+
+    const existingRequestNumber= await RequestCreationForMaterials.findOne({
+      requestNumber,
+        _id: { $ne: requestMaterialsId }, 
+      });
+      
+      if (existingRequestNumber) {
+        return {
+          status: 409,
+          message: "Request Number already exists",
+        };
+      }
+
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
         { requestNumber: requestNumber },

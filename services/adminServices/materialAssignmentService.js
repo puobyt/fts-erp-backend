@@ -66,6 +66,18 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     const { assignmentNumber, processOrderNumber, materials, assignedTo } =
       materialData;
 
+
+    const existingMaterialAssignment= await MaterialAssignment.findOne({
+      assignmentNumber,
+      });
+      
+      if (existingMaterialAssignment) {
+        return {
+          status: 409,
+          message: "Assignment Number already exists",
+        };
+      }
+
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
@@ -226,6 +238,17 @@ materialAssignmentService.editMaterialAssignment = async (
       };
     }
 
+    const existingMaterialAssignment= await MaterialAssignment.findOne({
+      assignmentNumber,
+        _id: { $ne: materialAssignmentId }, 
+      });
+      
+      if (existingMaterialAssignment) {
+        return {
+          status: 409,
+          message: "Assignment Number already exists",
+        };
+      }
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },

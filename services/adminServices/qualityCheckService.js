@@ -59,6 +59,18 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       comments,
     } = newQualityCheckData;
 
+   const existingBatchNumber = await QualityCheck.findOne({
+      batchNumber,
+    });
+    
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
+
+
     const existing = await QualityCheck.findOne({
       $and: [
         { batchNumber: batchNumber },
@@ -160,6 +172,17 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       };
     }
 
+       const existingBatchNumber = await QualityCheck.findOne({
+          batchNumber,
+          _id: { $ne: qualityCheckId }, 
+        });
+        
+        if (existingBatchNumber) {
+          return {
+            status: 409,
+            message: "Batch Number already exists",
+          };
+        }
     const existing = await QualityCheck.findOne({
       $and: [
         { batchNumber: batchNumber },
