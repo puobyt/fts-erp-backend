@@ -72,6 +72,7 @@ gateEntryService.newGateEntry = async (newGateEntry) => {
   }
 };
 
+
 gateEntryService.editGateEntry = async (gateEntryData) => {
   try {
     const {

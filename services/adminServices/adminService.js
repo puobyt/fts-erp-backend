@@ -1,6 +1,6 @@
 const { Admin } = require("../../models/admin");
 const { GenerateTokenAdmin } = require("../../configs/adminAuth");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");  
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const otpGenerator = require("../../configs/otpGenerator");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
@@ -18,6 +18,7 @@ const allowedEmails = [
   "puobyt@gmail.com",
   "bobydavist@gmail.com",
   "jishnuanil055@gmail.com",
+  "jishnuanil255@gmail.com",
 ];
 adminService.signIn = async (email, password) => {
   try {
