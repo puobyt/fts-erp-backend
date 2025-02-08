@@ -143,6 +143,11 @@ adminService.fetchPDFData = async (id) => {
       return { status: 404, message: "Vendor details not found" };
     }
 
+    const purchaseOrderCreation = await PurchaseOrderCreation.findOne({
+      nameOfTheFirm:currentStock.vendorName
+    });
+
+
     // const storage = await ProductionOrderCreationOutput.findOne({ storageLocation: currentStock.storageLocation });
     // if (!storage) {
     //   return res.status(404).json({ error: "Storage details not found" });
@@ -151,15 +156,21 @@ adminService.fetchPDFData = async (id) => {
     // const production = await
     const pdfData = {
       vendor: {
+        vendorId:purchaseOrderCreation.vendorId,
+        vendorName:currentStock.vendorName,
         contactName: vendor.contactPersonName,
         contactPersonDetails: vendor.contactPersonDetails,
         address: vendor.address,
+        location:currentStock.storageLocation
       },
-      storage: {
-        id: storage.storageId,
-        location: storage.locationName, // Adjust based on schema
-        capacity: storage.capacity, // Adjust based on schema
-      },
+
+    };
+
+    return {
+      status: 200,
+      message: "Downloading",
+      pdfData: pdfData,
+      success: true,
     };
 
     res.status(200).json(pdfData);

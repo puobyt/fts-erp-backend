@@ -70,7 +70,7 @@ adminController.fetchPDFData = async (req, res) => {
 
     res.status(result.status).json({
       message: result.message,
-      userToken: result.token,
+      pdfData: result.pdfData,
       success: result.success,
     });
   } catch (error) {
