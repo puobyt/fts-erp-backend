@@ -24,6 +24,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
   try {
     const {
       processOrderNumber,
+      batchNumber,
       plant,
       equipment,
       startDate,
@@ -81,6 +82,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
 
     const newProcessOrder = new ProcessOrder({
       processOrderNumber,
+      batchNumber,
       plant,
       equipment,
       startDate,
@@ -113,6 +115,7 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       authPassword,
       processOrderId,
       processOrderNumber,
+      batchNumber,
       plant,
       equipment,
       startDate,
@@ -155,6 +158,7 @@ processOrderService.editProcessOrder = async (processOrderData) => {
     const existingProcessOrder = await ProcessOrder.findOne({
       $and: [
         { processOrderNumber: processOrderNumber },
+        { batchNumber: batchNumber },
         { plant: plant },
         { equipment: equipment },
         { startDate: startDate },
@@ -171,6 +175,7 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       $and: [
         { _id: processOrderId },
         { processOrderNumber: processOrderNumber },
+        { batchNumber: batchNumber },
         { plant: plant },
         { equipment: equipment },
         { startDate: startDate },
@@ -193,6 +198,7 @@ processOrderService.editProcessOrder = async (processOrderData) => {
         processOrderId,
         {
           processOrderNumber,
+          batchNumber,
           plant,
           equipment,
           startDate,

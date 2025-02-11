@@ -31,6 +31,7 @@ processOrderController.newProcessOrder = async (req, res) => {
 
     const {
       processOrderNumber,
+      batchNumber,
       plant,
       equipment,
       startDate,
@@ -46,6 +47,7 @@ processOrderController.newProcessOrder = async (req, res) => {
     // Pass the extracted data to the service function
     const result = await processOrderService.newProcessOrder({
       processOrderNumber,
+      batchNumber,
       plant,
       equipment,
       startDate,

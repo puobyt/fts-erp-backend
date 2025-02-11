@@ -25,7 +25,7 @@ const schema = new mongoose.Schema(
     productCode: {
       type: String,
     },
-    batch: {
+    batchNumber: {
       type: String,
     },
     orderQuantity: {
