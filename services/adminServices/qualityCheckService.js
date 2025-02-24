@@ -214,11 +214,26 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         message: "Quality Check already exists with the same details",
       };
     } 
-     
-    const mainStockExist = await MainStock.findOne({ materialName });
+    const currentStock = await CurrentStock.findOne({ batchNumber });
+   
+       const mainStockExist = await MainStock.findOne({
+         $and: [
+
+           { materialName: currentStock.materialName },
+           { materialCode: currentStock.materialCode },
+           { batchNumber: currentStock.batchNumber },
+           { quantity: currentStock.quantity },
+           { price: currentStock.price },
+           { storageLocation: currentStock.storageLocation },
+           { vendorName: currentStock.vendorName },
+           { dateRecieved: currentStock.dateRecieved },
+           { expiryDate: currentStock.expiryDate },
+         ],
+       });
+
     if (qualityStatus === "Accepted") {
       if (!mainStockExist) {
-        const currentStock = await CurrentStock.findOne({ batchNumber });
+
         if (!currentStock) {
           return {
             status: 409,
@@ -228,6 +243,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         const mainStock = new MainStock({
           currentStockId: currentStock.id,
           materialCode:currentStock.materialCode,
+          batchNumber:currentStock.batchNumber,
           materialName: currentStock.materialName,
           quantity:currentStock.quantity,
           price: currentStock.price,
