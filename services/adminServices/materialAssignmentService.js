@@ -6,6 +6,7 @@ const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
+const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -29,14 +30,20 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     //     },
     //   },
     // ]);
-    const materials = await MainStock.aggregate([
-      {
-        $project: {
-          materialName: 1, 
-          materialCode: 1, 
-          _id: 0,         
-        },
-      },
+    // const materials = await MainStock.aggregate([
+    //   {
+    //     $project: {
+    //       materialName: 1, 
+    //       materialCode: 1, 
+    //       _id: 0,         
+    //     },
+    //   },
+    // ]);
+
+
+    const requestMaterials = await RequestCreationForMaterials.aggregate([
+      { $unwind: "$materials" },
+      { $project: { materialsList: "$materials.materialsList", materialCode: "$materials.materialCode" } }
     ]);
     const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
     const batchNumber = await CurrentStock.distinct("batchNumber");
@@ -47,7 +54,7 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
       status: 200,
       data: data,
       batchNumber: batchNumber,
-      materials: materials,
+      materials: requestMaterials,
       finishedGoods: finishedGoods,
       processOrderNumber: processOrderNumber,
     };
