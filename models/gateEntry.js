@@ -18,6 +18,20 @@ const schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    docNumber: {
+      type: String,
+      required: true,
+    },
+    materials: [
+      {
+        materialName: {
+          type: String,
+        },
+        quantity: {
+          type: String,
+        },
+      },
+    ],
     vendorName: String,
     date: Date,
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },

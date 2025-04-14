@@ -14,6 +14,46 @@ const PurchaseOrderCreationSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    quotationReferenceNumber: {
+      type: String,
+    },
+    hsn: {
+      type: String,
+    },
+    description: {
+      type: String,
+    },
+    totalAmount: {
+      type: String,
+    },
+    amountInWords: {
+      type: String,
+    },
+    discount: {
+      type: String,
+    },
+    afterDiscount: {
+      type: String,
+    },
+    igst: {
+      type: String,
+    },
+    transportationFreight: {
+      type: String,
+    },
+    roundOff: {
+      type: String,
+    },
+    unit: {
+      type: String,
+    },
+    finalAmount: {
+      type: String,
+    },
+    poDate: {
+      type: String,
+    },
+
     contactNumber: {
       type: String,
     },

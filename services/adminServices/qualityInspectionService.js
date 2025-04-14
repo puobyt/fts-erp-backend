@@ -34,7 +34,7 @@ qualityInspectionService.fetchQualityInspection = async () => {
 
 qualityInspectionService.newQualityInspection = async (inspectionData) => {
   try {
-    const { inspectionNumber, productName, inspectionResults } = inspectionData;
+    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity } = inspectionData;
 
     const existingInspectionNumber = await FinalQualityInspection.findOne({
       inspectionNumber,
@@ -47,11 +47,25 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           };
         }
 
+        const existingBatch = await FinalQualityInspection.findOne({
+          batchNumber,
+            });
+            
+            if (existingBatch) {
+              return {
+                status: 409,
+                message: "Batch Number already exists",
+              };
+            }
+
     const existing = await FinalQualityInspection.findOne({
       $and: [
         { inspectionNumber: inspectionNumber },
         { productName: productName },
         { inspectionResults: inspectionResults },
+        { date: date },
+        { batchNumber: batchNumber },
+        { quantity: quantity },
       ],
     });
 
@@ -179,6 +193,9 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       inspectionNumber: assignedInspectionNumber,
       productName,
       inspectionResults,
+      date,
+      batchNumber,
+      quantity
     });
 
     await newData.save();
@@ -209,6 +226,9 @@ qualityInspectionService.editQualityInspection = async (
       inspectionNumber,
       productName,
       inspectionResults,
+      date,
+      batchNumber,
+      quantity
     } = qualityInpectionData;
 
     if (adminAuthPassword !== authPassword) {
@@ -228,11 +248,27 @@ qualityInspectionService.editQualityInspection = async (
             message: "Inspection Number already exists",
           };
         }
+        const existingBatchNumber = await FinalQualityInspection.findOne({
+          batchNumber,
+              _id: { $ne: qualityInspectionId }, 
+            });
+            
+            if (existingBatchNumber) {
+              return {
+                status: 409,
+                message: "Batch Number already exists",
+              };
+            }
+
+
     const existing = await FinalQualityInspection.findOne({
       $and: [
         { inspectionNumber: inspectionNumber },
         { productName: productName },
         { inspectionResults: inspectionResults },
+        { date: date },
+        { quantity: quantity },
+        { batchNumber: batchNumber },
       ],
     });
 
@@ -242,6 +278,9 @@ qualityInspectionService.editQualityInspection = async (
         { inspectionNumber: inspectionNumber },
         { productName: productName },
         { inspectionResults: inspectionResults },
+        { date: date },
+        { quantity: quantity },
+        { batchNumber: batchNumber },
       ],
     });
     let assignedInspectionNumber = inspectionNumber;
@@ -296,6 +335,9 @@ qualityInspectionService.editQualityInspection = async (
           inspectionNumber: assignedInspectionNumber,
           productName,
           inspectionResults,
+          date,
+          batchNumber,
+          quantity
         },
         {
           new: true,

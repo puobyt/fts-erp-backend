@@ -42,7 +42,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber, materials, requiredDate } =
+    const { requestNumber, materials, requiredDate,finishedGoodsName,status } =
       requestCreationData;
 
           const existingRequestNumber= await RequestCreationForMaterials.findOne({
@@ -60,6 +60,8 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
         { requestNumber: requestNumber },
         { materials: materials },
         { requiredDate: requiredDate },
+        { status: status },
+        { finishedGoodsName: finishedGoodsName },
       ],
     });
 
@@ -90,6 +92,8 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
       requestNumber:assignedRequestNumber,
       materials,
       requiredDate,
+      finishedGoodsName,
+      status
     });
 
     await newData.save();
@@ -120,6 +124,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       requestNumber,
       materials,
       requiredDate,
+      finishedGoodsName,
+      status
     } = requestCreationData;
     if (adminAuthPassword !== authPassword) {
       return {
@@ -145,6 +151,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         { requestNumber: requestNumber },
         { materials: materials },
         { requiredDate: requiredDate },
+        { status: status },
+        { finishedGoodsName: finishedGoodsName },
       ],
     });
     const currentRequestMaterialsOrder =
@@ -154,6 +162,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           { requestNumber: requestNumber},
           {materials: materials},
           { requiredDate: requiredDate },
+          { status: status },
+          { finishedGoodsName: finishedGoodsName },
         ],
       });
 
@@ -186,6 +196,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
             requestNumber:assignedRequestNumber,
             materials,
             requiredDate,
+            finishedGoodsName,
+            status
           },
           {
             new: true,

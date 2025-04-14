@@ -15,7 +15,7 @@ const finishedGoodsController = require('../controllers/adminController/finished
 const invoiceCreationController = require('../controllers/adminController/invoiceCreationController');
 const adminController = require('../controllers/adminController/adminController');
 const mainStockController = require('../controllers/adminController/mainStockController');
-const processOrderController = require('../controllers/adminController/processOrderController')
+const processOrderController = require('../controllers/adminController/processOrderController');
 
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);

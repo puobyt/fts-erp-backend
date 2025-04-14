@@ -11,6 +11,15 @@ const schema = new mongoose.Schema(
     inspectionResults: {
       type: String,
     },
+    date: {
+      type: String,
+    },
+    batchNumber: {
+      type: String,
+    },
+    quantity: {
+      type: String,
+    },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },

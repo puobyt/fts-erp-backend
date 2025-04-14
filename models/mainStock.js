@@ -13,7 +13,7 @@ const schema = new mongoose.Schema(
     materialCode: {
       type: String,
     },
-    batchNumber: {
+    grn: {
       type: String,
     },
     quantity: {

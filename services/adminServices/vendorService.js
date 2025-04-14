@@ -23,6 +23,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
     const {
       nameOfTheFirm,
       address,
+      vendorCode,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
@@ -36,6 +37,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
       $and: [
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
+        { vendorCode: vendorCode },
         { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
@@ -56,6 +58,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
     const newVendor = new VendorManagement({
       nameOfTheFirm,
       address,
+      vendorCode,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
@@ -87,6 +90,7 @@ vendorService.editVendorManagement = async (VendorData) => {
       vendorId,
       nameOfTheFirm,
       address,
+      vendorCode,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
@@ -107,6 +111,7 @@ vendorService.editVendorManagement = async (VendorData) => {
       $and: [
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
+        { vendorCode: vendorCode },
         { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
@@ -122,6 +127,7 @@ vendorService.editVendorManagement = async (VendorData) => {
         { _id: vendorId },
         { nameOfTheFirm: nameOfTheFirm },
         { address: address },
+        { vendorCode: vendorCode },
         { contactNumber: contactNumber },
         { contactPersonName: contactPersonName },
         { contactPersonDetails: contactPersonDetails },
@@ -143,6 +149,7 @@ vendorService.editVendorManagement = async (VendorData) => {
         {
           nameOfTheFirm,
           address,
+          vendorCode,
           contactNumber,
           contactPersonName,
           contactPersonDetails,

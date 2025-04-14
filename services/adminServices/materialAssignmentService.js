@@ -7,6 +7,7 @@ const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
+const requestCreationForMaterials = require("../../models/requestCreationForMaterials");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -41,10 +42,20 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     // ]);
 
 
-    const requestMaterials = await RequestCreationForMaterials.aggregate([
-      { $unwind: "$materials" },
-      { $project: { materialsList: "$materials.materialsList", materialCode: "$materials.materialCode" } }
-    ]);
+    // const requestMaterials = await RequestCreationForMaterials.aggregate([
+    //   { $unwind: "$materials" },
+    //   { $project: { materialsList: "$materials.materialsList", materialCode: "$materials.materialCode" } }
+    // ]);
+
+        const materials = await MainStock.aggregate([
+          {
+            $project: {
+              materialName: 1, 
+              materialCode: 1, 
+              _id: 0,         
+            },
+          },
+        ]);
     const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
     const batchNumber = await CurrentStock.distinct("batchNumber");
     const processOrderNumber = await ProductionOrderCreation.distinct(
@@ -54,7 +65,7 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
       status: 200,
       data: data,
       batchNumber: batchNumber,
-      materials: requestMaterials,
+      materials: materials,
       finishedGoods: finishedGoods,
       processOrderNumber: processOrderNumber,
     };
@@ -70,7 +81,7 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
 };
 materialAssignmentService.newMaterialAssignment = async (materialData) => {
   try {
-    const { assignmentNumber, processOrderNumber, materials, assignedTo } =
+    const { assignmentNumber, processOrderNumber, materials, assignedTo,indentNumber,date,finishedGoodsName } =
       materialData;
 
 
@@ -88,6 +99,8 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
+        { indentNumber: indentNumber },
+        { finishedGoodsName: finishedGoodsName },
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -104,6 +117,9 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       const currentStock = await CurrentStock.findOne({
         materialName: materialsList,
       });
+
+
+      // const requestCreationForMaterials = await requestCreationForMaterials
       if (!mainStock) {
         throw new Error(`Material ${materialsList} not found in current stock`);
       }
@@ -164,7 +180,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
           const newOutOfStock = new OutOfStock({
             materialName: mainStock.materialName,
             materialCode: mainStock.materialCode,
-            batchNumber: mainStock.batchNumber,
+            grn: mainStock.grn,
             price: mainStock.price,
             vendorName: mainStock.vendorName,
             storageLocation: mainStock.storageLocation,
@@ -202,6 +218,9 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
     }
     const newData = new MaterialAssignment({
       assignmentNumber: assignedAssignmentNumber,
+      indentNumber,
+      date,
+      finishedGoodsName,
       processOrderNumber,
       materials,
       assignedTo,
@@ -233,6 +252,9 @@ materialAssignmentService.editMaterialAssignment = async (
       authPassword,
       materialAssignmentId,
       assignmentNumber,
+      indentNumber,
+      date,
+      finishedGoodsName,
       processOrderNumber,
       materials,
       assignedTo,
@@ -259,6 +281,9 @@ materialAssignmentService.editMaterialAssignment = async (
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
+        { indentNumber: indentNumber },
+        { finishedGoodsName: finishedGoodsName },
+    
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -270,6 +295,8 @@ materialAssignmentService.editMaterialAssignment = async (
       $and: [
         { _id: materialAssignmentId },
         { assignmentNumber: assignmentNumber },
+        { indentNumber: indentNumber },
+        { finishedGoodsName: finishedGoodsName },
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
@@ -397,6 +424,9 @@ materialAssignmentService.editMaterialAssignment = async (
           {
             assignmentNumber: assignedAssignmentNumber,
             processOrderNumber,
+            indentNumber,
+            finishedGoodsName,
+            date,
             materials,
             assignedTo,
           },

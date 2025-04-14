@@ -42,7 +42,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
     const {
       materialName,
       materialCode,
-      batchNumber,
+      grn,
       quantity,
       price,
       storageLocation,
@@ -51,21 +51,21 @@ currentStockService.newCurrentStock = async (newStockData) => {
       expiryDate,
     } = newStockData;
 
-    const existingBatchNumber = await CurrentStock.findOne({
-      batchNumber,
+    const existingGrnNumber = await CurrentStock.findOne({
+      grn,
     });
 
-    if (existingBatchNumber) {
+    if (existingGrnNumber) {
       return {
         status: 409,
-        message: "Batch Number already exists",
+        message: " GRN already exists",
       };
     }
     const existing = await CurrentStock.findOne({
       $and: [
         { materialName: materialName },
         { materialCode: materialCode },
-        { batchNumber: batchNumber },
+        { grn: grn },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -85,19 +85,19 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
 
     // const batchNumberValue = batchNumber || "NIL";
-    let assignedBatchNumber = batchNumber;
+    let assignedGrn = grn;
 
-    if (!batchNumber) {
+    if (!grn) {
       const lastOrder = await CurrentStock.findOne()
         .sort({ createdAt: -1 })
-        .select("batchNumber");
+        .select("grn");
 
-      if (lastOrder && lastOrder.batchNumber) {
-        const lastNumber = parseInt(lastOrder.batchNumber.match(/\d+$/), 10);
+      if (lastOrder && lastOrder.grn) {
+        const lastNumber = parseInt(lastOrder.grn.match(/\d+$/), 10);
         const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
-        assignedBatchNumber = `FRN/MT/${nextNumber}`;
+        assignedGrn = `FRN/MT/${nextNumber}`;
       } else {
-        assignedBatchNumber = "FRN/MT/1";
+        assignedGrn = "FRN/MT/1";
       }
     }
 
@@ -133,7 +133,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
     const newStock = new CurrentStock({
       materialName,
       materialCode,
-      batchNumber: assignedBatchNumber,
+      grn: assignedGrn,
       quantity,
       quantityReceived: quantity,
       price,
@@ -147,7 +147,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
     await newStock.save();
 
         const newData = new QualityCheck({
-          batchNumber:assignedBatchNumber,
+          batchNumber:assignedGrn,
           materialName,
           materialCode,
           inspectionDate:Date.now(),
@@ -181,7 +181,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       currentStockId,
       materialName,
       materialCode,
-      batchNumber,
+      grn,
       quantity,
       price,
       storageLocation,
@@ -196,21 +196,21 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         message: "Authorization Password is Invalid",
       };
     }
-    const existingBatchNumber = await CurrentStock.findOne({
-      batchNumber,
+    const existingGrn = await CurrentStock.findOne({
+      grn,
       _id: { $ne: currentStockId }, 
     });
     
-    if (existingBatchNumber) {
+    if (existingGrn) {
       return {
         status: 409,
-        message: "Batch Number already exists",
+        message: "GRN already exists",
       };
     }
     const existing = await CurrentStock.findOne({
       $and: [
         { materialName: materialName },
-        { batchNumber: batchNumber },
+        { grn: grn },
         { materialCode: materialCode },
         { quantity: quantity },
         { price: price },
@@ -225,7 +225,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { _id: currentStockId },
         { materialName: materialName },
         { materialCode: materialCode },
-        { batchNumber: batchNumber },
+        { grn: grn },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -235,7 +235,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       ],
     });
 
-    const batchNumberValue = batchNumber || "NIL";
+    const GrnValue = grn || "NIL";
 
     if (existing && !currentStockExist) {
       return {
@@ -248,7 +248,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       {
         materialName,
         materialCode,
-        batchNumber: batchNumberValue,
+        grn: GrnValue,
         quantity,
         price,
         vendorName,
@@ -267,7 +267,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       {
         materialName,
         materialCode,
-        batchNumber: batchNumberValue,
+        grn: GrnValue,
         quantity,
         price,
         vendorName,

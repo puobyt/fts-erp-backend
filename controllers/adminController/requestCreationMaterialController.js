@@ -37,13 +37,15 @@ requestCreationMaterialController.newRequestCreationForMaterials = async (
   try {
     console.log("Adding new  Request Creation For Materials creation ");
 
-    const { requestNumber, materials, requiredDate } = req.body;
+    const { requestNumber, materials, requiredDate,finishedGoodsName,status } = req.body;
 
     const result =
       await requestCreationMaterialService.newRequestCreationForMaterials({
         requestNumber,
         materials,
         requiredDate,
+        finishedGoodsName,
+        status
       });
 
     res.status(result.status).json({
@@ -70,7 +72,9 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
         requestMaterialsId,
         requestNumber,
         materials,
-        requiredDate
+        requiredDate,
+        status,
+        finishedGoodsName,
       } = req.body;
   
 
@@ -79,7 +83,9 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
         requestMaterialsId,
         requestNumber,
         materials,
-        requiredDate
+        requiredDate,
+        status,
+        finishedGoodsName,
       });
   
       res.status(result.status).json({

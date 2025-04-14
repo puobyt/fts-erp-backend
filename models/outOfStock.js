@@ -10,7 +10,7 @@ const schema = new mongoose.Schema(
     materialName: {
       type: String,
     },
-    batchNumber: {
+    grn: {
       type: String,
     },
     quantity: {

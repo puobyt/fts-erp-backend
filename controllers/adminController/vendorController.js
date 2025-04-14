@@ -31,6 +31,7 @@ vendorController.newVendorManagement = async (req, res) => {
     const {
       nameOfTheFirm,
       address,
+      vendorCode,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
@@ -44,6 +45,7 @@ vendorController.newVendorManagement = async (req, res) => {
     const result = await vendorService.newVendorManagement({
       nameOfTheFirm,
       address,
+      vendorCode,
       contactNumber,
       contactPersonName,
       contactPersonDetails,
@@ -76,6 +78,7 @@ vendorController.editVendorManagement = async (req, res) => {
       vendorId,
       nameOfTheFirm,
       address,
+      vendorCode,
       contact,
       contactPersonName,
       contactPersonDetails,
@@ -91,6 +94,7 @@ vendorController.editVendorManagement = async (req, res) => {
       vendorId,
       nameOfTheFirm,
       address,
+      vendorCode,
       contact,
       contactPersonName,
       contactPersonDetails,

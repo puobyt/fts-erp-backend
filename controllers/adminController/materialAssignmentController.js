@@ -31,7 +31,7 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
   try {
     console.log("Adding new Material Assignment ");
 
-    const { assignmentNumber,processOrderNumber, materials, assignedTo } =
+    const { assignmentNumber,processOrderNumber, materials, assignedTo,indentNumber,date,finishedGoodsName} =
       req.body;
 
     const result = await materialAssignmentService.newMaterialAssignment({
@@ -39,6 +39,9 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
       processOrderNumber,
       materials,
       assignedTo,
+      indentNumber,
+      date,
+      finishedGoodsName
     });
 
     res.status(result.status).json({
@@ -63,6 +66,9 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
       authPassword,
       materialAssignmentId,
       assignmentNumber,
+      indentNumber,
+      finishedGoodsName,
+      date,
       processOrderNumber,
       materials,
       assignedTo,
@@ -72,6 +78,9 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
       await materialAssignmentService.editMaterialAssignment({
         authPassword,
         materialAssignmentId,
+        indentNumber,
+        finishedGoodsName,
+        date,
         assignmentNumber,
         processOrderNumber,
         materials,

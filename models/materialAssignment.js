@@ -11,6 +11,15 @@ const schema = new mongoose.Schema(
     processOrderNumber: {
       type: String,
     },
+    indentNumber: {
+      type: String,
+    },
+    finishedGoodsName: {
+      type: String,
+    },
+    date: {
+      type: String,
+    },
     materials: [
       {
         materialsList: {

@@ -129,7 +129,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       mainStockId,
       materialName,
       materialCode,
-      batchNumber,
+      grn,
       quantity,
       price,
       vendorName,
@@ -144,22 +144,22 @@ mainStockService.editMainStock = async (mainStockData) => {
         message: "Authorization Password is Invalid",
       };
     }
-    const existingBatchNumber = await MainStock.findOne({
-      batchNumber,
+    const existingGrn = await MainStock.findOne({
+      grn,
       _id: { $ne: mainStockId }, 
     });
     
-    if (existingBatchNumber) {
+    if (existingGrn) {
       return {
         status: 409,
-        message: "Batch Number already exists",
+        message: "GRN already exists",
       };
     }
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
         { materialCode: materialCode },
-        { batchNumber: batchNumber },
+        { grn: grn },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -174,7 +174,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         { _id: mainStockId },
         { materialName: materialName },
         { materialCode: materialCode },
-        { batchNumber: batchNumber },
+        { grn: grn },
         { quantity: quantity },
         { price: price },
         { storageLocation: storageLocation },
@@ -195,7 +195,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       {
         materialName,
         materialCode,
-        batchNumber,
+        grn,
         quantity,
         price,
         vendorName,
@@ -214,7 +214,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       {
         materialName,
         materialCode,
-        batchNumber,
+        grn,
         quantity,
         price,
         vendorName,

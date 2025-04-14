@@ -28,12 +28,15 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
   try {
     console.log("Adding new Quality Inspection ");
 
-    const { inspectionNumber, productName, inspectionResults } = req.body;
+    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity } = req.body;
 
     const result = await qualityInspectionService.newQualityInspection({
       inspectionNumber,
       productName,
       inspectionResults,
+      date,
+      batchNumber,
+      quantity
     });
 
     res.status(result.status).json({
@@ -60,7 +63,10 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
       qualityInspectionId,
       inspectionNumber,
       productName,
-      inspectionResults
+      inspectionResults,
+      date,
+      batchNumber,
+      quantity
     } = req.body;
 
     const result =
@@ -69,7 +75,10 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
         qualityInspectionId,
         inspectionNumber,
         productName,
-        inspectionResults
+        inspectionResults,
+        date,
+        batchNumber,
+        quantity
       });
 
     res.status(result.status).json({

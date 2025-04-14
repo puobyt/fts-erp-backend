@@ -8,6 +8,12 @@ const schema = new mongoose.Schema(
     batchNumber: {
       type: String,
     },
+    finishedGoodsName: {
+      type: String,
+    },
+    status: {
+      type: String,
+    },
     materials: [
       {
         materialsList: {
@@ -17,6 +23,9 @@ const schema = new mongoose.Schema(
           type: String,
         },
         materialCode: {
+          type: String,
+        },
+        unit: {
           type: String,
         },
       },
