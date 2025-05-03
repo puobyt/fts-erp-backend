@@ -214,14 +214,14 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         message: "Quality Check already exists with the same details",
       };
     } 
-    const currentStock = await CurrentStock.findOne({ batchNumber });
+    const currentStock = await CurrentStock.findOne({ grn:batchNumber });
    
        const mainStockExist = await MainStock.findOne({
          $and: [
 
            { materialName: currentStock.materialName },
            { materialCode: currentStock.materialCode },
-           { batchNumber: currentStock.batchNumber },
+           { grn: currentStock.grn },
            { quantity: currentStock.quantity },
            { price: currentStock.price },
            { storageLocation: currentStock.storageLocation },
@@ -243,7 +243,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         const mainStock = new MainStock({
           currentStockId: currentStock.id,
           materialCode:currentStock.materialCode,
-          batchNumber:currentStock.batchNumber,
+          grn:currentStock.grn,
           materialName: currentStock.materialName,
           quantity:currentStock.quantity,
           price: currentStock.price,
@@ -256,7 +256,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       }
     } else if (qualityStatus === "Quarantine || Rejected ") {
       if (mainStockExist) {
-        await MainStock.findOneAndDelete({ batchNumber });
+        await MainStock.findOneAndDelete({ grn:batchNumber });
       }
     }
 

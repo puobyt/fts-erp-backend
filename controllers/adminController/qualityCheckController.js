@@ -100,7 +100,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
       });
     } catch (error) {
       console.log(
-        "An error occurred while adding editing Current Stock in admin controller:",
+        "An error occurred while adding editing quality check controller in admin controller:",
         error.message
       );
       res.status(500).json({ info: "An error occurred" });
