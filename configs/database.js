@@ -3,7 +3,7 @@ require("dotenv").config();
 
 // const dbConnect = () => {
 //   mongoose
-//     .connect(process.env.MONGO_URL)
+//     .connect(process.env.MONGO_LOCAL_URL)
 //     .then(() => {
 //       console.log("Mongodb connected successfully");
 //     })
@@ -11,13 +11,24 @@ require("dotenv").config();
 // };
 
 
+// const dbConnect = () => {
+//   mongoose
+//     .connect(process.env.MONGO_ATLAS_URL)
+//     .then(() => {
+//       console.log("Mongodb connected successfully");
+//     })
+//     .catch((err) => console.log(err.message));
+// };
+
 const dbConnect = () => {
   mongoose
-    .connect('mongodb+srv://yanuhiwii:7pS6GIuIuy40NyLu@clusterfts.wqv73.mongodb.net/FtsCrm?retryWrites=true&w=majority&appName=ClusterFTS')
+    .connect(process.env.MONGO_ATLAS_URL_OFFICIAL)
     .then(() => {
       console.log("Mongodb connected successfully");
     })
     .catch((err) => console.log(err.message));
 };
 
+
+// databaseConfig
 module.exports = dbConnect;
