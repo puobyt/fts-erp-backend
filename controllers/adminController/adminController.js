@@ -127,6 +127,7 @@ adminController.tracebilityProductionSearch =  async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       productionData: result.productionData,
+      qcDetails:result.qcDetails,
       success:result.success,
       
     });

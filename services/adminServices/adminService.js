@@ -8,7 +8,7 @@ const ProductionOrderCreationOutput = require("../../models/productionOrderCreat
 const FinishedGoods = require("../../models/finishedGoods");
 const CurrentStock = require("../../models/currentStock");
 const VendorManagement = require("../../models/vendorManagement");
-
+const QualityCheck = require("../../models/qualityCheck");
 const sendMail = require("../../configs/otpMailer");
 const InvoiceCreation = require("../../models/invoiceCreation");
 const { PendingAdmin } = require("../../models/admin");
@@ -265,7 +265,9 @@ adminService.tracebilityProductionSearch = async (materialCode) => {
       },
     });
 
-    if (!production || production.length === 0) {
+    const qcDetails = await QualityCheck.find({materialCode});
+
+    if (!production || production.length === 0 && !qcDetails || qcDetails.length===0) {
       return {
         status: 404,
         message: "No production data found for the provided material code.",
@@ -277,6 +279,7 @@ adminService.tracebilityProductionSearch = async (materialCode) => {
       status: 200,
       message: "Production data found successfully!",
       productionData: production,
+      qcDetails:qcDetails,
       success: true,
     };
   } catch (err) {
