@@ -8,6 +8,7 @@ const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 const requestCreationForMaterials = require("../../models/requestCreationForMaterials");
+const outOfStock = require("../../models/outOfStock");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -34,28 +35,27 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
     // const materials = await MainStock.aggregate([
     //   {
     //     $project: {
-    //       materialName: 1, 
-    //       materialCode: 1, 
-    //       _id: 0,         
+    //       materialName: 1,
+    //       materialCode: 1,
+    //       _id: 0,
     //     },
     //   },
     // ]);
-
 
     // const requestMaterials = await RequestCreationForMaterials.aggregate([
     //   { $unwind: "$materials" },
     //   { $project: { materialsList: "$materials.materialsList", materialCode: "$materials.materialCode" } }
     // ]);
 
-        const materials = await MainStock.aggregate([
-          {
-            $project: {
-              materialName: 1, 
-              materialCode: 1, 
-              _id: 0,         
-            },
-          },
-        ]);
+    const materials = await MainStock.aggregate([
+      {
+        $project: {
+          materialName: 1,
+          materialCode: 1,
+          _id: 0,
+        },
+      },
+    ]);
     const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
     const batchNumber = await CurrentStock.distinct("batchNumber");
     const processOrderNumber = await ProductionOrderCreation.distinct(
@@ -81,124 +81,117 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
 };
 materialAssignmentService.newMaterialAssignment = async (materialData) => {
   try {
-    const { assignmentNumber, processOrderNumber, materials, assignedTo,indentNumber,date,finishedGoodsName } =
-      materialData;
-
-
-    const existingMaterialAssignment= await MaterialAssignment.findOne({
+    const {
       assignmentNumber,
-      });
-      
-      if (existingMaterialAssignment) {
-        return {
-          status: 409,
-          message: "Assignment Number already exists",
-        };
-      }
+      processOrderNumber,
+      materials,
+      assignedTo,
+      indentNumber,
+      date,
+      finishedGoodsName,
+    } = materialData;
 
-    const existing = await MaterialAssignment.findOne({
-      $and: [
-        { assignmentNumber: assignmentNumber },
-        { indentNumber: indentNumber },
-        { finishedGoodsName: finishedGoodsName },
-        { processOrderNumber: processOrderNumber },
-        { materials: materials },
-        { assignedTo: assignedTo },
-      ],
+    const existingMaterialAssignment = await MaterialAssignment.findOne({
+      assignmentNumber,
     });
 
-    for (let i = 0; i < materials.length; i++) {
-      const { materialsList, assignedQuantity } = materials[i];
-
-      const mainStock = await MainStock.findOne({
-        materialName: materialsList,
-      });
-
-      const currentStock = await CurrentStock.findOne({
-        materialName: materialsList,
-      });
-
-
-      // const requestCreationForMaterials = await requestCreationForMaterials
-      if (!mainStock) {
-        throw new Error(`Material ${materialsList} not found in current stock`);
-      }
-
-      let mainStockQuantity = parseFloat(mainStock.quantity.replace(/\D/g, ""));
-
-      if (mainStockQuantity < assignedQuantity) {
-        return {
-          status: 409,
-          message: `Insufficient stock for material: ${materialsList}`,
-        };
-      }
-
-      const updatedQuantity = mainStockQuantity - assignedQuantity;
-      let newAssignedQuantity;
-      if (
-        currentStock.quantityUsed &&
-        parseFloat(currentStock.quantityUsed) >= 0
-      ) {
-        newAssignedQuantity =
-          parseFloat(currentStock.quantityUsed) + assignedQuantity;
-      } else {
-        newAssignedQuantity = assignedQuantity;
-      }
-
-      const finalResult = newAssignedQuantity
-        .toString()
-        .split("")
-        .filter((char) => !isNaN(char))
-        .map(Number)
-        .reduce((sum, digit) => sum + digit, 0);
-
-      const currentStockUpdate = await CurrentStock.findOneAndUpdate(
-        { materialName: materialsList },
-        {
-          $set: {
-            quantity: `${updatedQuantity}`,
-            quantityUsed: `${finalResult}`,
-          },
-        },
-        { new: true }
-      );
-
-      const mainStockUpdate = await MainStock.findOneAndUpdate(
-        { materialName: materialsList },
-        {
-          $set: {
-            quantity: `${updatedQuantity}`,
-            quantityUsed: `${assignedQuantity}`,
-          },
-        },
-        { new: true }
-      );
-      if (mainStockUpdate) {
-        if (updatedQuantity === 0) {
-          await MainStock.deleteOne({ materialName: materialsList });
-          await CurrentStock.deleteOne({ materialName: materialsList });
-          const newOutOfStock = new OutOfStock({
-            materialName: mainStock.materialName,
-            materialCode: mainStock.materialCode,
-            grn: mainStock.grn,
-            price: mainStock.price,
-            vendorName: mainStock.vendorName,
-            storageLocation: mainStock.storageLocation,
-            dateRecieved: mainStock.dateRecieved,
-            expiryDate: mainStock.expiryDate,
-          });
-
-          await newOutOfStock.save();
-        }
-      }
+    if (existingMaterialAssignment) {
+      return {
+        status: 409,
+        message: "Assignment Number already exists",
+      };
     }
+
+    const existing = await MaterialAssignment.findOne({
+      assignmentNumber,
+      indentNumber,
+      finishedGoodsName,
+      processOrderNumber,
+      materials,
+      assignedTo,
+    });
 
     if (existing) {
       return {
         status: 409,
-        message: " Material Assignment already exists with the same details",
+        message: "Material Assignment already exists with the same details",
       };
     }
+
+    for (let i = 0; i < materials.length; i++) {
+      const { materialsList, assignedQuantity } = materials[i];
+      let qtyToAssign = parseFloat(assignedQuantity);
+
+      const stockBatches = await MainStock.find({
+        materialName: materialsList,
+      }).sort({ dateRecieved: 1 });
+
+      if (!stockBatches.length) {
+        throw new Error(`Material ${materialsList} not found in stock!`);
+      }
+
+      const totalAvailable = stockBatches.reduce(
+        (sum, batch) => sum + parseFloat(batch.quantity),
+        0
+      );
+
+      if (totalAvailable < qtyToAssign) {
+        return {
+          status: 400,
+          message: `Insufficient stock for material ${materialsList}`,
+        };
+      }
+      for (let batch of stockBatches) {
+        if (qtyToAssign <= 0) break;
+
+        const availableQty = parseFloat(batch.quantity);
+        const usedQty = Math.min(qtyToAssign, availableQty);
+        const remainingQty = availableQty - usedQty;
+
+        qtyToAssign -= usedQty;
+
+        await CurrentStock.findOneAndUpdate(
+          {
+            materialName: materialsList,
+            batchNumber: batch.batchNumber,
+          },
+          {
+            $set: { quantity: remainingQty.toString() },
+            $inc: { quantityUsed: usedQty },
+          },
+          { new: true }
+        );
+
+        if (remainingQty === 0) {
+          await MainStock.deleteOne({ _id: batch._id });
+          await CurrentStock.deleteOne({
+            materialName: materialsList,
+            batchNumber: batch.batchNumber,
+          });
+
+          const newOutOfStock = new OutOfStock({
+            materialName: batch.materialName,
+            materialCode: batch.materialCode,
+            grn: batch.grn,
+            price: batch.price,
+            vendorName: batch.vendorName,
+            storageLocation: batch.storageLocation,
+            dateRecieved: batch.dateRecieved,
+            expiryDate: batch.expiryDate,
+            batchNumber: batch.batchNumber,
+          });
+
+          await newOutOfStock.save();
+        } else {
+          await MainStock.findByIdAndUpdate(
+            batch._id,
+            { $set: { quantity: remainingQty.toString() } },
+            { new: true }
+          );
+        }
+      }
+    }
+
     let assignedAssignmentNumber = assignmentNumber;
 
     if (!assignmentNumber) {
@@ -216,7 +209,8 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         assignedAssignmentNumber = "FRN/AN/1";
       }
     }
-    const newData = new MaterialAssignment({
+
+    const newAssignment = new MaterialAssignment({
       assignmentNumber: assignedAssignmentNumber,
       indentNumber,
       date,
@@ -226,23 +220,27 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       assignedTo,
     });
 
-    await newData.save();
+    await newAssignment.save();
+
     return {
       status: 200,
       message: "New Material Assignment added successfully",
-      data: newData,
+      data: newAssignment,
       token: "sampleToken",
     };
   } catch (error) {
     console.log(
-      "An error occured at adding new Material Assignment in admin service",
+      "An error occurred while adding new Material Assignment in admin service:",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in adding new Material Assignment in admin services",
-    });
+    return {
+      status: 500,
+      message: "An error occurred in adding new Material Assignment",
+      error: error.message,
+    };
   }
 };
+
 
 materialAssignmentService.editMaterialAssignment = async (
   materialAssignmentData
@@ -267,27 +265,26 @@ materialAssignmentService.editMaterialAssignment = async (
       };
     }
 
-    const existingMaterialAssignment= await MaterialAssignment.findOne({
+    const existingMaterialAssignment = await MaterialAssignment.findOne({
       assignmentNumber,
-        _id: { $ne: materialAssignmentId }, 
-      });
-      
-      if (existingMaterialAssignment) {
-        return {
-          status: 409,
-          message: "Assignment Number already exists",
-        };
-      }
+      _id: { $ne: materialAssignmentId },
+    });
+
+    if (existingMaterialAssignment) {
+      return {
+        status: 409,
+        message: "Assignment Number already exists",
+      };
+    }
     const existing = await MaterialAssignment.findOne({
       $and: [
         { assignmentNumber: assignmentNumber },
         { indentNumber: indentNumber },
         { finishedGoodsName: finishedGoodsName },
-    
+
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
-
       ],
     });
 
@@ -300,7 +297,6 @@ materialAssignmentService.editMaterialAssignment = async (
         { processOrderNumber: processOrderNumber },
         { materials: materials },
         { assignedTo: assignedTo },
- 
       ],
     });
 

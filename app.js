@@ -12,7 +12,6 @@ const dbConnect = require("./configs/database");
 var app = express();
 require("dotenv").config();
 
-// view engine setup
 app.set("views", path.join(__dirname, "views"));
 const PORT = process.env.PORT || 5000;
 app.use(helmet());
@@ -22,9 +21,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "*", // Replace with your frontend URL
-    methods: "GET,POST,PUT,DELETE", // Specify allowed HTTP methods
-    allowedHeaders: "Content-Type,Authorization", // Specify allowed headers
+    origin: "*", 
+    methods: "GET,POST,PUT,DELETE", 
+    allowedHeaders: "Content-Type,Authorization", 
   })
 );
 app.use(express.static(path.join(__dirname, "public")));
@@ -43,11 +42,9 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (err, req, res, next) {
-  // Set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // Render the error page
   res.status(err.status || 500);
   res.json({ error: err.message });
 });

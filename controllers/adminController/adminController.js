@@ -84,10 +84,12 @@ adminController.tracebilitySearch = async (req, res) => {
     const { code } = req.query;
 
     const result = await adminService.tracebilitySearch(code);
+    console.log("Result",result)
 
     res.status(result.status).json({
       message: result.message,
       materials: result.materials,
+      qcDetails:result.qcDetails,
       success:result.success,
       
     });
@@ -107,6 +109,7 @@ adminController.tracebilityFinishedGoodsSearch = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       materials: result.materials,
+      qcDetails:result.qcDetails,
       success:result.success,
       
     });

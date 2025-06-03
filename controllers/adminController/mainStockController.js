@@ -127,6 +127,22 @@ mainStockController.editMainStock = async (req, res) => {
   }
 };
 
+mainStockController.getFirstStocks=async(req,res)=>{
+  try {
+    const materialName=req.params.materialName
+    if(!materialName)
+    {
+      return res.status(400).json({message:"MaterialName is required!"})
+    }
+    const result=await mainStockService.getFIFOStock(materialName)
+    res.status(result.status).json({
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    
+  }
+}
 mainStockController.removeMainStock = async (req, res) => {
   try {
     console.log("deleting current stock...");

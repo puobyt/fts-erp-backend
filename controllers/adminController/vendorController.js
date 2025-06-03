@@ -41,7 +41,6 @@ vendorController.newVendorManagement = async (req, res) => {
       gst,
     } = req.body;
 
-    // Pass the extracted data to the service function
     const result = await vendorService.newVendorManagement({
       nameOfTheFirm,
       address,

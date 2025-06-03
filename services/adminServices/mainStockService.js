@@ -259,4 +259,15 @@ mainStockService.removeMainStock = async (mainStockId) => {
   }
 };
 
+mainStockService.getFIFOStock=async(materialName)=>{
+  try {
+    const stock=await MainStock.find({materialName:materialName,removed:false,}).sort({dateReceived:1})
+    return {status:200,data:stock}
+  } catch (error) {
+    console.log("An error occured at getting first in first out", error.message);
+    res.status(500).json({
+      info: "An error occured at getting first in first out",
+    });
+  }
+}
 module.exports = mainStockService;

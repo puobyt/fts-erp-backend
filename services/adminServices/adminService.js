@@ -12,6 +12,7 @@ const QualityCheck = require("../../models/qualityCheck");
 const sendMail = require("../../configs/otpMailer");
 const InvoiceCreation = require("../../models/invoiceCreation");
 const { PendingAdmin } = require("../../models/admin");
+const qualityCheck = require("../../models/qualityCheck");
 
 let adminService = {};
 const allowedEmails = [
@@ -183,6 +184,9 @@ adminService.fetchPDFData = async (id) => {
 adminService.tracebilitySearch = async (materialCode) => {
   try {
     const materials = await CurrentStock.find({ materialCode });
+    const qcDetails=await qualityCheck.find({
+      materialCode:{$in:materialCode}
+    })
 
     if (materials.length === 0) {
       console.log("No materials found for search");
@@ -197,6 +201,7 @@ adminService.tracebilitySearch = async (materialCode) => {
       status: 200,
       message: "Raw materials found",
       materials: materials,
+      qcDetails:qcDetails,
       success: true,
     };
   } catch (err) {
@@ -230,6 +235,9 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
     const materials = await CurrentStock.find({
       materialCode: { $in: materialCodes },
     });
+    const qcDetails=await qualityCheck.find({
+      materialCode:{$in:materialCodes}
+    })
 
     if (materials.length === 0) {
       console.log("No finished goods found for search");
@@ -244,6 +252,7 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
       status: 200,
       message: "Finished Goods found",
       materials: materials,
+      qcDetails:qcDetails,
       success: true,
     };
   } catch (err) {

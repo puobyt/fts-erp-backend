@@ -31,11 +31,13 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
   try {
     const { finishedGoodsName, batchNumber, productionDate, quantityProduced } =
       finishedGoodsData;
+console.log("Looking for productName in ProductionOrderCreation:", finishedGoodsName);
 
           const existingBatchNumber= await FinishedGoods.findOne({
             batchNumber,
             });
-            
+            console.log("Checking for batchNumber:", batchNumber);
+
             if (existingBatchNumber) {
               return {
                 status: 409,

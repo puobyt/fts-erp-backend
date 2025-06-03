@@ -65,6 +65,7 @@ adminRouter.put('/editGateEntry',gateEntryController.editGateEntry);
 adminRouter.put('/editCurrentStock',currentStockController.editCurrentStock);
 adminRouter.put('/editQualityCheck',qualityCheckController.editQualityCheck);
 adminRouter.put('/editMainStock',mainStockController.editMainStock);
+adminRouter.put('/getfirststocks/:materialName',mainStockController.getFirstStocks);
 adminRouter.put('/editProcessOrder',processOrderController.editProcessOrder);
 adminRouter.put('/editRework',reworkController.editRework);
 adminRouter.put('/editProductionOrderCreation',productionOrderCreationController.editProductionOrderCreation);
