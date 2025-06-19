@@ -27,7 +27,7 @@ gateEntryController.fetchGateEntry = async (req, res) => {
 
 gateEntryController.newGateEntry = async (req, res) => {
   try {
-    console.log("Adding new gate entry ");
+    console.log("Adding new gate entry ",req.body);
 
     const {entryTime,materials,docNumber, vehicleNumber, vendorName, date } = req.body;
 

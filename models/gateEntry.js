@@ -18,6 +18,7 @@ const schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    
     docNumber: {
       type: String,
       required: true,
@@ -30,6 +31,11 @@ const schema = new mongoose.Schema(
         quantity: {
           type: String,
         },
+        unit:{
+        type:String,
+        required:true,
+        enum:['KG', 'Gram', 'Litre', 'ML', 'Pieces'],
+    },
       },
     ],
     vendorName: String,

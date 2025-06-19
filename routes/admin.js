@@ -22,6 +22,7 @@ adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOr
 adminRouter.get('/gateEntry',gateEntryController.fetchGateEntry);
 adminRouter.get('/currentStock',currentStockController.fetchCurrentStock);
 adminRouter.get('/qualityCheck',qualityCheckController.fetchQualityCheck);
+adminRouter.get('/qc-parameters',qualityCheckController.fetchQcParams);
 adminRouter.get('/mainStock',mainStockController.fetchMainStock);
 adminRouter.get('/outOfStock',mainStockController.fetchOutOfStock);
 adminRouter.get('/processOrder',processOrderController.fetchProcessOrder);
@@ -45,6 +46,7 @@ adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchase
 adminRouter.post('/newGateEntry',gateEntryController.newGateEntry);
 adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
+adminRouter.post('/qc-parameters',qualityCheckController.addQcParams);
 adminRouter.post('/newMainStock',mainStockController.newMainStock);
 adminRouter.post('/newProcessOrder',processOrderController.newProcessOrder); 
 adminRouter.post('/processOrder/import-data',processOrderController.excelImportData); 
@@ -64,6 +66,7 @@ adminRouter.put('/editPurchaseOrderCreation',purchaseOrderController.editPurchas
 adminRouter.put('/editGateEntry',gateEntryController.editGateEntry);
 adminRouter.put('/editCurrentStock',currentStockController.editCurrentStock);
 adminRouter.put('/editQualityCheck',qualityCheckController.editQualityCheck);
+adminRouter.put('/qc-parameters/:id',qualityCheckController.editQcParams);
 adminRouter.put('/editMainStock',mainStockController.editMainStock);
 adminRouter.put('/getfirststocks/:materialName',mainStockController.getFirstStocks);
 adminRouter.put('/editProcessOrder',processOrderController.editProcessOrder);
@@ -81,6 +84,7 @@ adminRouter.delete('/removePurchaseOrderCreation',purchaseOrderController.remove
 adminRouter.delete('/removeGateEntry',gateEntryController.removeGateEntry);
 adminRouter.delete('/removeCurrentStock',currentStockController.removeCurrentStock);
 adminRouter.delete('/removeQualityCheck',qualityCheckController.removeQualityCheck);
+adminRouter.delete('/qc-parameters/:id',qualityCheckController.deleteQcParams);
 adminRouter.delete('/removeMainStock',mainStockController.removeMainStock);
 adminRouter.delete('/removeRework',reworkController.removeRework);
 adminRouter.delete('/removeProcessOrder',processOrderController.removeProcessOrder);

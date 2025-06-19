@@ -1,13 +1,9 @@
 const MaterialAssignment = require("../../models/materialAssignment");
-const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const FinishedGoods = require("../../models/finishedGoods");
-const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
-const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
-const requestCreationForMaterials = require("../../models/requestCreationForMaterials");
 const outOfStock = require("../../models/outOfStock");
 let materialAssignmentService = {};
 require("dotenv").config();

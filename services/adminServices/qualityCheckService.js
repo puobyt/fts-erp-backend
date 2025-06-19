@@ -2,6 +2,7 @@ const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const QualityCheck = require("../../models/qualityCheck");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
+const qualityParameterSchema = require("../../models/qualityParameterSchema");
 let qualityCheckService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -316,5 +317,36 @@ qualityCheckService.removeQualityCheck = async (qualityCheckId) => {
     });
   }
 };
+qualityCheckService.addQcParameters=async(data)=>{
+    if(!data||!data.parameterName)
+    {
+      throw new Error("Fields are missing")
+    }
+    const result=await qualityParameterSchema.create(data)
+    return result
+}
+qualityCheckService.editQcParameters=async(id,data)=>{
+    const params=await qualityParameterSchema.findById(id)
+    if(!params)
+    {
+      throw new Error("QC params missing!")
+    }
+    const result=await qualityParameterSchema.findByIdAndUpdate(id,{data},{new:true})
+    console.log("An error occured at editing qc parameters", error.message);
+   
+}
+qualityCheckService.deleteQcParameters=async(id)=>{
+    const qcParams=await qualityParameterSchema.findByIdAndDelete(id)
+    if(!qcParams)
+    {
+      throw new Error("QC params not found!")
+    }
+    return qcParams
+}
+qualityCheckService.fetchQcParameters=async()=>{
+    const result=await qualityParameterSchema.find()
+    return result
+    
+  }
 
 module.exports = qualityCheckService;
