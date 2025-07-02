@@ -8,6 +8,7 @@ const cors = require("cors");
 var adminRouter = require("./routes/admin");
 
 const dbConnect = require("./configs/database");
+const { default: rateLimit } = require("express-rate-limit");
 
 var app = express();
 require("dotenv").config();
@@ -19,6 +20,10 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100
+}));
 app.use(
   cors({
     origin: "*", 

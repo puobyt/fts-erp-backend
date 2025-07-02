@@ -1,7 +1,6 @@
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
-const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
 let productOrderCreationService = {};
@@ -49,9 +48,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
       "An error occured at fetching Production Order Creation in admin service",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in fetching Production Order Creation in admin services",
-    });
+    
   }
 };
 
@@ -71,9 +68,7 @@ productOrderCreationService.fetchProductOrderCreationOutput = async () => {
       "An error occured at fetching Production Order outputs Creation in admin service",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in fetching Production Order reation Outputs in admin services",
-    });
+  
   }
 };
 productOrderCreationService.newProductionOrderCreation = async (
@@ -178,9 +173,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       "An error occured at adding production order in admin service",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in adding production order in admin services",
-    });
+  
   }
 };
 
@@ -199,6 +192,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
+      packingMaterials
     } = productionOrderData;
 
     const existing = await ProductionOrderCreationOutput.findOne({
@@ -213,6 +207,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
         { Yield: Yield },
         { outputQualityRating: outputQualityRating },
         { outputHandlingInstructions: outputHandlingInstructions },
+
       ],
     });
 
@@ -251,6 +246,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       Yield: Yield,
       outputQualityRating,
       outputHandlingInstructions,
+      packingMaterials
     });
 
     await newData.save();
@@ -261,13 +257,11 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       token: "sampleToken",
     };
   } catch (error) {
-    console.log(
+     console.log(
       "An error occured at adding production order output in admin service",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in adding production order output in admin services",
-    });
+    throw error; 
   }
 };
 
@@ -400,9 +394,7 @@ productOrderCreationService.editProductionOrderCreation = async (
     };
   } catch (error) {
     console.log("An error occured at editing Production Order ", error.message);
-    res.status(500).json({
-      info: "An error occured in editing Production Order  services",
-    });
+    
   }
 };
 
@@ -423,6 +415,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
+      packingMaterials
     } = productionOrderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -501,6 +494,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
             Yield: Yield,
             outputQualityRating,
             outputHandlingInstructions,
+            packingMaterials
           },
           {
             new: true,
@@ -519,9 +513,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       "An error occured at editing Production Order output ",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in editing Production Order output  services",
-    });
+   
   }
 };
 productOrderCreationService.removeProductionOrderCreation = async (
@@ -551,9 +543,7 @@ productOrderCreationService.removeProductionOrderCreation = async (
       "An error occured at production order creation remove",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in productio order creation remove in current stock services",
-    });
+   
   }
 };
 
@@ -585,10 +575,32 @@ productOrderCreationService.removeProductionOrderCreationOutput = async (
       "An error occured at production order creation output remove",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in productio order creation output remove in current stock services",
-    });
+   
   }
 };
+productOrderCreationService.fetchProductionOrdersForPO = async (poId) => {
+  try {
+    if (!poId) {
+      throw new Error("PO ID is missing!");
+    }
+    const prodOrders = await ProductionOrderCreationOutput.find({ purchaseOrder: poId });
+    return prodOrders;
+  } catch (error) {
+    throw new Error("Failed to fetch production orders for PO");
+  }
+};
+productOrderCreationService.fetchMaterialsForProductionOrderService = async (prodOrderId) => {
+  try {
+    if (!prodOrderId) {
+      throw new Error("Production order ID is missing!");
+    }
+    const materials = await MaterialAssignment.find({ productionOrder: prodOrderId });
+    return materials;
+  } catch (error) {
+    throw new Error("Failed to fetch materials for production order");
+  }
+};
+ 
+
 
 module.exports = productOrderCreationService;

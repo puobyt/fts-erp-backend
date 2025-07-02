@@ -16,6 +16,8 @@ const invoiceCreationController = require('../controllers/adminController/invoic
 const adminController = require('../controllers/adminController/adminController');
 const mainStockController = require('../controllers/adminController/mainStockController');
 const processOrderController = require('../controllers/adminController/processOrderController');
+const { createRequestSchema } = require('../middleware/createRequestSchema');
+const validate = require('../middleware/validate');
 
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);
@@ -36,6 +38,9 @@ adminRouter.get('/qualityInpsection',qualityInspectionController.fetchQualityIns
 adminRouter.get('/finishedGoods',finishedGoodsController.fetchFinishedGoods);
 adminRouter.get('/search/materials',adminController.tracebilitySearch);
 adminRouter.get('/search/finishedGoods',adminController.tracebilityFinishedGoodsSearch);
+adminRouter.get('/purchase-orders',purchaseOrderController.getAllPurchaseOrders);
+adminRouter.get('/purchase-orders/:poId/production-orders', productionOrderCreationController.fetchProductionOrderForPO);
+adminRouter.get('/production-orders/:prodOrderId/materials', productionOrderCreationController.fetchMaterialsForProductionOrder);
 // adminRouter.get('/firms',purchaseOrderController.fetchFirms);
 adminRouter.get('/search/production',adminController.tracebilityProductionSearch);
 adminRouter.get('/search/packing&shipping',adminController.tracebilityPackingAndShipping);
@@ -53,7 +58,7 @@ adminRouter.post('/processOrder/import-data',processOrderController.excelImportD
 adminRouter.post('/newRework',reworkController.newRework);
 adminRouter.post('/newProductionOrderCreation',productionOrderCreationController.newProductionOrderCreation);
 adminRouter.post('/newProductionOrderCreationOutput',productionOrderCreationController.newProductionOrderCreationOutput);
-adminRouter.post('/newRequestCreationForMaterials',requestCreationMaterialController.newRequestCreationForMaterials);
+adminRouter.post('/newRequestCreationForMaterials',validate(createRequestSchema),requestCreationMaterialController.newRequestCreationForMaterials);
 adminRouter.post('/newMaterialAssignment',materialAssignmentController.newMaterialAssignment);
 adminRouter.post('/newBillOfMaterials',billOfMaterialsController.newBillOfMaterials);
 adminRouter.post('/newQualityInspection',qualityInspectionController.newQualityInspection);

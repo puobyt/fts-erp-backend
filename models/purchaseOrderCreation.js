@@ -5,6 +5,7 @@ const PurchaseOrderCreationSchema = new mongoose.Schema(
     purchaseOrderNumber: {
       type: String,
     },
+    termsAndConditions:{type:String},
     date: {
       type: Date,
     },

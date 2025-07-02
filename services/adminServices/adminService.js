@@ -51,8 +51,7 @@ adminService.signIn = async (email, password) => {
       "Error occured in login admin in sign in controller",
       err.message
     );
-    res
-      .status(500)
+    res.status(500)
       .json({ info: "An error login admin in sign in controller " });
   }
 };

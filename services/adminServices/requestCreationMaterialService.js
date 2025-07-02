@@ -1,8 +1,5 @@
-const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 const FinishedGoods = require("../../models/finishedGoods");
-const VendorManagement = require("../../models/vendorManagement");
-const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 let requestCreationMaterialService = {};
 require("dotenv").config();

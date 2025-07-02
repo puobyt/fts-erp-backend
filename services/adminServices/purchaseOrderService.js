@@ -9,6 +9,7 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({});
     const firms = await VendorManagement.find({});
+    console.log(orders)
 // const materials = await VendorManagement.find({nameOfTheFirm})
     return {
       status: 200,
@@ -80,6 +81,7 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       price,
       pan,
       gst,
+      termsAndConditions
     } = newPurchaseData;
 const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({purchaseOrderNumber});
 if(existingPurchaseOrderNumber){
@@ -172,6 +174,7 @@ if(existingPurchaseOrderNumber){
       price,
       pan,
       gst,
+      termsAndConditions
     });
 
     await newPurchaseOrder.save();
@@ -225,6 +228,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       price,
       pan,
       gst,
+      termsAndConditions
     } = orderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -354,6 +358,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
           price,
           pan,
           gst,
+          termsAndConditions
         },
         {
           new: true,
@@ -399,5 +404,13 @@ purchaseOrderService.removePurchaseOrderCreation = async (purchaseOrderId) => {
     });
   }
 };
+purchaseOrderService.fetchAllPurchaseOrder=async(req,res)=>{
+  try {
+    const pos=await PurchaseOrderCreation.find({})
+    return pos
+  } catch (error) {
+    throw new Error("Failed to get purchase order!")
+  }
+}
 
 module.exports = purchaseOrderService;

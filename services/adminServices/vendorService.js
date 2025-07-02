@@ -33,20 +33,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
       gst,
     } = newVendorData;
 
-    const existingVendor = await VendorManagement.findOne({
-      $and: [
-        { nameOfTheFirm: nameOfTheFirm },
-        { address: address },
-        { vendorCode: vendorCode },
-        { contactNumber: contactNumber },
-        { contactPersonName: contactPersonName },
-        { contactPersonDetails: contactPersonDetails },
-        { material: material },
-        { bankDetails: bankDetails },
-        { pan: pan },
-        { gst: gst },
-      ],
-    });
+    const existingVendor = await VendorManagement.findOne({$or:[{vendorCode},{gst}]});
 
     if (existingVendor) {
       return {
@@ -107,38 +94,16 @@ vendorService.editVendorManagement = async (VendorData) => {
       };
     }
 
-    const existingVendor = await VendorManagement.findOne({
-      $and: [
-        { nameOfTheFirm: nameOfTheFirm },
-        { address: address },
-        { vendorCode: vendorCode },
-        { contactNumber: contactNumber },
-        { contactPersonName: contactPersonName },
-        { contactPersonDetails: contactPersonDetails },
-        { material: material },
-        { bankDetails: bankDetails },
-        { pan: pan },
-        { gst: gst },
-      ],
-    });
+   const existingVendor = await VendorManagement.findOne({
+  _id: { $ne: vendorId },
+  $or: [
+    { vendorCode: vendorCode },
+    { gst: gst }
+  ]
+});
 
-    const currentVendor = await VendorManagement.findOne({
-      $and: [
-        { _id: vendorId },
-        { nameOfTheFirm: nameOfTheFirm },
-        { address: address },
-        { vendorCode: vendorCode },
-        { contactNumber: contactNumber },
-        { contactPersonName: contactPersonName },
-        { contactPersonDetails: contactPersonDetails },
-        { material: material },
-        { bankDetails: bankDetails },
-        { pan: pan },
-        { gst: gst },
-      ],
-    });
 
-    if (existingVendor && !currentVendor) {
+    if (existingVendor ) {
       return {
         status: 409,
         message: "Vendor already exists with the same details",
