@@ -142,12 +142,12 @@ mainStockService.editMainStock = async (mainStockData) => {
       expiryDate,
     } = mainStockData;
 
-    // if (adminAuthPassword !== authPassword) {
-    //   return {
-    //     status: 401,
-    //     message: "Authorization Password is Invalid",
-    //   };
-    // }
+    if (adminAuthPassword !== authPassword) {
+      return {
+        status: 401,
+        message: "Authorization Password is Invalid",
+      };
+    }
     const existingGrn = await MainStock.findOne({
       grn,
       _id: { $ne: mainStockId },
