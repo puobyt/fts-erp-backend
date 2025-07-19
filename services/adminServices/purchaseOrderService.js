@@ -9,8 +9,8 @@ purchaseOrderService.fetchPurchaseOrderCreation = async () => {
   try {
     const orders = await PurchaseOrderCreation.find({});
     const firms = await VendorManagement.find({});
-    console.log(orders)
-// const materials = await VendorManagement.find({nameOfTheFirm})
+    console.log(orders);
+    // const materials = await VendorManagement.find({nameOfTheFirm})
     return {
       status: 200,
       data: orders,
@@ -81,15 +81,19 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       price,
       pan,
       gst,
-      termsAndConditions
+      termsAndConditions,
+      materials,
+      deliveryAddress,
     } = newPurchaseData;
-const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({purchaseOrderNumber});
-if(existingPurchaseOrderNumber){
-  return {
-    status: 409,
-    message: "Purchase Order Number already exists",
-  };
-}
+    const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({
+      purchaseOrderNumber,
+    });
+    if (existingPurchaseOrderNumber) {
+      return {
+        status: 409,
+        message: "Purchase Order Number already exists",
+      };
+    }
     const existing = await PurchaseOrderCreation.findOne({
       $and: [
         { purchaseOrderNumber: purchaseOrderNumber },
@@ -174,7 +178,9 @@ if(existingPurchaseOrderNumber){
       price,
       pan,
       gst,
-      termsAndConditions
+      termsAndConditions,
+      materials,
+      deliveryAddress,
     });
 
     await newPurchaseOrder.save();
@@ -228,9 +234,11 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       price,
       pan,
       gst,
-      termsAndConditions
+      deliveryAddress,
+      termsAndConditions,
+      materials,
     } = orderData;
-
+    console.log('deliveryaddress',deliveryAddress)
     if (adminAuthPassword !== authPassword) {
       return {
         status: 401,
@@ -242,13 +250,14 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       _id: { $ne: orderId }, // Exclude the current order being edited
     });
 
-    if(existingPurchaseOrderNumber){
+    if (existingPurchaseOrderNumber) {
       return {
         status: 409,
         message: "Purchase Order Number already exists",
       };
     }
     const existing = await PurchaseOrderCreation.findOne({
+      _id: { $ne: orderId },
       $and: [
         { purchaseOrderNumber: purchaseOrderNumber },
         { date: date },
@@ -259,7 +268,6 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         { contactPersonDetails: contactPersonDetails },
         { vendorId: vendorId },
         { materialName: materialName },
-        // { batchNumber: batchNumber },
         { mfgDate: mfgDate },
         { quantity: quantity },
         { price: price },
@@ -286,6 +294,7 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
         { price: price },
         { pan: pan },
         { gst: gst },
+        { deliveryAddress: deliveryAddress },
       ],
     });
     let newVendorId = vendorId;
@@ -358,7 +367,9 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
           price,
           pan,
           gst,
-          termsAndConditions
+          termsAndConditions,
+          materials,
+          deliveryAddress
         },
         {
           new: true,
@@ -404,13 +415,13 @@ purchaseOrderService.removePurchaseOrderCreation = async (purchaseOrderId) => {
     });
   }
 };
-purchaseOrderService.fetchAllPurchaseOrder=async(req,res)=>{
+purchaseOrderService.fetchAllPurchaseOrder = async (req, res) => {
   try {
-    const pos=await PurchaseOrderCreation.find({})
-    return pos
+    const pos = await PurchaseOrderCreation.find({});
+    return pos;
   } catch (error) {
-    throw new Error("Failed to get purchase order!")
+    throw new Error("Failed to get purchase order!");
   }
-}
+};
 
 module.exports = purchaseOrderService;

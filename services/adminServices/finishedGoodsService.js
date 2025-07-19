@@ -5,25 +5,52 @@ const MainStock = require("../../models/mainStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProcessOrder = require("../../models/processOrder");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
+const vendorManagement = require("../../models/vendorManagement");
 let finishedGoodsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 finishedGoodsService.fetchFinishedGoods = async () => {
   try {
-    const data = await FinishedGoods.find({})
+    const finishedGoodsList = await FinishedGoods.find({}).lean();
+
+    const result = await Promise.all(finishedGoodsList.map(async (fg) => {
+      const materialsWithVendor = await Promise.all(
+        (fg.materials || []).map(async (mat) => {
+          let vendorName = null;
+          if (mat.vendorId) {
+            const vendor = await vendorManagement
+              .findOne({ vendorCode: mat.vendorId })
+              .select('nameOfTheFirm')
+              .lean();
+            vendorName = vendor ? vendor.nameOfTheFirm : null;
+          }
+          return {
+            ...mat,
+            vendorName,
+          };
+        })
+      );
+
+      return {
+        ...fg,
+        materials: materialsWithVendor,
+      };
+    }));
 
     return {
       status: 200,
-      data: data,
+      data: result,
     };
+
   } catch (error) {
     console.log(
-      "An error occured at fetching Finished Goods in admin service",
+      "An error occurred while fetching Finished Goods in admin service:",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in fetching Finished Goods in admin services",
-    });
+    return {
+      status: 500,
+      info: "An error occurred while fetching Finished Goods in admin services",
+    };
   }
 };
 

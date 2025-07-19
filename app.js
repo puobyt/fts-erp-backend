@@ -5,6 +5,8 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
+const multer=require('multer')
+const upload = multer();
 var adminRouter = require("./routes/admin");
 
 const dbConnect = require("./configs/database");
@@ -15,10 +17,12 @@ require("dotenv").config();
 
 app.set("views", path.join(__dirname, "views"));
 const PORT = process.env.PORT || 5000;
+
+// Middleware setup
 app.use(helmet());
 app.use(logger("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000, 
@@ -32,7 +36,13 @@ app.use(
   })
 );
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+// Database connection
 dbConnect();
+
+// Routes
 app.use("/", adminRouter);
 
 app.get("/", (req, res) => {
@@ -42,6 +52,8 @@ app.get("/", (req, res) => {
 app.get("/api", (req, res) => {
   res.send("FTS API Home Page");
 });
+
+// Error handlers
 app.use(function (req, res, next) {
   next(createError(404));
 });
@@ -54,6 +66,7 @@ app.use(function (err, req, res, next) {
   res.json({ error: err.message });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`server is running on ${PORT}`);
 });

@@ -18,6 +18,32 @@ const mainStockController = require('../controllers/adminController/mainStockCon
 const processOrderController = require('../controllers/adminController/processOrderController');
 const { createRequestSchema } = require('../middleware/createRequestSchema');
 const validate = require('../middleware/validate');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Save files in uploads/ folder
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname); // e.g. .jpg, .pdf
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, uniqueName);
+  }
+});
+
+// ✅ Accept only images and PDFs
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true); // Accept file
+  } else {
+    cb(new Error('Only images and PDFs are allowed!'), false); // Reject file
+  }
+};
+
+const upload = multer({ storage: storage, fileFilter: fileFilter });
+
 
 adminRouter.get('/vendorManagement',vendorController.vendorManagement);
 adminRouter.get('/purchaseOrderCreation',purchaseOrderController.fetchPurchaseOrderCreation);
@@ -48,7 +74,10 @@ adminRouter.get('/invoiceCreations',invoiceCreationController.fetchInvoiceCreati
 adminRouter.get('/current-stock/:id/pdf-data',adminController.fetchPDFData);
 adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement); 
 adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchaseOrderCreation);
-adminRouter.post('/newGateEntry',gateEntryController.newGateEntry);
+adminRouter.post('/newGateEntry',upload.none(),gateEntryController.newGateEntry);
+adminRouter.post('/newGateExit',upload.array('qcDocuments'),gateEntryController.newGateExit);
+adminRouter.post('/newQcReturnEntry',upload.array('qcDocuments'),gateEntryController.newQcReturnEntry);
+adminRouter.patch('/newQcReturn/:id',gateEntryController.updateQcStatus);
 adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
 adminRouter.post('/qc-parameters',qualityCheckController.addQcParams);

@@ -13,6 +13,11 @@ const schema = new mongoose.Schema({
     inspectorName: {
         type: String,
       },
+      materialId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Material', 
+  autopopulate: true
+},
     issueDescription: {
         type: String,
       },
