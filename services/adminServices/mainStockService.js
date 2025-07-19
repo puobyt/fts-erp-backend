@@ -53,6 +53,7 @@ mainStockService.newMainStock = async (mainStockData) => {
       materialName,
       materialCode,
       quantity,
+      unit,
       batchNumber,
       price,
       vendorName,
@@ -61,22 +62,23 @@ mainStockService.newMainStock = async (mainStockData) => {
       expiryDate,
     } = mainStockData;
 
-        const existingBatchNumber = await MainStock.findOne({
-          batchNumber,
-        });
-    
-        if (existingBatchNumber) {
-          return {
-            status: 409,
-            message: "Batch Number already exists",
-          };
-        }
+    const existingBatchNumber = await MainStock.findOne({
+      batchNumber,
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await MainStock.findOne({
       $and: [
         { materialName: materialName },
         { materialCode: materialCode },
         { batchNumber: batchNumber },
         { quantity: quantity },
+        { unit: unit },
         { price: price },
         { storageLocation: storageLocation },
         { vendorName: vendorName },
@@ -96,6 +98,7 @@ mainStockService.newMainStock = async (mainStockData) => {
       materialName,
       materialCode,
       quantity,
+      unit,
       batchNumber,
       price,
       vendorName,
@@ -131,6 +134,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       materialCode,
       grn,
       quantity,
+      unit,
       price,
       vendorName,
       storageLocation,
@@ -138,17 +142,17 @@ mainStockService.editMainStock = async (mainStockData) => {
       expiryDate,
     } = mainStockData;
 
-    if (adminAuthPassword !== authPassword) {
-      return {
-        status: 401,
-        message: "Authorization Password is Invalid",
-      };
-    }
+    // if (adminAuthPassword !== authPassword) {
+    //   return {
+    //     status: 401,
+    //     message: "Authorization Password is Invalid",
+    //   };
+    // }
     const existingGrn = await MainStock.findOne({
       grn,
-      _id: { $ne: mainStockId }, 
+      _id: { $ne: mainStockId },
     });
-    
+
     if (existingGrn) {
       return {
         status: 409,
@@ -161,6 +165,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         { materialCode: materialCode },
         { grn: grn },
         { quantity: quantity },
+        { unit: unit },
         { price: price },
         { storageLocation: storageLocation },
         { vendorName: vendorName },
@@ -176,6 +181,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         { materialCode: materialCode },
         { grn: grn },
         { quantity: quantity },
+        { unit: unit },
         { price: price },
         { storageLocation: storageLocation },
         { vendorName: vendorName },
@@ -197,6 +203,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         materialCode,
         grn,
         quantity,
+        unit,
         price,
         vendorName,
         storageLocation,
@@ -216,6 +223,7 @@ mainStockService.editMainStock = async (mainStockData) => {
         materialCode,
         grn,
         quantity,
+        unit,
         price,
         vendorName,
         storageLocation,
@@ -259,10 +267,10 @@ mainStockService.removeMainStock = async (mainStockId) => {
   }
 };
 
-mainStockService.getFIFOStock=async(materialName)=>{
+mainStockService.getFIFOStock = async (materialName) => {
   try {
-    const stock=await MainStock.find({materialName:materialName,removed:false,}).sort({dateReceived:1})
-    return {status:200,data:stock}
+    const stock = await MainStock.find({ materialName: materialName, removed: false, }).sort({ dateReceived: 1 })
+    return { status: 200, data: stock }
   } catch (error) {
     console.log("An error occured at getting first in first out", error.message);
     res.status(500).json({
