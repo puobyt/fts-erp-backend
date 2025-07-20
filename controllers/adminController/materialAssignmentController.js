@@ -2,6 +2,8 @@ const express = require("express");
 
 const materialAssignmentService = require("../../services/adminServices/materialAssignmentService");
 const finishedGoods = require("../../models/finishedGoods");
+const requestCreationMaterialService = require("../../services/adminServices/requestCreationMaterialService");
+const { default: mongoose } = require("mongoose");
 
 let materialAssignmentController = {};
 
@@ -14,9 +16,9 @@ materialAssignmentController.fetchMaterialAssignment = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      materials:result.materials,
-      finishedGoods:result.finishedGoods,
-      processOrderNumber:result.processOrderNumber,
+      materials: result.materials,
+      finishedGoods: result.finishedGoods,
+      processOrderNumber: result.processOrderNumber,
       userToken: "",
     });
   } catch (error) {
@@ -31,10 +33,11 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
   try {
     console.log("Adding new Material Assignment ");
 
-    const { assignmentNumber,processOrderNumber, materials, assignedTo,indentNumber,date,finishedGoodsName} =
+    const { pendingItemId, assignmentNumber, processOrderNumber, materials, assignedTo, indentNumber, date, finishedGoodsName } =
       req.body;
 
     const result = await materialAssignmentService.newMaterialAssignment({
+      pendingItemId,
       assignmentNumber,
       processOrderNumber,
       materials,
@@ -43,6 +46,15 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
       date,
       finishedGoodsName
     });
+
+    if (result.status == 200) {
+      const updateStatus = await requestCreationMaterialService.updateStatusRequestCreationForMaterials(new mongoose.Types.ObjectId(pendingItemId), 'Assigned');
+      return res.status(updateStatus.status).json({
+        message: result.message,
+        data: result.data,
+        userToken: result.token,
+      });
+    }
 
     res.status(result.status).json({
       message: result.message,
@@ -104,7 +116,7 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
 materialAssignmentController.removeMaterialAssignment = async (req, res) => {
   try {
     console.log("deleting Rework...");
-const {materialAssignmentId} = req.query;
+    const { materialAssignmentId } = req.query;
     // Pass the extracted data to the service function
     const result = await materialAssignmentService.removeMaterialAssignment(materialAssignmentId);
 
