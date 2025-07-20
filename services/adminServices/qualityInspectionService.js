@@ -175,8 +175,20 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           message: `product Name not found in production Order Creation Output`,
         };
       }
+
+      function generateMaterialCode(finishedGoodsName) {
+        // Split the finishedGoodsName into words
+        const nameParts = finishedGoodsName.split(' ');
+    
+        // Get the first part of the name to form the material code
+        const firstWord = nameParts[0].toUpperCase().slice(0, 3); // First three letters of the first word
+        const materialCode = firstWord + ' ' + (Math.floor(Math.random() * 99) + 1).toString().padStart(2, '0'); // Random two-digit number
+    
+        return materialCode;
+    }
       const finishedGoods = new FinishedGoods({
         finishedGoodsName: productName,
+        materialCode: generateMaterialCode(productName),
         batchNumber: productionOrderCreationOutput.batchNumberforOutput,
         productionDate: productionOrderCreationOutput.productionCompletionDate,
         plant: productionOrderCreation.plant,

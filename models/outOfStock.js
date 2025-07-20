@@ -10,10 +10,16 @@ const schema = new mongoose.Schema(
     materialName: {
       type: String,
     },
+    materialCode: {
+      type: String,
+    },
     grn: {
       type: String,
     },
     quantity: {
+      type: String,
+    },
+    unit: {
       type: String,
     },
     price: {
@@ -30,6 +36,9 @@ const schema = new mongoose.Schema(
     },
     expiryDate: {
       type: Date,
+    },
+    from: {
+      type: String
     },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },

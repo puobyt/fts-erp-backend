@@ -7,6 +7,9 @@ const schema = new mongoose.Schema({
       batchNumber: {
         type: String,
       },
+      materialCode: {
+        type: String,
+      },
       plant: {
         type: String,
       },
