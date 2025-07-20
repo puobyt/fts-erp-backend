@@ -237,7 +237,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
               { new: true }
             );
           }
-
         }
       }
     }
