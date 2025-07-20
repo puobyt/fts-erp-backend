@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const createRequestSchema = Joi.object({
-  requestNumber: Joi.string().optional(),
+  requestNumber: Joi.string().allow(null, '').optional(),
   materials: Joi.array().items(
     Joi.object({
       materialsList: Joi.string().required(),
@@ -12,7 +12,7 @@ const createRequestSchema = Joi.object({
   ).min(1).required(),
   requiredDate: Joi.date().iso().greater('now').required(),
   finishedGoodsName: Joi.string().required(),
-  status: Joi.string().valid('Pending', 'Approved', 'Rejected', 'Completed')
+  status: Joi.string().valid('Pending', 'Approved', 'Rejected', 'Completed', 'Assigned')
 });
 
 module.exports = { createRequestSchema };

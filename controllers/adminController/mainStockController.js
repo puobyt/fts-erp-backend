@@ -46,9 +46,10 @@ mainStockController.newMainStock = async (req, res) => {
     console.log("Adding new main stock ");
 
     const {
-        materialName,
-        materialCode,
+      materialName,
+      materialCode,
       quantity,
+      unit,
       price,
       vendorName,
       storageLocation,
@@ -57,9 +58,10 @@ mainStockController.newMainStock = async (req, res) => {
     } = req.body;
 
     const result = await mainStockService.newMainStock({
-        materialName,
-        materialCode,
+      materialName,
+      materialCode,
       quantity,
+      unit,
       price,
       vendorName,
       storageLocation,
@@ -92,6 +94,7 @@ mainStockController.editMainStock = async (req, res) => {
       materialCode,
       grn,
       quantity,
+      unit,
       price,
       vendorName,
       storageLocation,
@@ -106,6 +109,7 @@ mainStockController.editMainStock = async (req, res) => {
       materialCode,
       grn,
       quantity,
+      unit,
       price,
       vendorName,
       storageLocation,
@@ -127,20 +131,19 @@ mainStockController.editMainStock = async (req, res) => {
   }
 };
 
-mainStockController.getFirstStocks=async(req,res)=>{
+mainStockController.getFirstStocks = async (req, res) => {
   try {
-    const materialName=req.params.materialName
-    if(!materialName)
-    {
-      return res.status(400).json({message:"MaterialName is required!"})
+    const materialName = req.params.materialName
+    if (!materialName) {
+      return res.status(400).json({ message: "MaterialName is required!" })
     }
-    const result=await mainStockService.getFIFOStock(materialName)
+    const result = await mainStockService.getFIFOStock(materialName)
     res.status(result.status).json({
       data: result.data,
       userToken: result.token,
     });
   } catch (error) {
-    
+
   }
 }
 mainStockController.removeMainStock = async (req, res) => {

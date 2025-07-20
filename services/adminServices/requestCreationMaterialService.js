@@ -5,9 +5,9 @@ let requestCreationMaterialService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
-requestCreationMaterialService.fetchRequestCreationForMaterials = async () => {
+requestCreationMaterialService.fetchRequestCreationForMaterials = async (query={}) => {
   try {
-    const data = await RequestCreationForMaterials.find({});
+    const data = await RequestCreationForMaterials.find(query);
     const materials = await MainStock.aggregate([
       {
         $project: {
@@ -238,6 +238,41 @@ requestCreationMaterialService.removeRequestCreationForMaterials = async (
       return {
         status: 201,
         message: "Request creation for materials deleted successfully",
+        token: "sampleToken",
+      };
+    }
+  } catch (error) {
+    console.log(
+      "An error occured at request creation for materials remove",
+      error.message
+    );
+    res.status(500).json({
+      info: "An error occured in request creation for materials remove in current stock services",
+    });
+  }
+};
+
+
+requestCreationMaterialService.updateStatusRequestCreationForMaterials = async (
+  id,
+  status
+) => {
+  try {
+    const requestCreationForMaterials =
+      await RequestCreationForMaterials.findByIdAndUpdate(id,{status:status});
+
+    if (!requestCreationForMaterials) {
+      return {
+        status: 201,
+        message:
+          "Something went wrong",
+        token: "sampleToken",
+      };
+    }
+    if (requestCreationForMaterials) {
+      return {
+        status: 200,
+        message: "Updated Successfully",
         token: "sampleToken",
       };
     }

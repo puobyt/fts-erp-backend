@@ -10,15 +10,20 @@ requestCreationMaterialController.fetchRequestCreationForMaterials = async (
 ) => {
   try {
     console.log("loadingRequestCreationForMaterials...");
+    const { getPendings } = req.query;
+    let query = {}
+    if (getPendings === 'true') {
+      query = { status: 'Pending' }
+    }
 
     const result =
-      await requestCreationMaterialService.fetchRequestCreationForMaterials();
+      await requestCreationMaterialService.fetchRequestCreationForMaterials(query);
 
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      materials:result.materials,
-      finishedGoods:result.finishedGoods,
+      materials: result.materials,
+      finishedGoods: result.finishedGoods,
       userToken: "",
     });
   } catch (error) {
@@ -37,8 +42,7 @@ requestCreationMaterialController.newRequestCreationForMaterials = async (
   try {
     console.log("Adding new  Request Creation For Materials creation ");
 
-    const { requestNumber, materials, requiredDate,finishedGoodsName,status } = req.body;
-
+    const { requestNumber, materials, requiredDate, finishedGoodsName, status } = req.body;
     const result =
       await requestCreationMaterialService.newRequestCreationForMaterials({
         requestNumber,
@@ -64,63 +68,63 @@ requestCreationMaterialController.newRequestCreationForMaterials = async (
 
 
 requestCreationMaterialController.editRequestCreationForMaterials = async (req, res) => {
-    try {
-      console.log("editing Request Creation For Materials..");
-  
-      const {
-        authPassword,
-        requestMaterialsId,
-        requestNumber,
-        materials,
-        requiredDate,
-        status,
-        finishedGoodsName,
-      } = req.body;
-  
+  try {
+    console.log("editing Request Creation For Materials..");
 
-      const result = await requestCreationMaterialService.editRequestCreationForMaterials({
-        authPassword,
-        requestMaterialsId,
-        requestNumber,
-        materials,
-        requiredDate,
-        status,
-        finishedGoodsName,
-      });
-  
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while editing production order creation in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred" });
-    }
-  };
+    const {
+      authPassword,
+      requestMaterialsId,
+      requestNumber,
+      materials,
+      requiredDate,
+      status,
+      finishedGoodsName,
+    } = req.body;
 
 
-  requestCreationMaterialController.removeRequestCreationForMaterials = async (req, res) => {
-    try {
-      console.log("deleting request creation materials...");
-  const {requestCreationId} = req.query;
-      // Pass the extracted data to the service function
-      const result = await requestCreationMaterialService.removeRequestCreationForMaterials(requestCreationId);
-  
-      res.status(result.status).json({
-        message: result.message,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while removing request creation order for materials in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred in server" });
-    }
-  };
+    const result = await requestCreationMaterialService.editRequestCreationForMaterials({
+      authPassword,
+      requestMaterialsId,
+      requestNumber,
+      materials,
+      requiredDate,
+      status,
+      finishedGoodsName,
+    });
+
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while editing production order creation in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred" });
+  }
+};
+
+
+requestCreationMaterialController.removeRequestCreationForMaterials = async (req, res) => {
+  try {
+    console.log("deleting request creation materials...");
+    const { requestCreationId } = req.query;
+    // Pass the extracted data to the service function
+    const result = await requestCreationMaterialService.removeRequestCreationForMaterials(requestCreationId);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing request creation order for materials in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
 
 module.exports = requestCreationMaterialController;

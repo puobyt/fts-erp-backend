@@ -19,6 +19,9 @@ const schema = new mongoose.Schema(
     quantity: {
       type: String,
     },
+    unit: {
+      type: String,
+    },
     quantityUsed: {
       type: String,
 
