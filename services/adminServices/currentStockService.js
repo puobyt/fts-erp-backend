@@ -157,6 +157,8 @@ currentStockService.newCurrentStock = async (newStockData) => {
           inspectorName:'Nil',
           qualityStatus:'Nil',
           comments:'Nil',
+          expiryDate,
+          
         });
 
         await newData.save();

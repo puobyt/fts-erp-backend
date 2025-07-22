@@ -325,7 +325,6 @@ qualityInspectionService.editQualityInspection = async (
     });
     if (inspectionResults === "Accepted") {
       const rework = await reworkService.fetchRework({ batchNumber: batchNumber, materialName: productName })
-      console.log('rework',rework)
       if (rework.data.length > 0) {
         reworkService.removeRework(rework.data[0]._id)
       }

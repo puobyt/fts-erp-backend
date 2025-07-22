@@ -25,7 +25,7 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
         {
           $group: {
             _id: {
-              batchNumber: "$batchNumber",
+              grn: "$grn",
               materialName: "$materialName",
               materialCode: "$materialCode",
             },
@@ -34,7 +34,7 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
         {
           $project: {
             _id: 0,
-            batchNumber: "$_id.batchNumber",
+            grn: "$_id.grn",
             materialName: "$_id.materialName",
             materialCode: "$_id.materialCode",
           },
@@ -63,6 +63,7 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
 qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
   try {
     const {
+      grn,
       batchNumber,
       materialName,
       materialCode,
@@ -104,6 +105,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
     }
 
     const mainStockExist = await MainStock.findOne({ materialName });
+    let currentStock = await CurrentStock.findOne({ grn });
 
     if (qualityStatus === "Accepted") {
       if (mainStockExist) {
@@ -112,38 +114,49 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
           message: "Material stock already exists",
         };
       }
-      const currentStock = await CurrentStock.findOne({ batchNumber });
+      console.log('currentStock',currentStock)
       if (!currentStock) {
         return {
           status: 409,
           message: "Current stock not found",
         };
       }
+
+      const productPrefix = currentStock.materialName.slice(0, 4).toUpperCase().trim();
+      const year = new Date(inspectionDate).getFullYear();
+      const randomBatchNum = Math.floor(1000 + Math.random() * 9000); // Range: 1000-9999
+      const customBatch = `${productPrefix}_${randomBatchNum}_${year}`;
+
+      assignedBatch = customBatch
       const mainStock = new MainStock({
         currentStockId: currentStock.id,
         materialName: currentStock.materialName,
         materialCode: currentStock.materialCode,
-        batchNumber: currentStock.batchNumber,
+        batchNumber: customBatch,
+        grn: grn,
         quantity: currentStock.quantity,
         price: currentStock.price,
         vendorName: currentStock.vendorName,
         storageLocation: currentStock.storageLocation,
         dateRecieved: currentStock.dateRecieved,
-        expiryDate: currentStock.expiryDate,
+        expiryDate: new Date(currentStock.expiryDate),
       });
       await mainStock.save();
       currentStock.mainStockId = mainStock.id;
       await currentStock.save();
     }
 
+    let cmt = comments.join(", ")
     const newData = new QualityCheck({
       batchNumber,
+      grn,
       materialName,
       materialCode,
       inspectionDate,
       inspectorName,
       qualityStatus,
-      comments,
+      cmt,
+      expiryDate: new Date(currentStock.expiryDate),
     });
 
     await newData.save();
@@ -158,9 +171,6 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       "An error occured at adding quality check in admin service",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in adding new current stock in admin services",
-    });
   }
 };
 
@@ -231,7 +241,6 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
 
     const mainStockExist = await MainStock.findOne({
       $and: [
-
         { materialName: currentStock.materialName },
         { materialCode: currentStock.materialCode },
         { grn: currentStock.grn },
@@ -245,14 +254,14 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
     });
 
     if (qualityStatus === "Accepted") {
-      const rework = await reworkService.fetchRework({batchNumber:batchNumber, materialName: materialName})
+      let rework = await reworkService.fetchRework({ batchNumber: batchNumber, materialName: materialName });
       
-      if(rework.data.length<=0){
-        rework = await qualityInspectionService.fetchQualityInspection({batchNumber:batchNumber, productName: materialName})
+      if (rework.data.length <= 0) {
+        rework = await qualityInspectionService.fetchQualityInspection({ batchNumber: batchNumber, productName: materialName });
       }
 
-      if(rework.data.length > 0){
-        reworkService.removeRework(rework.data[0]._id)
+      if (rework.data.length > 0) {
+        await reworkService.removeRework(rework.data[0]._id);
       }
       if (!mainStockExist) {
 
@@ -268,6 +277,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
           grn: currentStock.grn,
           materialName: currentStock.materialName,
           quantity: currentStock.quantity,
+          unit: currentStock.unit ,
           price: currentStock.price,
           vendorName: currentStock.vendorName,
           storageLocation: currentStock.storageLocation,
@@ -301,16 +311,18 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
 
     return {
       status: 201,
-      message: "quality Check Edited Successfully",
+      message: "Quality Check Edited Successfully",
       token: "sampleToken",
     };
   } catch (error) {
-    console.log("An error occured at editing quality Check", error.message);
-    res.status(500).json({
-      info: "An error occured in editing quality Check management services",
-    });
+    console.log("An error occurred at editing quality Check", error.message);
+    return {
+      status: 500,
+      message: "Internal Server Error",
+    };
   }
 };
+
 
 qualityCheckService.removeQualityCheck = async (qualityCheckId) => {
   try {
