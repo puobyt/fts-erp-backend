@@ -48,7 +48,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
       "An error occured at fetching Production Order Creation in admin service",
       error.message
     );
-    
+
   }
 };
 
@@ -136,16 +136,11 @@ productOrderCreationService.newProductionOrderCreation = async (
     let assignedBatch = batch;
 
     if (!batch) {
-      const lastOrder = await ProductionOrderCreation.findOne()
-        .sort({ createdAt: -1 })
-        .select("batch");
-
-      if (lastOrder && lastOrder.batch) {
-        const lastNumber = parseInt(lastOrder.batch.match(/\d+$/), 10);
-        assignedBatch = `FRN/FG/${(lastNumber || 0) + 1}`;
-      } else {
-        assignedBatch = "FRN/FG/1";
-      }
+      const productPrefix = productName.slice(0, 4).toUpperCase().trim();
+      const year = new Date(endDate).getFullYear();
+      const randomBatchNum = Math.floor(1000 + Math.random() * 9000); // Range: 1000-9999
+      const customBatch = `${productPrefix}_${randomBatchNum}_${year}`;
+      assignedBatch = customBatch
     }
 
     const newData = new ProductionOrderCreation({
@@ -257,11 +252,11 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       token: "sampleToken",
     };
   } catch (error) {
-     console.log(
+    console.log(
       "An error occured at adding production order output in admin service",
       error.message
     );
-    throw error; 
+    throw error;
   }
 };
 
@@ -292,15 +287,15 @@ productOrderCreationService.editProductionOrderCreation = async (
     }
     const existingBatchNumber = await ProductionOrderCreation.findOne({
       batch,
-        _id: { $ne: productionOrderId }, 
-      });
-      
-      if (existingBatchNumber) {
-        return {
-          status: 409,
-          message: "Batch Number already exists",
-        };
-      }
+      _id: { $ne: productionOrderId },
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await ProductionOrderCreation.findOne({
       $and: [
         { processOrder: processOrder },
@@ -394,7 +389,7 @@ productOrderCreationService.editProductionOrderCreation = async (
     };
   } catch (error) {
     console.log("An error occured at editing Production Order ", error.message);
-    
+
   }
 };
 
@@ -513,7 +508,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       "An error occured at editing Production Order output ",
       error.message
     );
-   
+
   }
 };
 productOrderCreationService.removeProductionOrderCreation = async (
@@ -543,7 +538,7 @@ productOrderCreationService.removeProductionOrderCreation = async (
       "An error occured at production order creation remove",
       error.message
     );
-   
+
   }
 };
 
@@ -575,7 +570,7 @@ productOrderCreationService.removeProductionOrderCreationOutput = async (
       "An error occured at production order creation output remove",
       error.message
     );
-   
+
   }
 };
 productOrderCreationService.fetchProductionOrdersForPO = async (poId) => {
@@ -600,7 +595,7 @@ productOrderCreationService.fetchMaterialsForProductionOrderService = async (pro
     throw new Error("Failed to fetch materials for production order");
   }
 };
- 
+
 
 
 module.exports = productOrderCreationService;

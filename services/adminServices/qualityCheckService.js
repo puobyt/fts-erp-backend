@@ -3,35 +3,47 @@ const QualityCheck = require("../../models/qualityCheck");
 const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const qualityParameterSchema = require("../../models/qualityParameterSchema");
+const finalQualityInspection = require("../../models/finalQualityInspection");
+const reworkService = require("./reworkService");
+const qualityInspectionService = require("./qualityInspectionService");
 let qualityCheckService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
-qualityCheckService.fetchQualityCheck = async () => {
+qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectionQuery = {}) => {
   try {
-    const data = await QualityCheck.find({});
-    const batches = await CurrentStock.aggregate([
-      {
-        $group: {
-          _id: {
-            batchNumber: "$batchNumber",
-            materialName: "$materialName",
-            materialCode: "$materialCode",
+    let data = []
+    data = await QualityCheck.find(query);
+    if (Object.keys(finalQualityInspectionQuery).length > 0) {
+      const finalQIResult = await finalQualityInspection.find(finalQualityInspectionQuery)
+      if (finalQIResult) {
+        finalQIResult.map((item) => data.push(item))
+      }
+    }
+    if (Object.keys(query).length === 0) {
+      var batches = await CurrentStock.aggregate([
+        {
+          $group: {
+            _id: {
+              batchNumber: "$batchNumber",
+              materialName: "$materialName",
+              materialCode: "$materialCode",
+            },
           },
         },
-      },
-      {
-        $project: {
-          _id: 0,
-          batchNumber: "$_id.batchNumber",
-          materialName: "$_id.materialName",
-          materialCode: "$_id.materialCode",
+        {
+          $project: {
+            _id: 0,
+            batchNumber: "$_id.batchNumber",
+            materialName: "$_id.materialName",
+            materialCode: "$_id.materialCode",
+          },
         },
-      },
-    ]);
-    const products = await CurrentStock.distinct("materialName");
+      ]);
+      var products = await CurrentStock.distinct("materialName");
+    }
 
-    console.log(batches);
+
     return {
       status: 200,
       data: data,
@@ -60,10 +72,10 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       comments,
     } = newQualityCheckData;
 
-   const existingBatchNumber = await QualityCheck.findOne({
+    const existingBatchNumber = await QualityCheck.findOne({
       batchNumber,
     });
-    
+
     if (existingBatchNumber) {
       return {
         status: 409,
@@ -110,7 +122,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       const mainStock = new MainStock({
         currentStockId: currentStock.id,
         materialName: currentStock.materialName,
-        materialCode:currentStock.materialCode,
+        materialCode: currentStock.materialCode,
         batchNumber: currentStock.batchNumber,
         quantity: currentStock.quantity,
         price: currentStock.price,
@@ -136,7 +148,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
 
     await newData.save();
     return {
-      status: 201,
+      status: 200,
       message: " New quality check added successfully",
       data: newData,
       token: "sampleToken",
@@ -173,17 +185,17 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       };
     }
 
-       const existingBatchNumber = await QualityCheck.findOne({
-          batchNumber,
-          _id: { $ne: qualityCheckId }, 
-        });
-        
-        if (existingBatchNumber) {
-          return {
-            status: 409,
-            message: "Batch Number already exists",
-          };
-        }
+    const existingBatchNumber = await QualityCheck.findOne({
+      batchNumber,
+      _id: { $ne: qualityCheckId },
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await QualityCheck.findOne({
       $and: [
         { batchNumber: batchNumber },
@@ -214,25 +226,34 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         status: 409,
         message: "Quality Check already exists with the same details",
       };
-    } 
-    const currentStock = await CurrentStock.findOne({ grn:batchNumber });
-   
-       const mainStockExist = await MainStock.findOne({
-         $and: [
+    }
+    const currentStock = await CurrentStock.findOne({ grn: batchNumber });
 
-           { materialName: currentStock.materialName },
-           { materialCode: currentStock.materialCode },
-           { grn: currentStock.grn },
-           { quantity: currentStock.quantity },
-           { price: currentStock.price },
-           { storageLocation: currentStock.storageLocation },
-           { vendorName: currentStock.vendorName },
-           { dateRecieved: currentStock.dateRecieved },
-           { expiryDate: currentStock.expiryDate },
-         ],
-       });
+    const mainStockExist = await MainStock.findOne({
+      $and: [
+
+        { materialName: currentStock.materialName },
+        { materialCode: currentStock.materialCode },
+        { grn: currentStock.grn },
+        { quantity: currentStock.quantity },
+        { price: currentStock.price },
+        { storageLocation: currentStock.storageLocation },
+        { vendorName: currentStock.vendorName },
+        { dateRecieved: currentStock.dateRecieved },
+        { expiryDate: currentStock.expiryDate },
+      ],
+    });
 
     if (qualityStatus === "Accepted") {
+      const rework = await reworkService.fetchRework({batchNumber:batchNumber, materialName: materialName})
+      
+      if(rework.data.length<=0){
+        rework = await qualityInspectionService.fetchQualityInspection({batchNumber:batchNumber, productName: materialName})
+      }
+
+      if(rework.data.length > 0){
+        reworkService.removeRework(rework.data[0]._id)
+      }
       if (!mainStockExist) {
 
         if (!currentStock) {
@@ -243,10 +264,10 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
         }
         const mainStock = new MainStock({
           currentStockId: currentStock.id,
-          materialCode:currentStock.materialCode,
-          grn:currentStock.grn,
+          materialCode: currentStock.materialCode,
+          grn: currentStock.grn,
           materialName: currentStock.materialName,
-          quantity:currentStock.quantity,
+          quantity: currentStock.quantity,
           price: currentStock.price,
           vendorName: currentStock.vendorName,
           storageLocation: currentStock.storageLocation,
@@ -257,7 +278,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       }
     } else if (qualityStatus === "Quarantine || Rejected ") {
       if (mainStockExist) {
-        await MainStock.findOneAndDelete({ grn:batchNumber });
+        await MainStock.findOneAndDelete({ grn: batchNumber });
       }
     }
 
@@ -317,36 +338,33 @@ qualityCheckService.removeQualityCheck = async (qualityCheckId) => {
     });
   }
 };
-qualityCheckService.addQcParameters=async(data)=>{
-    if(!data||!data.parameterName)
-    {
-      throw new Error("Fields are missing")
-    }
-    const result=await qualityParameterSchema.create(data)
-    return result
-}
-qualityCheckService.editQcParameters=async(id,data)=>{
-    const params=await qualityParameterSchema.findById(id)
-    if(!params)
-    {
-      throw new Error("QC params missing!")
-    }
-    const result=await qualityParameterSchema.findByIdAndUpdate(id,{data},{new:true})
-    console.log("An error occured at editing qc parameters", error.message);
-   
-}
-qualityCheckService.deleteQcParameters=async(id)=>{
-    const qcParams=await qualityParameterSchema.findByIdAndDelete(id)
-    if(!qcParams)
-    {
-      throw new Error("QC params not found!")
-    }
-    return qcParams
-}
-qualityCheckService.fetchQcParameters=async()=>{
-    const result=await qualityParameterSchema.find()
-    return result
-    
+qualityCheckService.addQcParameters = async (data) => {
+  if (!data || !data.parameterName) {
+    throw new Error("Fields are missing")
   }
+  const result = await qualityParameterSchema.create(data)
+  return result
+}
+qualityCheckService.editQcParameters = async (id, data) => {
+  const params = await qualityParameterSchema.findById(id)
+  if (!params) {
+    throw new Error("QC params missing!")
+  }
+  const result = await qualityParameterSchema.findByIdAndUpdate(id, { data }, { new: true })
+  console.log("An error occured at editing qc parameters", error.message);
+
+}
+qualityCheckService.deleteQcParameters = async (id) => {
+  const qcParams = await qualityParameterSchema.findByIdAndDelete(id)
+  if (!qcParams) {
+    throw new Error("QC params not found!")
+  }
+  return qcParams
+}
+qualityCheckService.fetchQcParameters = async () => {
+  const result = await qualityParameterSchema.find()
+  return result
+
+}
 
 module.exports = qualityCheckService;

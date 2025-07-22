@@ -55,6 +55,7 @@ adminRouter.get('/mainStock',mainStockController.fetchMainStock);
 adminRouter.get('/outOfStock',mainStockController.fetchOutOfStock);
 adminRouter.get('/processOrder',processOrderController.fetchProcessOrder);
 adminRouter.get('/rework',reworkController.fetchRework);
+adminRouter.get('/get-quarantine-items',reworkController.getQuarentineItems)
 adminRouter.get('/productionOrderCreation',productionOrderCreationController.fetchProductOrderCreation);
 adminRouter.get('/productionOrderCreationOutput',productionOrderCreationController.fetchProductOrderCreationOutput);
 adminRouter.get('/requestCreationForMaterials',requestCreationMaterialController.fetchRequestCreationForMaterials);
