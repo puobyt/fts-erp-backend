@@ -17,7 +17,20 @@ requestCreationMaterialService.fetchRequestCreationForMaterials = async (query={
         },
       },
     ]);
-    const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
+    const finishedGoods = await FinishedGoods.aggregate([
+          {
+            $group: {
+              _id: { finishedGoodsName: "$finishedGoodsName", materialCode: "$materialCode" }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              materialName: "$_id.finishedGoodsName",
+              materialCode: "$_id.materialCode"
+            }
+          }
+        ]);
 
     return {
       status: 200,

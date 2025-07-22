@@ -55,9 +55,11 @@ mainStockController.newMainStock = async (req, res) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      batchNumber,
     } = req.body;
 
     const result = await mainStockService.newMainStock({
+      batchNumber,
       materialName,
       materialCode,
       quantity,

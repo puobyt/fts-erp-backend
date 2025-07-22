@@ -5,6 +5,7 @@ const CurrentStock = require("../../models/currentStock");
 const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
 const outOfStock = require("../../models/outOfStock");
+const finishedGoods = require("../../models/finishedGoods");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -52,7 +53,20 @@ materialAssignmentService.fetchMaterialAssignment = async () => {
         },
       },
     ]);
-    const finishedGoods = await FinishedGoods.distinct("finishedGoodsName");
+    const finishedGoods = await FinishedGoods.aggregate([
+      {
+        $group: {
+          _id: { finishedGoodsName: "$finishedGoodsName", materialCode: "$materialCode" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          materialName: "$_id.finishedGoodsName",
+          materialCode: "$_id.materialCode"
+        }
+      }
+    ]);
     const batchNumber = await CurrentStock.distinct("batchNumber");
     const processOrderNumber = await ProductionOrderCreation.distinct(
       "processOrder"
@@ -118,16 +132,28 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       const { materialsList, assignedQuantity } = materials[i];
       let qtyToAssign = parseFloat(assignedQuantity);
 
-      const stockBatches = await MainStock.find({
+      let stockBatches = []
+      stockBatches = await MainStock.find({
         materialName: materialsList,
       }).sort({ dateRecieved: 1 });
 
+
       if (!stockBatches.length) {
-        throw new Error(`Material ${materialsList} not found in stock!`);
+        const finishedGoodsData = await finishedGoods.find({
+          finishedGoodsName: materialsList,
+        });
+        if (finishedGoodsData) {
+          stockBatches = finishedGoodsData
+        } else {
+          throw new Error(`Material ${materialsList} not found in stock!`);
+        }
+
       }
 
+      console.log('stockBatches', stockBatches)
+
       const totalAvailable = stockBatches.reduce(
-        (sum, batch) => sum + parseFloat(batch.quantity),
+        (sum, batch) => sum + parseFloat(batch?.quantity || batch?.quantityProduced),
         0
       );
 
@@ -140,7 +166,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       for (let batch of stockBatches) {
         if (qtyToAssign <= 0) break;
 
-        const availableQty = parseFloat(batch.quantity);
+        const availableQty = parseFloat(batch['finishedGoodsName'] ? batch.quantityProduced : batch.quantity);
         const usedQty = Math.min(qtyToAssign, availableQty);
         const remainingQty = availableQty - usedQty;
 
@@ -159,31 +185,58 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
         );
 
         if (remainingQty === 0) {
-          await MainStock.deleteOne({ _id: batch._id });
+          let data = {}
+          if (batch['finishedGoodsName']) {
+            await finishedGoods.deleteOne({ _id: batch._id })
+            data = {
+              materialName: batch.finishedGoodsName,
+              materialCode: batch.materialCode,
+              quantity: batch.quantityProduced,
+              unit: batch?.unit || '',
+              storageLocation: batch.storageLocation,
+              dateRecieved: batch.productionDate,
+              batchNumber: batch.batchNumber,
+              from: 'finished_goods'
+            }
+          } else {
+            await MainStock.deleteOne({ _id: batch._id });
+            data = {
+              materialName: batch.materialName,
+              materialCode: batch.materialCode,
+              grn: batch.grn,
+              price: batch.price,
+              quantity: batch.quantity,
+              unit: batch.unit,
+              vendorName: batch.vendorName,
+              storageLocation: batch.storageLocation,
+              dateRecieved: batch.dateRecieved,
+              expiryDate: batch.expiryDate,
+              batchNumber: batch.batchNumber,
+              from: 'main_stock'
+            }
+          }
           await CurrentStock.deleteOne({
             materialName: materialsList,
             batchNumber: batch.batchNumber,
           });
 
-          const newOutOfStock = new OutOfStock({
-            materialName: batch.materialName,
-            materialCode: batch.materialCode,
-            grn: batch.grn,
-            price: batch.price,
-            vendorName: batch.vendorName,
-            storageLocation: batch.storageLocation,
-            dateRecieved: batch.dateRecieved,
-            expiryDate: batch.expiryDate,
-            batchNumber: batch.batchNumber,
-          });
+          const newOutOfStock = new OutOfStock(data);
 
           await newOutOfStock.save();
         } else {
-          await MainStock.findByIdAndUpdate(
-            batch._id,
-            { $set: { quantity: remainingQty.toString() } },
-            { new: true }
-          );
+          if (batch['finishedGoodsName']) {
+            await finishedGoods.findByIdAndUpdate(
+              batch._id,
+              { $set: { quantity: remainingQty.toString() } },
+              { new: true }
+            );
+          } else {
+            await MainStock.findByIdAndUpdate(
+              batch._id,
+              { $set: { quantity: remainingQty.toString() } },
+              { new: true }
+            );
+          }
         }
       }
     }
