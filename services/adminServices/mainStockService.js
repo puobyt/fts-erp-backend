@@ -50,6 +50,7 @@ mainStockService.fetchMainStock = async () => {
 mainStockService.newMainStock = async (mainStockData) => {
   try {
     const {
+      authPassword,
       materialName,
       materialCode,
       quantity,
@@ -61,6 +62,13 @@ mainStockService.newMainStock = async (mainStockData) => {
       dateRecieved,
       expiryDate,
     } = mainStockData;
+
+    if (adminAuthPassword !== authPassword) {
+      return {
+        status: 401,
+        message: "Authorization Password is Invalid",
+      };
+    }
 
     const existingBatchNumber = await MainStock.findOne({
       batchNumber,

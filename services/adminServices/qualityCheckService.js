@@ -114,7 +114,6 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
           message: "Material stock already exists",
         };
       }
-      console.log('currentStock',currentStock)
       if (!currentStock) {
         return {
           status: 409,
