@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    batchNumber: { type: String, required: true },
+    batchNumber: { type: String },
+    grn:{ type: String },
     materialName: { type: String, required: true },
     materialCode: { type: String, required: true },
     inspectionDate: { type: Date, required: true },

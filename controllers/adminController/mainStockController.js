@@ -46,6 +46,7 @@ mainStockController.newMainStock = async (req, res) => {
     console.log("Adding new main stock ");
 
     const {
+      authPassword,
       materialName,
       materialCode,
       quantity,
@@ -59,6 +60,7 @@ mainStockController.newMainStock = async (req, res) => {
     } = req.body;
 
     const result = await mainStockService.newMainStock({
+      authPassword,
       batchNumber,
       materialName,
       materialCode,

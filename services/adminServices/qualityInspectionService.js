@@ -6,13 +6,14 @@ const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const BillOfMaterials = require("../../models/billOfMaterials");
 const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
+const reworkService = require("./reworkService");
 let qualityInspectionService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
-qualityInspectionService.fetchQualityInspection = async () => {
+qualityInspectionService.fetchQualityInspection = async (query = {}) => {
   try {
-    const data = await FinalQualityInspection.find({});
+    const data = await FinalQualityInspection.find(query);
     const productNames = await ProductionOrderCreationOutput.distinct(
       "productName"
     );
@@ -34,29 +35,29 @@ qualityInspectionService.fetchQualityInspection = async () => {
 
 qualityInspectionService.newQualityInspection = async (inspectionData) => {
   try {
-    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity } = inspectionData;
+    const { inspectionNumber, productName, inspectionResults, date, batchNumber, quantity } = inspectionData;
 
     const existingInspectionNumber = await FinalQualityInspection.findOne({
       inspectionNumber,
-        });
-        
-        if (existingInspectionNumber) {
-          return {
-            status: 409,
-            message: "Inspection Number already exists",
-          };
-        }
+    });
 
-        const existingBatch = await FinalQualityInspection.findOne({
-          batchNumber,
-            });
-            
-            if (existingBatch) {
-              return {
-                status: 409,
-                message: "Batch Number already exists",
-              };
-            }
+    if (existingInspectionNumber) {
+      return {
+        status: 409,
+        message: "Inspection Number already exists",
+      };
+    }
+
+    const existingBatch = await FinalQualityInspection.findOne({
+      batchNumber,
+    });
+
+    if (existingBatch) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
 
     const existing = await FinalQualityInspection.findOne({
       $and: [
@@ -128,7 +129,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       const enrichedMaterials = [];
 
       for (const material of materials) {
-        const { materialsList, quantity,materialCode } = material;
+        const { materialsList, quantity, materialCode } = material;
 
         const mainStockData = await MainStock.findOne({
           materialName: materialsList,
@@ -179,13 +180,13 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       function generateMaterialCode(finishedGoodsName) {
         // Split the finishedGoodsName into words
         const nameParts = finishedGoodsName.split(' ');
-    
+
         // Get the first part of the name to form the material code
         const firstWord = nameParts[0].toUpperCase().slice(0, 3); // First three letters of the first word
         const materialCode = firstWord + ' ' + (Math.floor(Math.random() * 99) + 1).toString().padStart(2, '0'); // Random two-digit number
-    
+
         return materialCode;
-    }
+      }
       const finishedGoods = new FinishedGoods({
         finishedGoodsName: productName,
         materialCode: generateMaterialCode(productName),
@@ -251,26 +252,26 @@ qualityInspectionService.editQualityInspection = async (
     }
     const existingInspectionNumber = await FinalQualityInspection.findOne({
       inspectionNumber,
-          _id: { $ne: qualityInspectionId }, 
-        });
-        
-        if (existingInspectionNumber) {
-          return {
-            status: 409,
-            message: "Inspection Number already exists",
-          };
-        }
-        const existingBatchNumber = await FinalQualityInspection.findOne({
-          batchNumber,
-              _id: { $ne: qualityInspectionId }, 
-            });
-            
-            if (existingBatchNumber) {
-              return {
-                status: 409,
-                message: "Batch Number already exists",
-              };
-            }
+      _id: { $ne: qualityInspectionId },
+    });
+
+    if (existingInspectionNumber) {
+      return {
+        status: 409,
+        message: "Inspection Number already exists",
+      };
+    }
+    const existingBatchNumber = await FinalQualityInspection.findOne({
+      batchNumber,
+      _id: { $ne: qualityInspectionId },
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
 
 
     const existing = await FinalQualityInspection.findOne({
@@ -323,6 +324,10 @@ qualityInspectionService.editQualityInspection = async (
       finishedGoodsName: productName,
     });
     if (inspectionResults === "Accepted") {
+      const rework = await reworkService.fetchRework({ batchNumber: batchNumber, materialName: productName })
+      if (rework.data.length > 0) {
+        reworkService.removeRework(rework.data[0]._id)
+      }
       if (!finishedGoodsExist) {
         const productionOrderCreationOutput =
           await ProductionOrderCreationOutput.findOne({ productName });
@@ -366,9 +371,11 @@ qualityInspectionService.editQualityInspection = async (
       "An error occured at editing Quality Inspection",
       error.message
     );
-    res.status(500).json({
-      info: "An error occured in editing Quality Inspection services",
-    });
+    return {
+      status: 400,
+      message: error.message,
+      token: "sampleToken",
+    };
   }
 };
 
