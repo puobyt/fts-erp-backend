@@ -28,7 +28,7 @@ qualityInspectionService.fetchQualityInspection = async (query = {}) => {
         }
       }
     ]);
-    
+
     return {
       status: 200,
       data: data,
@@ -153,9 +153,17 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           };
         }
 
-        const vendorData = await PurchaseOrderCreation.findOne({
-          materialName: materialsList,
-        });
+        let vendorData
+        if (vendorData) {
+          vendorData = await PurchaseOrderCreation.findOne({
+            materialName: materialsList,
+          });
+        } else {
+          vendorData = await PurchaseOrderCreation.findOne({
+            materials: { $elemMatch: { materialName: { $in: materialsList } } }
+
+          });
+        }
         if (!vendorData) {
           return {
             status: 409,

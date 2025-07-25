@@ -156,19 +156,19 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
     await newStock.save();
 
-        const newData = new QualityCheck({
-          batchNumber:assignedGrn,
-          materialName,
-          materialCode,
-          inspectionDate:Date.now(),
-          inspectorName:'Nil',
-          qualityStatus:'Nil',
-          comments:'Nil',
-          expiryDate,
+        // const newData = new QualityCheck({
+        //   batchNumber:assignedGrn,
+        //   materialName,
+        //   materialCode,
+        //   inspectionDate:Date.now(),
+        //   inspectorName:'Nil',
+        //   qualityStatus:'Nil',
+        //   comments:'Nil',
+        //   expiryDate,
           
-        });
+        // });
 
-        await newData.save();
+        // await newData.save();
     return {
       status: 201,
       message: "New stock added successfully",
