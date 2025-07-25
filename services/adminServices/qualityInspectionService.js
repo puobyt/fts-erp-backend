@@ -14,9 +14,21 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 qualityInspectionService.fetchQualityInspection = async (query = {}) => {
   try {
     const data = await FinalQualityInspection.find(query);
-    const productNames = await ProductionOrderCreationOutput.distinct(
-      "productName"
-    );
+    const productNames = await ProductionOrderCreationOutput.aggregate([
+      {
+        $group: {
+          _id: { productName: "$productName", batchNumberforOutput: "$batchNumberforOutput" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          productName: "$_id.productName",
+          batchNumber: "$_id.batchNumberforOutput"
+        }
+      }
+    ]);
+    
     return {
       status: 200,
       data: data,

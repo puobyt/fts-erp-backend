@@ -1,17 +1,18 @@
 let invoiceCreationService = {};
 const InvoiceCreation = require("../../models/invoiceCreation");
 const FinishedGoods = require("../../models/finishedGoods");
+const outOfStock = require("../../models/outOfStock");
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
 invoiceCreationService.fetchInvoiceCreations = async () => {
   try {
     const data = await InvoiceCreation.find({})
-const itemNames = await FinishedGoods.distinct('finishedGoodsName')
+    const itemNames = await FinishedGoods.distinct('finishedGoodsName')
     return {
       status: 200,
       data: data,
-      itemNames:itemNames
+      itemNames: itemNames
     };
   } catch (error) {
     console.log(
@@ -42,11 +43,11 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
 
     const existingInvoiceNumber = await InvoiceCreation.findOne({
       $or: [
-        { invoiceNumber},
+        { invoiceNumber },
         { customerId },
       ],
     });
-    
+
     if (existingInvoiceNumber) {
       if (existingInvoiceNumber.invoiceNumber === invoiceNumber) {
         return {
@@ -87,7 +88,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
     if (!customerId) {
 
       const lastOrder = await InvoiceCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("customerId");
 
       if (lastOrder && lastOrder.customerId) {
@@ -103,7 +104,7 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
     if (!invoiceNumber) {
 
       const lastOrder = await InvoiceCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("invoiceNumber");
 
       if (lastOrder && lastOrder.invoiceNumber) {
@@ -113,9 +114,34 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
         assignedInvoiceNumber = "FRN/IV/1";
       }
     }
+
+    const finishedGoods = await FinishedGoods.find({ finishedGoodsName: itemName })
+    console.log('finishedGoods', finishedGoods)
+    if (finishedGoods) {
+      if (quantity > +finishedGoods[0].quantityProduced) {
+        res.status(400).json({
+          info: "Insufficiant quantity",
+        });
+      } else {
+        const totalLeft = +finishedGoods[0].quantityProduced - +quantity
+        if (totalLeft == 0) {
+          await FinishedGoods.deleteOne({ _id: finishedGoods[0]._id })
+        } else {
+          await FinishedGoods.updateOne(
+            { _id: finishedGoods[0]._id },
+            { $set: { quantityProduced: totalLeft } }
+          );
+        }
+      }
+    } else {
+      res.status(400).json({
+        info: "Finished Goods not found.",
+      });
+    }
+
     const newInvoice = new InvoiceCreation({
-      invoiceNumber:assignedInvoiceNumber,
-      customerId:assignedCustomerId,
+      invoiceNumber: assignedInvoiceNumber,
+      customerId: assignedCustomerId,
       invoiceDate,
       customerName,
       customerAddress,
@@ -167,7 +193,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
         { customerId, _id: { $ne: invoiceId } },
       ],
     });
-    
+
     if (existingInvoiceNumber) {
       if (existingInvoiceNumber.invoiceNumber === invoiceNumber) {
         return {
@@ -216,7 +242,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
     if (!customerId) {
 
       const lastOrder = await InvoiceCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("customerId");
 
       if (lastOrder && lastOrder.customerId) {
@@ -232,7 +258,7 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
     if (!invoiceNumber) {
 
       const lastOrder = await InvoiceCreation.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("invoiceNumber");
 
       if (lastOrder && lastOrder.invoiceNumber) {
@@ -251,9 +277,9 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       const InvoiceUpdate = await InvoiceCreation.findByIdAndUpdate(
         invoiceId,
         {
-          invoiceNumber:assignedInvoiceNumber,
+          invoiceNumber: assignedInvoiceNumber,
           invoiceDate,
-          customerId:assignedCustomerId,
+          customerId: assignedCustomerId,
           customerName,
           customerAddress,
           itemName,

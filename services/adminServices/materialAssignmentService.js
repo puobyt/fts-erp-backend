@@ -150,7 +150,6 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
       }
 
-      console.log('stockBatches', stockBatches)
 
       const totalAvailable = stockBatches.reduce(
         (sum, batch) => sum + parseFloat(batch?.quantity || batch?.quantityProduced),

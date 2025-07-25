@@ -73,9 +73,12 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
       comments,
     } = newQualityCheckData;
 
-    const existingBatchNumber = await QualityCheck.findOne({
-      batchNumber,
-    });
+    let existingBatchNumber
+    if (batchNumber) {
+      existingBatchNumber = await QualityCheck.findOne({
+        batchNumber,
+      });
+    }
 
     if (existingBatchNumber) {
       return {
@@ -134,6 +137,7 @@ qualityCheckService.newQualityCheck = async (newQualityCheckData) => {
         batchNumber: customBatch,
         grn: grn,
         quantity: currentStock.quantity,
+        unit: currentStock.unit,
         price: currentStock.price,
         vendorName: currentStock.vendorName,
         storageLocation: currentStock.storageLocation,
@@ -254,7 +258,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
 
     if (qualityStatus === "Accepted") {
       let rework = await reworkService.fetchRework({ batchNumber: batchNumber, materialName: materialName });
-      
+
       if (rework.data.length <= 0) {
         rework = await qualityInspectionService.fetchQualityInspection({ batchNumber: batchNumber, productName: materialName });
       }
@@ -276,7 +280,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
           grn: currentStock.grn,
           materialName: currentStock.materialName,
           quantity: currentStock.quantity,
-          unit: currentStock.unit ,
+          unit: currentStock.unit,
           price: currentStock.price,
           vendorName: currentStock.vendorName,
           storageLocation: currentStock.storageLocation,
