@@ -20,28 +20,28 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
         finalQIResult.map((item) => data.push(item))
       }
     }
-    if (Object.keys(query).length === 0) {
-      var batches = await CurrentStock.aggregate([
-        {
-          $group: {
-            _id: {
-              grn: "$grn",
-              materialName: "$materialName",
-              materialCode: "$materialCode",
-            },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            grn: "$_id.grn",
-            materialName: "$_id.materialName",
-            materialCode: "$_id.materialCode",
-          },
-        },
-      ]);
-      var products = await CurrentStock.distinct("materialName");
-    }
+    // if (Object.keys(query).length === 0) {
+    //   var batches = await CurrentStock.aggregate([
+    //     {
+    //       $group: {
+    //         _id: {
+    //           grn: "$grn",
+    //           materialName: "$materialName",
+    //           materialCode: "$materialCode",
+    //         },
+    //       },
+    //     },
+    //     {
+    //       $project: {
+    //         _id: 0,
+    //         grn: "$_id.grn",
+    //         materialName: "$_id.materialName",
+    //         materialCode: "$_id.materialCode",
+    //       },
+    //     },
+    //   ]);
+    //   var products = await CurrentStock.distinct("materialName");
+    // }
 
     console.log('fetch quality check',data)
     const batches = await CurrentStock.aggregate([
