@@ -183,9 +183,9 @@ adminService.fetchPDFData = async (id) => {
 adminService.tracebilitySearch = async (materialCode) => {
   try {
     const materials = await CurrentStock.find({ materialCode });
-    const qcDetails=await qualityCheck.find({
-      materialCode:{$in:materialCode}
-    })
+    const qcDetails = await qualityCheck.find({
+  materialCode: materialCode
+})
 
     if (materials.length === 0) {
       console.log("No materials found for search");

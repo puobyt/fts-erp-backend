@@ -12,7 +12,9 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({});
+    console.log('data',data)
     const materials = await PurchaseOrderCreation.distinct("materialName");
+    console.log('materials',materials)
     const vendors = await PurchaseOrderCreation.distinct("nameOfTheFirm");
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},

@@ -13,7 +13,7 @@ const adminSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       required: [true, "Email is required"], // Add this line
-    },
+    }, 
     password: {
       type: String,
       required: [true, "Password is required"], // Add this line

@@ -10,6 +10,7 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 qualityCheckService.fetchQualityCheck = async () => {
   try {
     const data = await QualityCheck.find({});
+    console.log('fetch quality check',data)
     const batches = await CurrentStock.aggregate([
       {
         $group: {
