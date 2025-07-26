@@ -25,7 +25,7 @@ currentStockService.fetchCurrentStock = async () => {
       status: 200,
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
-      materials: materials,
+      materials: distinctMaterials,
       vendors: vendors,
     };
   } catch (error) {
@@ -151,17 +151,19 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
     await newStock.save();
 
-        const newData = new QualityCheck({
-          batchNumber:assignedGrn,
-          materialName,
-          materialCode,
-          inspectionDate:Date.now(),
-          inspectorName:'Nil',
-          qualityStatus:'Nil',
-          comments:'Nil',
-        });
+        // const newData = new QualityCheck({
+        //   batchNumber:assignedGrn,
+        //   materialName,
+        //   materialCode,
+        //   inspectionDate:Date.now(),
+        //   inspectorName:'Nil',
+        //   qualityStatus:'Nil',
+        //   comments:'Nil',
+        //   expiryDate,
+          
+        // });
 
-        await newData.save();
+        // await newData.save();
     return {
       status: 201,
       message: "New stock added successfully",

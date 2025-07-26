@@ -1,6 +1,7 @@
 const express = require("express");
 
 const reworkService = require("../../services/adminServices/reworkService");
+const qualityCheckService = require("../../services/adminServices/qualityCheckService");
 
 let reworkController = {};
 
@@ -141,5 +142,24 @@ reworkController.editRework = async (req, res) => {
       res.status(500).json({ info: "An error occurred in server" });
     }
   };
+
+  reworkController.getQuarentineItems = async(req,res)=>{
+    try {
+      console.log("deleting Rework...");
+      // Pass the extracted data to the service function
+      const result = await qualityCheckService.fetchQualityCheck({qualityStatus: "Quarantine"}, {inspectionResults: 'Quarantine'})
+      res.status(result.status).json({
+        data: result.data,
+        message: result.message,
+        userToken: result.token,
+      });
+    } catch (error) {
+      console.log(
+        "An error occurred while removing Rework in admin controller:",
+        error.message
+      );
+      res.status(500).json({ info: "An error occurred in server" });
+    }
+  }
 
 module.exports = reworkController;

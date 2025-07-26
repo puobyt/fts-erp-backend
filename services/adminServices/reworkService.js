@@ -3,9 +3,9 @@ const Rework = require('../../models/rework');
 let reworkService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
-reworkService.fetchRework = async () => {
+reworkService.fetchRework = async (query={}) => {
     try {
-      const data = await Rework.find({})
+      const data = await Rework.find(query)
       const batches = await CurrentStock.aggregate([
         {
           $group: {

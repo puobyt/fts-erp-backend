@@ -30,7 +30,7 @@ qualityCheckController.newQualityCheck = async (req, res) => {
     console.log("Adding new quality check ");
 
     const {
-      batchNumber,
+      grn,
       materialName,
       materialCode,
       inspectionDate,
@@ -40,7 +40,7 @@ qualityCheckController.newQualityCheck = async (req, res) => {
     } = req.body;
 
     const result = await qualityCheckService.newQualityCheck({
-      batchNumber,
+      grn,
       materialName,
       materialCode,
       inspectionDate,
