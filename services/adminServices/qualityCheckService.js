@@ -43,7 +43,6 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
       var products = await CurrentStock.distinct("materialName");
     }
 
-    const data = await QualityCheck.find({});
     console.log('fetch quality check',data)
     const batches = await CurrentStock.aggregate([
       {
