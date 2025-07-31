@@ -12,14 +12,9 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({});
-    const materials = await PurchaseOrderCreation.aggregate([
-      { $unwind: "$materials" }, // Flatten the array
-      { $group: { _id: "$materials.materialName" } }, // Group by materialName to get distinct values
-      { $project: { _id: 0, materialName: "$_id" } } // Remove _id and rename _id to materialName
-    ]);
-    
-    // Extract just the materialNames from the result
-    const distinctMaterials = materials.map(item => item.materialName);
+    console.log('data',data)
+    const materials = await PurchaseOrderCreation.distinct("materialName");
+    console.log('materials',materials)
     const vendors = await PurchaseOrderCreation.distinct("nameOfTheFirm");
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},

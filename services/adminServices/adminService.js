@@ -24,22 +24,22 @@ const allowedEmails = [
 adminService.signIn = async (email, password) => {
   try {
     const admin = await Admin.findOne({ email });
-    if (!admin) {
-      return { status: 400, message: "Admin not found ", adminToken: "" };
+    if (!admin || admin.email !== email) {
+      return { status: 400, message: "Admin not found", adminToken: "" };
     }
-    if (admin.email != email) {
-      return { status: 400, message: "Admin not found ", adminToken: "" };
-    }
+
     const passwordMatch = await bcrypt.compare(password, admin.password);
     if (!passwordMatch) {
-      return { status: 400, message: "Inavlid password" };
+      return { status: 400, message: "Invalid password" };
     }
 
     const adminToken = await GenerateTokenAdmin(email);
     if (!adminToken) {
-      console.log("no admin token get in admin sign in service");
+      console.log("No admin token generated in admin sign in service");
     }
+
     const adminData = { email: admin.email, userName: admin.userName };
+
     return {
       status: 200,
       message: "Login successful",
@@ -47,14 +47,12 @@ adminService.signIn = async (email, password) => {
       adminData: adminData,
     };
   } catch (err) {
-    console.error(
-      "Error occured in login admin in sign in controller",
-      err.message
-    );
-    res.status(500)
-      .json({ info: "An error login admin in sign in controller " });
+    console.error("Error occurred in admin sign in service:", err.message);
+    // 👇 Just throw the error — let controller handle res
+    throw new Error("Something went wrong during admin login");
   }
 };
+
 
 adminService.signUp = async (userName, email, password) => {
   try {
@@ -183,9 +181,9 @@ adminService.fetchPDFData = async (id) => {
 adminService.tracebilitySearch = async (materialCode) => {
   try {
     const materials = await CurrentStock.find({ materialCode });
-    const qcDetails=await qualityCheck.find({
-      materialCode:{$in:materialCode}
-    })
+    const qcDetails = await qualityCheck.find({
+  materialCode: materialCode
+})
 
     if (materials.length === 0) {
       console.log("No materials found for search");

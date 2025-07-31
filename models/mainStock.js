@@ -26,7 +26,6 @@ const schema = new mongoose.Schema(
     },
     quantityUsed: {
       type: String,
-
     },
     price: {
       type: String,
@@ -51,6 +50,18 @@ const schema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    
+    batchNumber: { type: String }, 
+    qcStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    }, 
+    qcApproved: { type: Boolean, default: false }, 
+    comments: [{ type: String }], 
+    rejectionReason: { type: String }, 
+    quantityRejected: { type: String, default: "0" }, 
   },
   {
     timestamps: true,
