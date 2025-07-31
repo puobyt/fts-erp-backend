@@ -126,6 +126,19 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
         const totalLeft = +finishedGoods[0].quantityProduced - +quantity
         if (totalLeft == 0) {
           await FinishedGoods.deleteOne({ _id: finishedGoods[0]._id })
+          const data = {
+            materialName: finishedGoods.finishedGoodsName,
+            materialCode: finishedGoods.materialCode,
+            quantity: finishedGoods.quantityProduced,
+            unit: finishedGoods?.unit || '',
+            storageLocation: finishedGoods.storageLocation,
+            dateRecieved: finishedGoods.productionDate,
+            batchNumber: finishedGoods.batchNumber,
+            from: 'finished_goods'
+          }
+          const newOutOfStock = new outOfStock(data);
+          await newOutOfStock.save();
+
         } else {
           await FinishedGoods.updateOne(
             { _id: finishedGoods[0]._id },

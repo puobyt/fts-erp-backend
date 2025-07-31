@@ -16,6 +16,9 @@ const schema = new mongoose.Schema(
         requiredQuantity: {
           type: String,
         },
+        unit: {
+          type: String,
+        },
         materialCode: {
           type: String,
         },

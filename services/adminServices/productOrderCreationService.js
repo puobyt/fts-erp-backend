@@ -25,6 +25,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
           _id: {
             processOrderNumber: "$processOrderNumber",
             productName: "$productName",
+            plant: "$plant"
           },
         },
       },
@@ -33,6 +34,7 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
           _id: 0,
           processOrderNumber: "$_id.processOrderNumber",
           productName: "$_id.productName",
+          plant: "$_id.plant"
         },
       },
     ]);
