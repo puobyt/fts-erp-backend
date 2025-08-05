@@ -48,7 +48,7 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
       {
         $group: {
           _id: {
-            batchNumber: "$batchNumber",
+            grn: "$grn",
             materialName: "$materialName",
             materialCode: "$materialCode",
           },
@@ -57,12 +57,14 @@ qualityCheckService.fetchQualityCheck = async (query = {}, finalQualityInspectio
       {
         $project: {
           _id: 0,
-          batchNumber: "$_id.batchNumber",
+          grn: "$_id.grn",
           materialName: "$_id.materialName",
           materialCode: "$_id.materialCode",
         },
       },
     ]);
+
+    console.log('batches',batches)
     const products = await CurrentStock.distinct("materialName");
 
     return {

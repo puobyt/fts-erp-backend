@@ -1,5 +1,7 @@
 const CurrentStock = require("../../models/currentStock");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
+const GateEntry = require("../../models/gateEntry");
+
 const purchaseOrderService = require("../../services/adminServices/purchaseOrderService");
 const VendorManagement = require("../../models/vendorManagement");
 const MainStock = require("../../models/mainStock");
@@ -12,20 +14,37 @@ let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 currentStockService.fetchCurrentStock = async () => {
   try {
     const data = await CurrentStock.find({});
-    console.log('data',data)
-    const materials = await PurchaseOrderCreation.distinct("materialName");
-    console.log('materials',materials)
+    console.log('data', data)
+    // const materials = await PurchaseOrderCreation.distinct("materialName");
+    const newMaterials = await GateEntry.aggregate([
+      { $unwind: "$materials" }, // Flatten the materials array
+      {
+        $group: {
+          _id: "$materials.materialName" // Group by materialName
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          materialName: "$_id" // Rename _id to materialName
+        }
+      }
+    ]);
+    const materials = newMaterials.map(item => item.materialName);
+
+    console.log('materials', materials)
     const vendors = await PurchaseOrderCreation.distinct("nameOfTheFirm");
     const purchaseOrderCreationData = await PurchaseOrderCreation.find(
       {},
       "price quantity productName"
     ).sort({ createdAt: -1 });
+    const distinctMaterials = materials
 
     return {
       status: 200,
       data: data,
       purchaseOrderCreationData: purchaseOrderCreationData,
-      materials: distinctMaterials,
+      materials: distinctMaterials || [],
       vendors: vendors,
     };
   } catch (error) {
@@ -70,7 +89,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
         { materialCode: materialCode },
         { grn: grn },
         { quantity: quantity },
-        {unit: unit},
+        { unit: unit },
         { price: price },
         { storageLocation: storageLocation },
         { vendorName: vendorName },
@@ -151,19 +170,19 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
     await newStock.save();
 
-        // const newData = new QualityCheck({
-        //   batchNumber:assignedGrn,
-        //   materialName,
-        //   materialCode,
-        //   inspectionDate:Date.now(),
-        //   inspectorName:'Nil',
-        //   qualityStatus:'Nil',
-        //   comments:'Nil',
-        //   expiryDate,
-          
-        // });
+    // const newData = new QualityCheck({
+    //   batchNumber:assignedGrn,
+    //   materialName,
+    //   materialCode,
+    //   inspectionDate:Date.now(),
+    //   inspectorName:'Nil',
+    //   qualityStatus:'Nil',
+    //   comments:'Nil',
+    //   expiryDate,
 
-        // await newData.save();
+    // });
+
+    // await newData.save();
     return {
       status: 201,
       message: "New stock added successfully",
@@ -206,9 +225,9 @@ currentStockService.editCurrentStock = async (currentStockData) => {
     }
     const existingGrn = await CurrentStock.findOne({
       grn,
-      _id: { $ne: currentStockId }, 
+      _id: { $ne: currentStockId },
     });
-    
+
     if (existingGrn) {
       return {
         status: 409,
@@ -221,7 +240,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { grn: grn },
         { materialCode: materialCode },
         { quantity: quantity },
-        {unit: unit},
+        { unit: unit },
         { price: price },
         { vendorName: vendorName },
         { dateRecieved: dateRecieved },
@@ -236,7 +255,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         { materialCode: materialCode },
         { grn: grn },
         { quantity: quantity },
-        {unit: unit},
+        { unit: unit },
         { price: price },
         { storageLocation: storageLocation },
         { vendorName: vendorName },
