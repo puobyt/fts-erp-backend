@@ -13,6 +13,9 @@ const schema = new mongoose.Schema(
     materialCode: {
       type: String,
     },
+    batchNumber: {
+      type: String,
+    },
     grn: {
       type: String,
     },

@@ -6,6 +6,7 @@ const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const BillOfMaterials = require("../../models/billOfMaterials");
 const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
+const OutOfStock = require('../../models/outOfStock')
 const reworkService = require("./reworkService");
 let qualityInspectionService = {};
 require("dotenv").config();
@@ -137,6 +138,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       }
 
       const { materials } = billOfMaterials;
+      console.log('billOfMaterials',billOfMaterials)
 
       const enrichedMaterials = [];
 
@@ -147,10 +149,15 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           materialName: materialsList,
         });
         if (!mainStockData) {
-          return {
-            status: 409,
-            message: `Batch not found for material: ${materialsList}`,
-          };
+          const outOfStockData = await OutOfStock.findOne({
+            materialName: materialsList,
+          });
+          if(!outOfStockData){
+            return {
+              status: 409,
+              message: `Batch not found for material: ${materialsList}`,
+            };
+          }
         }
 
         let vendorData

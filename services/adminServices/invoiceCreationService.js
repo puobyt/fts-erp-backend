@@ -127,13 +127,13 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
         if (totalLeft == 0) {
           await FinishedGoods.deleteOne({ _id: finishedGoods[0]._id })
           const data = {
-            materialName: finishedGoods.finishedGoodsName,
-            materialCode: finishedGoods.materialCode,
-            quantity: finishedGoods.quantityProduced,
-            unit: finishedGoods?.unit || '',
-            storageLocation: finishedGoods.storageLocation,
-            dateRecieved: finishedGoods.productionDate,
-            batchNumber: finishedGoods.batchNumber,
+            materialName: finishedGoods[0].finishedGoodsName,
+            materialCode: finishedGoods[0].materialCode,
+            quantity: finishedGoods[0].quantityProduced,
+            unit: finishedGoods[0]?.unit || '',
+            storageLocation: finishedGoods[0].storageLocation,
+            dateRecieved: finishedGoods[0].productionDate,
+            batchNumber: finishedGoods[0].batchNumber,
             from: 'finished_goods'
           }
           const newOutOfStock = new outOfStock(data);
