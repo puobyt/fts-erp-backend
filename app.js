@@ -34,7 +34,7 @@ app.use(
 );
 app.use(
   cors({
-    origin: "*",
+    origin: "https://fts-erp-frontend.vercel.app/",
     methods: "GET,POST,PUT,DELETE",
     allowedHeaders: "Content-Type,Authorization",
   })
