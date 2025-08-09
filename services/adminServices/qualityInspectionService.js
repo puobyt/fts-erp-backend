@@ -161,15 +161,17 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
         }
 
         let vendorData
-        if (vendorData) {
-          vendorData = await PurchaseOrderCreation.findOne({
+        vendorData = await PurchaseOrderCreation.findOne({
             materialName: materialsList,
           });
-        } else {
+          console.log('vendorData11',vendorData)
+
+        if (!vendorData) {
           vendorData = await PurchaseOrderCreation.findOne({
             materials: { $elemMatch: { materialName: { $in: materialsList } } }
-
           });
+          console.log('vendorData222',vendorData)
+
         }
         if (!vendorData) {
           return {

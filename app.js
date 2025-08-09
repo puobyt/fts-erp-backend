@@ -1,3 +1,6 @@
+// ✅ MUST be first - before any other requires
+require("dotenv").config();
+
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
@@ -5,7 +8,7 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
-const multer=require('multer')
+const multer = require("multer");
 const upload = multer();
 var adminRouter = require("./routes/admin");
 
@@ -13,7 +16,6 @@ const dbConnect = require("./configs/database");
 const { default: rateLimit } = require("express-rate-limit");
 
 var app = express();
-require("dotenv").config();
 
 app.set("views", path.join(__dirname, "views"));
 const PORT = process.env.PORT || 5000;
@@ -24,20 +26,21 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100
-}));
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  })
+);
 app.use(
   cors({
-    origin: "*", 
-    methods: "GET,POST,PUT,DELETE", 
-    allowedHeaders: "Content-Type,Authorization", 
+    origin: "*",
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
   })
 );
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Database connection
 dbConnect();

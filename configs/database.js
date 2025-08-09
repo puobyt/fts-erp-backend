@@ -13,7 +13,7 @@ require("dotenv").config();
 
 const dbConnect = () => {
   mongoose
-    .connect(process.env.MONGO_ATLAS_URL_OFFICIAL)
+    .connect(process.env.MONGO_URI)
     .then(() => {
       console.log("Mongodb connected successfully");
     })
