@@ -15,7 +15,7 @@ const dbConnect = () => {
   mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
-      console.log("Mongodb connected successfully");
+      console.log("Mongodb connected successfully this is by AK");
     })
     .catch((err) => console.log(err.message));
 };
