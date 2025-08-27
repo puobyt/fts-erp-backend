@@ -90,8 +90,9 @@ adminController.tracebilitySearch = async (req, res) => {
       message: result.message,
       materials: result.materials,
       qcDetails:result.qcDetails,
+      productionData:result.production,
+      shipping: result.shipping,
       success:result.success,
-      
     });
 
   } catch (error) {

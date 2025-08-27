@@ -34,9 +34,12 @@ app.use(
 );
 app.use(
   cors({
-    origin: "https://fts-erp-frontend.vercel.app",
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
+    origin: [
+      "https://fts-erp-frontend.vercel.app",
+      "http://localhost:3039"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   })
 );

@@ -1,6 +1,6 @@
 const { Admin } = require("../../models/admin");
 const { GenerateTokenAdmin } = require("../../configs/adminAuth");
-const bcrypt = require("bcrypt");  
+const bcrypt = require("bcrypt");
 const ProductionOrderCreation = require("../../models/productionOrderCreation");
 const otpGenerator = require("../../configs/otpGenerator");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
@@ -13,6 +13,9 @@ const sendMail = require("../../configs/otpMailer");
 const InvoiceCreation = require("../../models/invoiceCreation");
 const { PendingAdmin } = require("../../models/admin");
 const qualityCheck = require("../../models/qualityCheck");
+const processOrder = require("../../models/processOrder");
+const invoiceCreation = require("../../models/invoiceCreation");
+const finishedGoods = require("../../models/finishedGoods");
 
 let adminService = {};
 const allowedEmails = [
@@ -142,7 +145,7 @@ adminService.fetchPDFData = async (id) => {
     }
 
     const purchaseOrderCreation = await PurchaseOrderCreation.findOne({
-      nameOfTheFirm:currentStock.vendorName
+      nameOfTheFirm: currentStock.vendorName
     });
 
 
@@ -154,12 +157,12 @@ adminService.fetchPDFData = async (id) => {
     // const production = await
     const pdfData = {
       vendor: {
-        vendorId:purchaseOrderCreation.vendorId,
-        vendorName:currentStock.vendorName,
+        vendorId: purchaseOrderCreation.vendorId,
+        vendorName: currentStock.vendorName,
         contactName: vendor.contactPersonName,
         contactPersonDetails: vendor.contactPersonDetails,
         address: vendor.address,
-        location:currentStock.storageLocation
+        location: currentStock.storageLocation
       },
 
     };
@@ -180,10 +183,18 @@ adminService.fetchPDFData = async (id) => {
 
 adminService.tracebilitySearch = async (materialCode) => {
   try {
-    const materials = await CurrentStock.find({ materialCode });
+    const materials = await CurrentStock.find({
+      $or: [
+        { materialCode },
+        { materialName: { $regex: new RegExp(`^${materialCode}$`, 'i') } }
+      ]
+    });
     const qcDetails = await qualityCheck.find({
-  materialCode: materialCode
-})
+      $or: [
+        { materialCode }, 
+        { materialName: { $regex: new RegExp(`^${materialCode}$`, 'i') } }
+      ]
+    })
 
     if (materials.length === 0) {
       console.log("No materials found for search");
@@ -194,11 +205,47 @@ adminService.tracebilitySearch = async (materialCode) => {
       };
     }
 
+    
+      const production = await processOrder.find({
+        'materialInput.materialCode': materials[0].materialCode
+      });
+
+      let shipping = []
+      if(production.length>0){
+        for(let i=0; i<production.length ; i++){
+          let data = await invoiceCreation.findOne({
+            itemName: production[i].productName
+          });
+          
+          if (data) {
+            var updatedData = data.toObject();
+          
+            const finishedGoodsData = await finishedGoods.findOne({
+              finishedGoodsName: data.itemName
+            });
+
+            const quantityLeft = finishedGoodsData
+            ? finishedGoodsData.quantityProduced
+            : 0;
+
+            updatedData.quantityLeft = finishedGoodsData
+              ? finishedGoodsData.quantityProduced
+              : 0;
+          
+          }
+          shipping.push(updatedData)
+        }
+
+      }
+    
+
     return {
       status: 200,
       message: "Raw materials found",
       materials: materials,
-      qcDetails:qcDetails,
+      qcDetails: qcDetails,
+      production: production,
+      shipping: shipping,
       success: true,
     };
   } catch (err) {
@@ -232,8 +279,8 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
     const materials = await CurrentStock.find({
       materialCode: { $in: materialCodes },
     });
-    const qcDetails=await qualityCheck.find({
-      materialCode:{$in:materialCodes}
+    const qcDetails = await qualityCheck.find({
+      materialCode: { $in: materialCodes }
     })
 
     if (materials.length === 0) {
@@ -249,7 +296,7 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
       status: 200,
       message: "Finished Goods found",
       materials: materials,
-      qcDetails:qcDetails,
+      qcDetails: qcDetails,
       success: true,
     };
   } catch (err) {
@@ -271,9 +318,9 @@ adminService.tracebilityProductionSearch = async (materialCode) => {
       },
     });
 
-    const qcDetails = await QualityCheck.find({materialCode});
+    const qcDetails = await QualityCheck.find({ materialCode });
 
-    if (!production || production.length === 0 && !qcDetails || qcDetails.length===0) {
+    if (!production || production.length === 0 && !qcDetails || qcDetails.length === 0) {
       return {
         status: 404,
         message: "No production data found for the provided material code.",
@@ -285,7 +332,7 @@ adminService.tracebilityProductionSearch = async (materialCode) => {
       status: 200,
       message: "Production data found successfully!",
       productionData: production,
-      qcDetails:qcDetails,
+      qcDetails: qcDetails,
       success: true,
     };
   } catch (err) {
