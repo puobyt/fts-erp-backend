@@ -216,24 +216,23 @@ adminService.tracebilitySearch = async (materialCode) => {
           let data = await invoiceCreation.findOne({
             itemName: production[i].productName
           });
-          
+          console.log('data',data)
           if (data) {
             var updatedData = data.toObject();
+
+            console.log('updatedddddddd',data)
           
             const finishedGoodsData = await finishedGoods.findOne({
               finishedGoodsName: data.itemName
             });
 
-            const quantityLeft = finishedGoodsData
-            ? finishedGoodsData.quantityProduced
-            : 0;
-
             updatedData.quantityLeft = finishedGoodsData
               ? finishedGoodsData.quantityProduced
               : 0;
-          
+              console.log('updatedData',updatedData)
+              shipping.push(updatedData)
           }
-          shipping.push(updatedData)
+
         }
 
       }

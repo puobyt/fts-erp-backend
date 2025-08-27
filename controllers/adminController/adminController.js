@@ -84,7 +84,7 @@ adminController.tracebilitySearch = async (req, res) => {
     const { code } = req.query;
 
     const result = await adminService.tracebilitySearch(code);
-    console.log("Result",result)
+    // console.log("Result",result)
 
     res.status(result.status).json({
       message: result.message,
