@@ -1,52 +1,52 @@
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
-    finishedGoodsName : {
+  finishedGoodsName: {
+    type: String,
+  },
+  batchNumber: {
+    type: String,
+  },
+  materialCode: {
+    type: String,
+  },
+  plant: {
+    type: String,
+  },
+  processOrderNo: {
+    type: String
+  },
+  description: {
+    type: String
+  },
+  storageLocation: {
+    type: String
+  },
+  materials: [
+    {
+      materialsList: {
+        type: String,
+      },
+      quantity: {
         type: String,
       },
       batchNumber: {
-        type: String,
+        type: String
       },
       materialCode: {
-        type: String,
+        type: String
       },
-      plant: {
-        type: String,
+      vendorId: {
+        type: String
       },
-      processOrderNo:{
-        type:String
-      },
-      description:{
-        type:String
-      },
-      storageLocation:{
-        type:String
-      },
-      materials: [
-        {
-          materialsList: {
-            type: String,
-          },
-          quantity: {
-            type: String,
-          },
-          batchNumber:{
-            type:String
-          },
-          materialCode:{
-            type:String
-          },
-          vendorId:{
-            type:String
-          },
-        },
-      ],
-      productionDate: {
-        type: Date,
-      }, quantityProduced: {
-          type: String,
-        },
- 
+    },
+  ],
+  productionDate: {
+    type: Date,
+  }, quantityProduced: {
+    type: String,
+  },
+
   createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
   assigned: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
 
