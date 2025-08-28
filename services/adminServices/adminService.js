@@ -191,7 +191,7 @@ adminService.tracebilitySearch = async (materialCode) => {
     });
     const qcDetails = await qualityCheck.find({
       $or: [
-        { materialCode }, 
+        { materialCode },
         { materialName: { $regex: new RegExp(`^${materialCode}$`, 'i') } }
       ]
     })
@@ -205,38 +205,34 @@ adminService.tracebilitySearch = async (materialCode) => {
       };
     }
 
-    
-      const production = await processOrder.find({
-        'materialInput.materialCode': materials[0].materialCode
-      });
 
-      let shipping = []
-      if(production.length>0){
-        for(let i=0; i<production.length ; i++){
-          let data = await invoiceCreation.findOne({
-            itemName: production[i].productName
+    const production = await processOrder.find({
+      'materialInput.materialCode': materials[0].materialCode
+    });
+
+    let shipping = []
+    if (production.length > 0) {
+      for (let i = 0; i < production.length; i++) {
+        let data = await invoiceCreation.findOne({
+          itemName: production[i].productName
+        });
+        if (data) {
+          var updatedData = data.toObject();
+
+          const finishedGoodsData = await finishedGoods.findOne({
+            finishedGoodsName: data.itemName
           });
-          console.log('data',data)
-          if (data) {
-            var updatedData = data.toObject();
 
-            console.log('updatedddddddd',data)
-          
-            const finishedGoodsData = await finishedGoods.findOne({
-              finishedGoodsName: data.itemName
-            });
-
-            updatedData.quantityLeft = finishedGoodsData
-              ? finishedGoodsData.quantityProduced
-              : 0;
-              console.log('updatedData',updatedData)
-              shipping.push(updatedData)
-          }
-
+          updatedData.quantityLeft = finishedGoodsData
+            ? finishedGoodsData.quantityProduced
+            : 0;
+          shipping.push(updatedData)
         }
 
       }
-    
+
+    }
+
 
     return {
       status: 200,
@@ -281,6 +277,28 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
     const qcDetails = await qualityCheck.find({
       materialCode: { $in: materialCodes }
     })
+    const production = await processOrder.find({
+      'productName': finishedGoods.finishedGoodsName
+    });
+
+    let shipping = []
+    let data = await invoiceCreation.findOne({
+      itemName: finishedGoods.finishedGoodsName
+    });
+    if (data) {
+      var updatedData = data.toObject();
+
+      updatedData.quantityLeft = finishedGoods
+        ? finishedGoods.quantityProduced
+        : 0;
+      shipping.push(updatedData)
+    }
+
+
+
+
+
+    console.log('shipping', shipping)
 
     if (materials.length === 0) {
       console.log("No finished goods found for search");
@@ -296,6 +314,8 @@ adminService.tracebilityFinishedGoodsSearch = async (finishedGoodsName) => {
       message: "Finished Goods found",
       materials: materials,
       qcDetails: qcDetails,
+      production: production,
+      shipping: shipping,
       success: true,
     };
   } catch (err) {
