@@ -40,6 +40,7 @@ processOrderController.newProcessOrder = async (req, res) => {
       productCode,
       batch,
       orderQuantity,
+      unit,
       materialInput
 
     } = req.body;
@@ -56,6 +57,7 @@ processOrderController.newProcessOrder = async (req, res) => {
       productCode,
       batch,
       orderQuantity,
+      unit,
       materialInput
 
     });

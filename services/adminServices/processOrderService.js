@@ -33,6 +33,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
       productCode,
       batch,
       orderQuantity,
+      unit,
       materialInput,
     } = processOrderData;
 
@@ -69,6 +70,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
         { productCode: productCode },
         { batch: batch },
         { orderQuantity: orderQuantity },
+        {unit: unit},
         { materialInput: materialInput },
       ],
     });
@@ -91,6 +93,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
       productCode,
       batch,
       orderQuantity,
+      unit,
       materialInput,
     });
 

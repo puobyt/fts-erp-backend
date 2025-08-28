@@ -31,6 +31,9 @@ const schema = new mongoose.Schema(
     orderQuantity: {
       type: String,
     },
+    unit: {
+      type: String,
+    },
 
     materialInput: [
       {
