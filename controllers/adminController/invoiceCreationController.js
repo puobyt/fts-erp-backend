@@ -37,7 +37,8 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      createdBy
     } = req.body;
 
     // Pass the extracted data to the service function
@@ -50,7 +51,8 @@ invoiceCreationController.newInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -82,7 +84,8 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      editedBy
     } = req.body;
 
     const result = await invoiceCreationService.editInvoiceCreation({
@@ -96,7 +99,8 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -116,9 +120,9 @@ invoiceCreationController.editInvoiceCreation = async (req, res) => {
 invoiceCreationController.removeInvoiceCreation = async (req, res) => {
   try {
     console.log("deleting invoice...");
-const {invoiceId} = req.query;
+const {invoiceId, user} = req.query;
 
-    const result = await invoiceCreationService.removeInvoiceCreation(invoiceId);
+    const result = await invoiceCreationService.removeInvoiceCreation(invoiceId,user);
 
     res.status(result.status).json({
       message: result.message,

@@ -6,6 +6,7 @@ const MainStock = require("../../models/mainStock");
 const OutOfStock = require("../../models/outOfStock");
 const outOfStock = require("../../models/outOfStock");
 const finishedGoods = require("../../models/finishedGoods");
+const { AuditLog } = require("../../models/auditLog");
 let materialAssignmentService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -99,6 +100,7 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
       indentNumber,
       date,
       finishedGoodsName,
+      createdBy
     } = materialData;
 
     const existingMaterialAssignment = await MaterialAssignment.findOne({
@@ -270,6 +272,15 @@ materialAssignmentService.newMaterialAssignment = async (materialData) => {
 
     await newAssignment.save();
 
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'material-assignment',
+      recordId: newAssignment._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 200,
       message: "New Material Assignment added successfully",
@@ -304,6 +315,7 @@ materialAssignmentService.editMaterialAssignment = async (
       processOrderNumber,
       materials,
       assignedTo,
+      editedBy
     } = materialAssignmentData;
 
     if (adminAuthPassword !== authPassword) {
@@ -481,6 +493,15 @@ materialAssignmentService.editMaterialAssignment = async (
         );
     }
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'material-assignment',
+      recordId: materialAssignmentId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Material Assignment Edited Successfully",
@@ -498,10 +519,11 @@ materialAssignmentService.editMaterialAssignment = async (
 };
 
 materialAssignmentService.removeMaterialAssignment = async (
-  materialAssignmentId
+  materialAssignmentId,
+  user
 ) => {
   try {
-    const materialAssignment = await MaterialAssignment.findByIdAndDelete(
+    const materialAssignment = await MaterialAssignment.findById(
       materialAssignmentId
     );
 
@@ -513,6 +535,19 @@ materialAssignmentService.removeMaterialAssignment = async (
         token: "sampleToken",
       };
     }
+    await MaterialAssignment.findByIdAndDelete(
+      materialAssignmentId
+    );
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'material-assignment',
+      recordId: materialAssignmentId,
+      user: user,
+      data: materialAssignment
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Material assignment deleted successfully",

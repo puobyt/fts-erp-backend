@@ -41,7 +41,8 @@ processOrderController.newProcessOrder = async (req, res) => {
       batch,
       orderQuantity,
       unit,
-      materialInput
+      materialInput,
+      createdBy
 
     } = req.body;
 
@@ -58,7 +59,8 @@ processOrderController.newProcessOrder = async (req, res) => {
       batch,
       orderQuantity,
       unit,
-      materialInput
+      materialInput,
+      createdBy
 
     });
 
@@ -94,7 +96,8 @@ processOrderController.editProcessOrder = async (req, res) => {
         productCode,
         batch,
         orderQuantity,
-        materialInput
+        materialInput,
+        editedBy
       } = req.body;
   
       // Pass the extracted data to the service function
@@ -110,7 +113,8 @@ processOrderController.editProcessOrder = async (req, res) => {
         productCode,
         batch,
         orderQuantity,
-        materialInput
+        materialInput,
+        editedBy
       });
   
       res.status(result.status).json({
@@ -130,9 +134,9 @@ processOrderController.editProcessOrder = async (req, res) => {
   processOrderController.removeProcessOrder = async (req, res) => {
     try {
       console.log("deleting process order...");
-  const {processOrderId} = req.query;
+  const {processOrderId,user} = req.query;
       // Pass the extracted data to the service function
-      const result = await processOrderService.removeProcessOrder(processOrderId);
+      const result = await processOrderService.removeProcessOrder(processOrderId,user);
   
       res.status(result.status).json({
         message: result.message,

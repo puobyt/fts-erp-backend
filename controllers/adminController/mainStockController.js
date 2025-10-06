@@ -57,6 +57,7 @@ mainStockController.newMainStock = async (req, res) => {
       dateRecieved,
       expiryDate,
       batchNumber,
+      createdBy
     } = req.body;
 
     const result = await mainStockService.newMainStock({
@@ -71,6 +72,7 @@ mainStockController.newMainStock = async (req, res) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -104,6 +106,7 @@ mainStockController.editMainStock = async (req, res) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      editedBy
     } = req.body;
 
     const result = await mainStockService.editMainStock({
@@ -119,6 +122,7 @@ mainStockController.editMainStock = async (req, res) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -153,10 +157,10 @@ mainStockController.getFirstStocks = async (req, res) => {
 mainStockController.removeMainStock = async (req, res) => {
   try {
     console.log("deleting current stock...");
-    const { mainStockId } = req.query;
+    const { mainStockId, user } = req.query;
     console.log("mainStock id..", mainStockId);
     // Pass the extracted data to the service function
-    const result = await mainStockService.removeMainStock(mainStockId);
+    const result = await mainStockService.removeMainStock(mainStockId, user);
 
     res.status(result.status).json({
       message: result.message,

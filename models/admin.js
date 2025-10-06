@@ -13,11 +13,13 @@ const adminSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       required: [true, "Email is required"], // Add this line
-    }, 
+    },
     password: {
       type: String,
       required: [true, "Password is required"], // Add this line
     },
+    role: String
+
   },
   { timestamps: true }
 );
@@ -32,8 +34,7 @@ const pendingAdminSchema = new mongoose.Schema({
     trim: true,
   },
   password: String,
-  OTP: String,
-  otpExpiresAt: Date,
+  role: String
 });
 const PendingAdmin = mongoose.model("PendingAdmin", pendingAdminSchema);
 const Admin = mongoose.model("Admin", adminSchema);

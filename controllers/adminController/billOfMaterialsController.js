@@ -30,12 +30,13 @@ billOfMaterialsController.newBillOfMaterials = async (req, res) => {
   try {
     console.log("Adding new Bill Of Materials ");
 
-    const { bomNumber, productName, materials } = req.body;
+    const { bomNumber, productName, materials, createdBy } = req.body;
 
     const result = await billOfMaterialsService.newBillOfMaterials({
       bomNumber,
       productName,
       materials,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -61,7 +62,8 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materials
+      materials,
+      editedBy
     } = req.body;
 
     const result = await billOfMaterialsService.editBillOfMaterials({
@@ -69,7 +71,8 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materials
+      materials,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -89,10 +92,11 @@ billOfMaterialsController.editBillOfMaterials = async (req, res) => {
 billOfMaterialsController.removeBillOfMaterials = async (req, res) => {
   try {
     console.log("deleting Rework...");
-    const { billOfMaterialsId } = req.query;
+    const { billOfMaterialsId, user } = req.query;
 
     const result = await billOfMaterialsService.removeBillOfMaterials(
-      billOfMaterialsId
+      billOfMaterialsId,
+      user
     );
 
     res.status(result.status).json({

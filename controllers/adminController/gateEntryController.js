@@ -16,8 +16,8 @@ gateEntryController.newGateExit = async (req, res) => {
       docNumber: req.body.docNumber,
       vehicleNumber: req.body.vehicleNumber,
       vendorName: req.body.vendorName,
-      returnReason:req.body.returnReason,
-      returnedBy:req.body.returnedBy,
+      returnReason: req.body.returnReason,
+      returnedBy: req.body.returnedBy,
       date: new Date(req.body.date),
       // Map files with relevant info
       qcDocuments: uploadedFiles.map(file => ({
@@ -26,6 +26,7 @@ gateEntryController.newGateExit = async (req, res) => {
         mimetype: file.mimetype,
         size: file.size
       })),
+      createdBy: req.body.createdBy
     };
 
     const result = await gateEntryService.newGateExit(formData);
@@ -51,8 +52,8 @@ gateEntryController.newQcReturnEntry = async (req, res) => {
       materials: JSON.parse(req.body.materials),
       serialNumbers: JSON.parse(req.body.serialNumbers || '[]'),
       date: new Date(req.body.date),
-      returnReason:req.body.returnReason,
-      returnedBy:req.body.returnedBy,
+      returnReason: req.body.returnReason,
+      returnedBy: req.body.returnedBy,
       qcDocuments: uploadedFiles.map(file => ({
         originalName: file.originalname,
         path: file.path,
@@ -115,6 +116,7 @@ gateEntryController.newGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
+      createdBy
     } = req.body;
 
     // Ensure materials are parsed correctly
@@ -127,6 +129,7 @@ gateEntryController.newGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -144,7 +147,7 @@ gateEntryController.newGateEntry = async (req, res) => {
 gateEntryController.editGateEntry = async (req, res) => {
   try {
     console.log("editing gate entry");
-    const { authPassword,materials,docNumber, gateEntryId,entryTime, vehicleNumber, vendorName, date } =
+    const { authPassword, materials, docNumber, gateEntryId, entryTime, vehicleNumber, vendorName, date, editedBy } =
       req.body;
     const result = await gateEntryService.editGateEntry({
       authPassword,
@@ -155,6 +158,7 @@ gateEntryController.editGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
+      editedBy
     });
     res.status(result.status).json({
       message: result.message,
@@ -172,8 +176,8 @@ gateEntryController.editGateEntry = async (req, res) => {
 gateEntryController.removeGateEntry = async (req, res) => {
   try {
     console.log("deleting Production Order Creation...");
-const {gateEntryId} = req.query;
-    const result = await gateEntryService.removeGateEntry(gateEntryId);
+    const { gateEntryId, user } = req.query;
+    const result = await gateEntryService.removeGateEntry(gateEntryId, user);
     res.status(result.status).json({
       message: result.message,
       userToken: result.token,

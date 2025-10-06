@@ -1,5 +1,6 @@
 const express = require("express");
 const VendorManagement = require("../../models/vendorManagement");
+const { AuditLog } = require("../../models/auditLog");
 let vendorService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -31,9 +32,10 @@ vendorService.newVendorManagement = async (newVendorData) => {
       bankDetails,
       pan,
       gst,
+      createdBy
     } = newVendorData;
 
-    const existingVendor = await VendorManagement.findOne({$or:[{vendorCode},{gst}]});
+    const existingVendor = await VendorManagement.findOne({ $or: [{ vendorCode }, { gst }] });
 
     if (existingVendor) {
       return {
@@ -56,6 +58,16 @@ vendorService.newVendorManagement = async (newVendorData) => {
     });
 
     await newVendor.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'vendor-management',
+      recordId: newVendor._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Vendor added successfully",
@@ -85,6 +97,7 @@ vendorService.editVendorManagement = async (VendorData) => {
       bankDetails,
       pan,
       gst,
+      editedBy
     } = VendorData;
 
     if (adminAuthPassword !== authPassword) {
@@ -94,16 +107,16 @@ vendorService.editVendorManagement = async (VendorData) => {
       };
     }
 
-   const existingVendor = await VendorManagement.findOne({
-  _id: { $ne: vendorId },
-  $or: [
-    { vendorCode: vendorCode },
-    { gst: gst }
-  ]
-});
+    const existingVendor = await VendorManagement.findOne({
+      _id: { $ne: vendorId },
+      $or: [
+        { vendorCode: vendorCode },
+        { gst: gst }
+      ]
+    });
 
 
-    if (existingVendor ) {
+    if (existingVendor) {
       return {
         status: 409,
         message: "Vendor already exists with the same details",
@@ -128,6 +141,15 @@ vendorService.editVendorManagement = async (VendorData) => {
           runValidators: true,
         }
       );
+      const newAuditLog = new AuditLog({
+        action: 'edit',
+        model: 'vendor-management',
+        recordId: vendorId,
+        user: editedBy,
+      })
+
+      await newAuditLog.save();
+
     }
 
     return {
@@ -143,9 +165,20 @@ vendorService.editVendorManagement = async (VendorData) => {
   }
 };
 
-vendorService.removeVendorManagement = async (vendorId) => {
+vendorService.removeVendorManagement = async (vendorId, user) => {
   try {
     const vendor = await VendorManagement.findByIdAndDelete(vendorId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'vendor-management',
+      recordId: vendorId,
+      user: user,
+      data: vendor
+    })
+
+    await newAuditLog.save();
+
 
     return {
       status: 201,

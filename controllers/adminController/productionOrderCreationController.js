@@ -17,8 +17,8 @@ productionOrderCreationController.fetchProductOrderCreation = async (
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      processOrderNumbers:result.processOrderNumbers,
-      materials:result.materials,
+      processOrderNumbers: result.processOrderNumbers,
+      materials: result.materials,
       userToken: "",
     });
   } catch (error) {
@@ -44,7 +44,7 @@ productionOrderCreationController.fetchProductOrderCreationOutput = async (
       message: result.message,
       data: result.data,
       batches: result.batches,
-      products:result.products,
+      products: result.products,
       userToken: "",
     });
   } catch (error) {
@@ -73,6 +73,7 @@ productionOrderCreationController.newProductionOrderCreation = async (
       instructions,
       startDate,
       endDate,
+      createdBy
     } = req.body;
 
     const result = await productOrderCreationService.newProductionOrderCreation(
@@ -87,6 +88,7 @@ productionOrderCreationController.newProductionOrderCreation = async (
         instructions,
         startDate,
         endDate,
+        createdBy
       }
     );
 
@@ -122,7 +124,8 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
-      packingMaterials
+      packingMaterials,
+      createdBy
     } = req.body;
 
     const result =
@@ -137,7 +140,8 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
         Yield,
         outputQualityRating,
         outputHandlingInstructions,
-        packingMaterials
+        packingMaterials,
+        createdBy
       });
 
     res.status(result.status).json({
@@ -175,6 +179,7 @@ productionOrderCreationController.editProductionOrderCreation = async (
       instructions,
       startDate,
       endDate,
+      editedBy
     } = req.body;
 
     const result =
@@ -192,6 +197,7 @@ productionOrderCreationController.editProductionOrderCreation = async (
         instructions,
         startDate,
         endDate,
+        editedBy
       });
 
     res.status(result.status).json({
@@ -228,7 +234,8 @@ productionOrderCreationController.editProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
-      packingMaterials
+      packingMaterials,
+      editedBy
     } = req.body;
 
     const result =
@@ -245,7 +252,9 @@ productionOrderCreationController.editProductionOrderCreationOutput = async (
         Yield,
         outputQualityRating,
         outputHandlingInstructions,
-        packingMaterials
+        packingMaterials,
+        editedBy
+
       });
 
     res.status(result.status).json({
@@ -268,11 +277,12 @@ productionOrderCreationController.removeProductionOrderCreation = async (
 ) => {
   try {
     console.log("deleting production order creation...");
-    const { productionOrderId } = req.query;
+    const { productionOrderId, user } = req.query;
     // Pass the extracted data to the service function
     const result =
       await productOrderCreationService.removeProductionOrderCreation(
-        productionOrderId
+        productionOrderId,
+        user
       );
 
     res.status(result.status).json({
@@ -295,11 +305,12 @@ productionOrderCreationController.removeProductionOrderCreationOutput = async (
 ) => {
   try {
     console.log("deleting production order creation output...");
-    const { productionOrderoutputId } = req.query;
+    const { productionOrderoutputId, user } = req.query;
     // Pass the extracted data to the service function
     const result =
       await productOrderCreationService.removeProductionOrderCreationOutput(
-        productionOrderoutputId
+        productionOrderoutputId,
+        user
       );
 
     res.status(result.status).json({
@@ -314,16 +325,15 @@ productionOrderCreationController.removeProductionOrderCreationOutput = async (
     res.status(500).json({ info: "An error occurred in server" });
   }
 };
-productionOrderCreationController.fetchProductionOrderForPO=async(req,res)=>{
+productionOrderCreationController.fetchProductionOrderForPO = async (req, res) => {
   try {
-    const {poId}=req.params
-    if(!poId)
-    {
+    const { poId } = req.params
+    if (!poId) {
       throw new Error("Production order ID is missing!")
     }
     console.log(poId)
-    const prodOrders=await productOrderCreationService.fetchProductionOrdersForPO(poId)
-    console.log("fetchProductionOrderForPO",prodOrders)
+    const prodOrders = await productOrderCreationService.fetchProductionOrdersForPO(poId)
+    console.log("fetchProductionOrderForPO", prodOrders)
     res.status(200).json(prodOrders)
   } catch (error) {
     console.log(
@@ -333,23 +343,22 @@ productionOrderCreationController.fetchProductionOrderForPO=async(req,res)=>{
     res.status(500).json({ info: "An error occurred in server" });
   }
 }
-productionOrderCreationController.fetchMaterialsForProductionOrder=async(req,res)=>{
+productionOrderCreationController.fetchMaterialsForProductionOrder = async (req, res) => {
   try {
-    const {prodOrderId}=req.params
-  if(!prodOrderId)
-  {
-    throw new Error("Production Order ID is missing!")
-  }
-  const materials=await productOrderCreationService.fetchMaterialsForProductionOrderService(prodOrderId)
-  console.log('fetchMaterialsForProductionOrder',materials)
-  res.status(200).json(materials)
+    const { prodOrderId } = req.params
+    if (!prodOrderId) {
+      throw new Error("Production Order ID is missing!")
+    }
+    const materials = await productOrderCreationService.fetchMaterialsForProductionOrderService(prodOrderId)
+    console.log('fetchMaterialsForProductionOrder', materials)
+    res.status(200).json(materials)
   } catch (error) {
-     console.log(
+    console.log(
       "An error occurred while fetching production order for purchase order in admin controller:",
       error.message
     );
     res.status(500).json({ info: "An error occurred in server" });
   }
-  
+
 }
 module.exports = productionOrderCreationController;

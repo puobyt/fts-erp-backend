@@ -14,7 +14,7 @@ reworkController.fetchRework = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      batches:result.batches,
+      batches: result.batches,
       userToken: "",
     });
   } catch (error) {
@@ -41,6 +41,7 @@ reworkController.newRework = async (req, res) => {
       quantityForRework,
       reworkStatus,
       comments,
+      createdBy
     } = req.body;
 
     const result = await reworkService.newRework({
@@ -55,6 +56,7 @@ reworkController.newRework = async (req, res) => {
       quantityForRework,
       reworkStatus,
       comments,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -73,93 +75,95 @@ reworkController.newRework = async (req, res) => {
 
 
 reworkController.editRework = async (req, res) => {
-    try {
-      console.log("editing rework..");
-  
-      const {
-        authPassword,
-        reworkId,
-        batchNumber ,
-        materialName,
-        inspectionDate ,
-        inspectorName,
-        issueDescription,
-        proposedReworkAction,
-        reworkStartDate,
-        reworkCompletionDate,
-        quantityForRework,
-        reworkStatus,
-        comments
-      } = req.body;
-  
+  try {
+    console.log("editing rework..");
 
-      const result = await reworkService.editRework({
-        authPassword,
-        reworkId,
-        batchNumber ,
-        materialName,
-        inspectionDate ,
-        inspectorName,
-        issueDescription,
-        proposedReworkAction,
-        reworkStartDate,
-        reworkCompletionDate,
-        quantityForRework,
-        reworkStatus,
-        comments
-      });
-  
-      res.status(result.status).json({
-        message: result.message,
-        data: result.data,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while adding editing Current Stock in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred" });
-    }
-  };
+    const {
+      authPassword,
+      reworkId,
+      batchNumber,
+      materialName,
+      inspectionDate,
+      inspectorName,
+      issueDescription,
+      proposedReworkAction,
+      reworkStartDate,
+      reworkCompletionDate,
+      quantityForRework,
+      reworkStatus,
+      comments,
+      editedBy
+    } = req.body;
 
-  reworkController.removeRework = async (req, res) => {
-    try {
-      console.log("deleting Rework...");
-  const {reworkId} = req.query;
-      // Pass the extracted data to the service function
-      const result = await reworkService.removeRework(reworkId);
-  
-      res.status(result.status).json({
-        message: result.message,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while removing Rework in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred in server" });
-    }
-  };
 
-  reworkController.getQuarentineItems = async(req,res)=>{
-    try {
-      console.log("deleting Rework...");
-      // Pass the extracted data to the service function
-      const result = await qualityCheckService.fetchQualityCheck({qualityStatus: "Quarantine"}, {inspectionResults: 'Quarantine'})
-      res.status(result.status).json({
-        data: result.data,
-        message: result.message,
-        userToken: result.token,
-      });
-    } catch (error) {
-      console.log(
-        "An error occurred while removing Rework in admin controller:",
-        error.message
-      );
-      res.status(500).json({ info: "An error occurred in server" });
-    }
+    const result = await reworkService.editRework({
+      authPassword,
+      reworkId,
+      batchNumber,
+      materialName,
+      inspectionDate,
+      inspectorName,
+      issueDescription,
+      proposedReworkAction,
+      reworkStartDate,
+      reworkCompletionDate,
+      quantityForRework,
+      reworkStatus,
+      comments,
+      editedBy
+    });
+
+    res.status(result.status).json({
+      message: result.message,
+      data: result.data,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while adding editing Current Stock in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred" });
   }
+};
+
+reworkController.removeRework = async (req, res) => {
+  try {
+    console.log("deleting Rework...");
+    const { reworkId, user } = req.query;
+    // Pass the extracted data to the service function
+    const result = await reworkService.removeRework(reworkId, user);
+
+    res.status(result.status).json({
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing Rework in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+};
+
+reworkController.getQuarentineItems = async (req, res) => {
+  try {
+    console.log("deleting Rework...");
+    // Pass the extracted data to the service function
+    const result = await qualityCheckService.fetchQualityCheck({ qualityStatus: "Quarantine" }, { inspectionResults: 'Quarantine' })
+    res.status(result.status).json({
+      data: result.data,
+      message: result.message,
+      userToken: result.token,
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while removing Rework in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in server" });
+  }
+}
 
 module.exports = reworkController;

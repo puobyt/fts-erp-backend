@@ -16,7 +16,7 @@ adminController.signIn = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       adminToken: result.adminToken,
-      adminData:result.adminData
+      adminData: result.adminData
     });
   } catch (err) {
     console.error("Error occurred in login data", err);
@@ -40,11 +40,11 @@ adminController.signUp = async (req, res) => {
   }
 };
 
-adminController.verifyOtp = async (req, res) => {
+adminController.verifyUser = async (req, res) => {
   try {
-    const { otp, email } = req.body;
-    console.log("otp,email:", otp, email);
-    const result = await adminService.verifyOtp(otp, email);
+    const { userId, role, action } = req.body;
+    console.log("userId:", userId);
+    const result = await adminService.verifyUser(userId, role, action);
 
     console.log("token after generated", result.token);
 
@@ -65,7 +65,7 @@ adminController.fetchPDFData = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log('id for current stock',id);
+    console.log('id for current stock', id);
     const result = await adminService.fetchPDFData(id);
 
     res.status(result.status).json({
@@ -89,10 +89,10 @@ adminController.tracebilitySearch = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       materials: result.materials,
-      qcDetails:result.qcDetails,
-      productionData:result.production,
+      qcDetails: result.qcDetails,
+      productionData: result.production,
       shipping: result.shipping,
-      success:result.success,
+      success: result.success,
     });
 
   } catch (error) {
@@ -110,11 +110,11 @@ adminController.tracebilityFinishedGoodsSearch = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       materials: result.materials,
-      qcDetails:result.qcDetails,
-      productionData:result.production,
-      shipping:result.shipping,
-      success:result.success,
-      
+      qcDetails: result.qcDetails,
+      productionData: result.production,
+      shipping: result.shipping,
+      success: result.success,
+
     });
 
   } catch (error) {
@@ -123,19 +123,19 @@ adminController.tracebilityFinishedGoodsSearch = async (req, res) => {
   }
 }
 
-adminController.tracebilityProductionSearch =  async (req, res) => {
-  const { materialCode } = req.query; 
+adminController.tracebilityProductionSearch = async (req, res) => {
+  const { materialCode } = req.query;
 
   try {
-    
+
     const result = await adminService.tracebilityProductionSearch(materialCode);
 
     res.status(result.status).json({
       message: result.message,
       productionData: result.productionData,
-      qcDetails:result.qcDetails,
-      success:result.success,
-      
+      qcDetails: result.qcDetails,
+      success: result.success,
+
     });
 
   } catch (error) {
@@ -145,18 +145,18 @@ adminController.tracebilityProductionSearch =  async (req, res) => {
 };
 
 
-adminController.tracebilityPackingAndShipping =  async (req, res) => {
-  const { processCode } = req.query; 
+adminController.tracebilityPackingAndShipping = async (req, res) => {
+  const { processCode } = req.query;
 
   try {
-    
+
     const result = await adminService.tracebilityPackingAndShipping(processCode);
 
     res.status(result.status).json({
       message: result.message,
       shippingData: result.shippingData,
-      success:result.success,
-      
+      success: result.success,
+
     });
 
   } catch (error) {
@@ -164,5 +164,23 @@ adminController.tracebilityPackingAndShipping =  async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+adminController.pendingUsers = async (req, res) => {
+  try {
+
+    const result = await adminService.fetchPendingUsers();
+
+    res.status(result.status).json({
+      message: result.message,
+      usersData: result.usersData,
+      success: result.success,
+
+    });
+
+  } catch (error) {
+    console.error("Error fetching pending users:", error.message);
+    res.status(500).json({ error: "Error fetching pending users" });
+  }
+}
 
 module.exports = adminController;

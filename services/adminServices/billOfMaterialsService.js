@@ -2,6 +2,7 @@ const BillOfMaterials = require("../../models/billOfMaterials");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 const MainStock = require("../../models/mainStock");
+const { AuditLog } = require("../../models/auditLog");
 let billOfMaterialsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS || 'admin@123';
@@ -13,17 +14,17 @@ billOfMaterialsService.fetchbillOfMaterials = async () => {
     const materials = await MainStock.aggregate([
       {
         $project: {
-          materialName: 1, 
-          materialCode: 1, 
-          _id: 0,         
+          materialName: 1,
+          materialCode: 1,
+          _id: 0,
         },
       },
     ]);
     return {
       status: 200,
       data: data,
-      productNames:productNames,
-      materials:materials
+      productNames: productNames,
+      materials: materials
     };
   } catch (error) {
     console.log(
@@ -37,7 +38,7 @@ billOfMaterialsService.fetchbillOfMaterials = async () => {
 };
 billOfMaterialsService.newBillOfMaterials = async (bomData) => {
   try {
-    const { bomNumber, productName, materials } = bomData;
+    const { bomNumber, productName, materials, createdBy } = bomData;
 
     if (!Array.isArray(materials) || materials.length === 0) {
       return {
@@ -46,22 +47,22 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
       };
     }
 
-        const existingBomNumber= await BillOfMaterials.findOne({
-          bomNumber,
-          });
-          
-          if (existingBomNumber) {
-            return {
-              status: 409,
-              message: "Bom Number already exists",
-            };
-          }
+    const existingBomNumber = await BillOfMaterials.findOne({
+      bomNumber,
+    });
+
+    if (existingBomNumber) {
+      return {
+        status: 409,
+        message: "Bom Number already exists",
+      };
+    }
 
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },
         { productName: productName },
-        { materials : materials  },
+        { materials: materials },
       ],
     });
 
@@ -76,7 +77,7 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
     if (!bomNumber) {
 
       const lastOrder = await BillOfMaterials.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("processOrder");
 
       if (lastOrder && lastOrder.bomNumber) {
@@ -88,12 +89,21 @@ billOfMaterialsService.newBillOfMaterials = async (bomData) => {
     }
 
     const newData = new BillOfMaterials({
-      bomNumber:assignedBomNUmber,
+      bomNumber: assignedBomNUmber,
       productName,
-      materials 
+      materials
     });
 
     await newData.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'bill-of-material',
+      recordId: newData._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "New Bill of materials added successfully",
@@ -118,7 +128,8 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
       billOfMaterialsId,
       bomNumber,
       productName,
-      materials
+      materials,
+      editedBy
     } = billOfMaterialsData;
 
     if (adminAuthPassword !== authPassword) {
@@ -128,23 +139,23 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
       };
     }
 
-    const existingBomNumber= await BillOfMaterials.findOne({
+    const existingBomNumber = await BillOfMaterials.findOne({
       bomNumber,
-        _id: { $ne: billOfMaterialsId }, 
-      });
-      
-      if (existingBomNumber) {
-        return {
-          status: 409,
-          message: "Bom Number already exists",
-        };
-      }
+      _id: { $ne: billOfMaterialsId },
+    });
+
+    if (existingBomNumber) {
+      return {
+        status: 409,
+        message: "Bom Number already exists",
+      };
+    }
     const existing = await BillOfMaterials.findOne({
       $and: [
         { bomNumber: bomNumber },
         { productName: productName },
         { materials: materials },
-       
+
       ],
     });
 
@@ -154,7 +165,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         { bomNumber: bomNumber },
         { productName: productName },
         { materials: materials },
-        
+
       ],
     });
     let assignedBomNUmber = bomNumber;
@@ -162,7 +173,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
     if (!bomNumber) {
 
       const lastOrder = await BillOfMaterials.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("processOrder");
 
       if (lastOrder && lastOrder.bomNumber) {
@@ -182,7 +193,7 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         billOfMaterialsId,
         {
 
-          bomNumber:assignedBomNUmber,
+          bomNumber: assignedBomNUmber,
           productName,
           materials
         },
@@ -192,6 +203,15 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
         }
       );
     }
+
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'bill-of-material',
+      recordId: billOfMaterialsId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,
@@ -210,20 +230,34 @@ billOfMaterialsService.editBillOfMaterials = async (billOfMaterialsData) => {
 };
 
 billOfMaterialsService.removeBillOfMaterials = async (
-  billOfMaterialsId
+  billOfMaterialsId,
+  user
 ) => {
   try {
-    const billOfMaterials = await BillOfMaterials.findByIdAndDelete(
+    const billOfMaterials = await BillOfMaterials.findById(
       billOfMaterialsId
     );
 
-    if(!billOfMaterials){
+    if (!billOfMaterials) {
       return {
         status: 201,
         message: "Bill of materials not found or can't able to delete right now,Please try again later",
         token: "sampleToken",
       };
     }
+    await BillOfMaterials.findByIdAndDelete(
+      billOfMaterialsId
+    );
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'bill-of-material',
+      recordId: billOfMaterialsId,
+      user: user,
+      data: billOfMaterials
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Bill of materials deleted successfully",

@@ -6,6 +6,7 @@ const qualityParameterSchema = require("../../models/qualityParameterSchema");
 const finalQualityInspection = require("../../models/finalQualityInspection");
 const reworkService = require("./reworkService");
 const qualityInspectionService = require("./qualityInspectionService");
+const { AuditLog } = require("../../models/auditLog");
 let qualityCheckService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -212,6 +213,7 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       inspectorName,
       qualityStatus,
       comments,
+      editedBy
     } = qualityCheckData;
 
     if (adminAuthPassword !== authPassword) {
@@ -335,6 +337,15 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
       }
     );
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'quality-check',
+      recordId: qualityCheckId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Quality Check Edited Successfully",
@@ -350,9 +361,9 @@ qualityCheckService.editQualityCheck = async (qualityCheckData) => {
 };
 
 
-qualityCheckService.removeQualityCheck = async (qualityCheckId) => {
+qualityCheckService.removeQualityCheck = async (qualityCheckId, user) => {
   try {
-    const qualityCheck = await QualityCheck.findByIdAndDelete(qualityCheckId);
+    const qualityCheck = await QualityCheck.findById(qualityCheckId);
 
     if (!qualityCheck) {
       return {
@@ -362,6 +373,18 @@ qualityCheckService.removeQualityCheck = async (qualityCheckId) => {
         token: "sampleToken",
       };
     }
+
+    await QualityCheck.findByIdAndDelete(qualityCheckId);
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'quality-check',
+      recordId: qualityCheck._id,
+      user: user,
+      data: qualityCheck
+    })
+    
+    await newAuditLog.save();
+
     if (qualityCheck) {
       return {
         status: 201,

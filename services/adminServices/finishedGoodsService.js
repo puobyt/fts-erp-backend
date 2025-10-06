@@ -6,6 +6,7 @@ const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const ProcessOrder = require("../../models/processOrder");
 const ProductionOrderCreationOutput = require("../../models/productionOrderCreationOutput");
 const vendorManagement = require("../../models/vendorManagement");
+const { AuditLog } = require("../../models/auditLog");
 let finishedGoodsService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -56,21 +57,21 @@ finishedGoodsService.fetchFinishedGoods = async () => {
 
 finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
   try {
-    const { finishedGoodsName, batchNumber, productionDate, quantityProduced } =
+    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy } =
       finishedGoodsData;
-console.log("Looking for productName in ProductionOrderCreation:", finishedGoodsName);
+    console.log("Looking for productName in ProductionOrderCreation:", finishedGoodsName);
 
-          const existingBatchNumber= await FinishedGoods.findOne({
-            batchNumber,
-            });
-            console.log("Checking for batchNumber:", batchNumber);
+    const existingBatchNumber = await FinishedGoods.findOne({
+      batchNumber,
+    });
+    console.log("Checking for batchNumber:", batchNumber);
 
-            if (existingBatchNumber) {
-              return {
-                status: 409,
-                message: "Batch Number already exists",
-              };
-            }
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
     const existing = await FinishedGoods.findOne({
       $and: [
         { finishedGoodsName: finishedGoodsName },
@@ -95,7 +96,7 @@ console.log("Looking for productName in ProductionOrderCreation:", finishedGoods
         message: "Product Not Found In Production Order Creation",
       };
     }
-    
+
     const billOfMaterials = await BillOfMaterials.findOne({
       productName: finishedGoodsName,
     });
@@ -105,14 +106,14 @@ console.log("Looking for productName in ProductionOrderCreation:", finishedGoods
         message: "Product Not Found In Bill Of Materials",
       };
     }
-    
+
     const { materials } = billOfMaterials;
-    
+
     const enrichedMaterials = [];
-    
+
     for (const material of materials) {
-      const { materialsList, quantity,materialCode } = material;
-    
+      const { materialsList, quantity, materialCode } = material;
+
       const mainStockData = await MainStock.findOne({ materialName: materialsList });
       if (!mainStockData) {
         return {
@@ -120,7 +121,7 @@ console.log("Looking for productName in ProductionOrderCreation:", finishedGoods
           message: `Batch not found for material: ${materialsList}`,
         };
       }
-    
+
       const vendorData = await PurchaseOrderCreation.findOne({ materialName: materialsList });
       if (!vendorData) {
         return {
@@ -128,7 +129,7 @@ console.log("Looking for productName in ProductionOrderCreation:", finishedGoods
           message: `Vendor not found for material: ${materialsList}`,
         };
       }
-    
+
       enrichedMaterials.push({
         materialsList,
         quantity,
@@ -137,33 +138,41 @@ console.log("Looking for productName in ProductionOrderCreation:", finishedGoods
         vendorId: vendorData.vendorId,
       });
     }
-    const processOrder = await ProcessOrder.findOne({productName:finishedGoodsName});
-    if(!processOrder){
+    const processOrder = await ProcessOrder.findOne({ productName: finishedGoodsName });
+    if (!processOrder) {
       return {
         status: 409,
         message: `product Name not found in process Order`,
       };
     }
-const productionOrderCreationOutput = await ProductionOrderCreationOutput.findOne({productName:finishedGoodsName})
-if(!productionOrderCreationOutput){
-  return {
-    status: 409,
-    message: `product Name not found in production Order Creation Output`,
-  };
-}
+    const productionOrderCreationOutput = await ProductionOrderCreationOutput.findOne({ productName: finishedGoodsName })
+    if (!productionOrderCreationOutput) {
+      return {
+        status: 409,
+        message: `product Name not found in production Order Creation Output`,
+      };
+    }
     const newFinishedGoods = new FinishedGoods({
       finishedGoodsName,
       batchNumber,
       productionDate,
       plant: productionOrderCreation.plant,
       materials: enrichedMaterials,
-      processOrderNo:processOrder.processOrderNumber,
-      description:processOrder.description,
-      storageLocation:productionOrderCreationOutput.storageLocationforOutput,
+      processOrderNo: processOrder.processOrderNumber,
+      description: processOrder.description,
+      storageLocation: productionOrderCreationOutput.storageLocationforOutput,
       quantityProduced,
     });
-    
+
     await newFinishedGoods.save();
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'finished-goods',
+      recordId: newFinishedGoods._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "New Finished Goods added successfully",
@@ -190,6 +199,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
       batchNumber,
       productionDate,
       quantityProduced,
+      editedBy
     } = finishedGoodsData;
 
     if (adminAuthPassword !== authPassword) {
@@ -199,17 +209,17 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
       };
     }
 
-    const existingBatchNumber= await FinishedGoods.findOne({
+    const existingBatchNumber = await FinishedGoods.findOne({
       batchNumber,
-        _id: { $ne: finishedGoodsId }, 
-      });
-      
-      if (existingBatchNumber) {
-        return {
-          status: 409,
-          message: "Batch Number already exists",
-        };
-      }
+      _id: { $ne: finishedGoodsId },
+    });
+
+    if (existingBatchNumber) {
+      return {
+        status: 409,
+        message: "Batch Number already exists",
+      };
+    }
 
     const existing = await FinishedGoods.findOne({
       $and: [
@@ -235,39 +245,48 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         status: 409,
         message: "Finished Goods already exists with the same details",
       };
-    } 
+    }
 
-    const productionOrderCreation = await ProductionOrderCreation.findOne({productName:finishedGoodsName});
-if(!productionOrderCreation){
-  return {
-    status: 409,
-    message: "Product Not Found In Production Order Creation",
-  };
-}
+    const productionOrderCreation = await ProductionOrderCreation.findOne({ productName: finishedGoodsName });
+    if (!productionOrderCreation) {
+      return {
+        status: 409,
+        message: "Product Not Found In Production Order Creation",
+      };
+    }
 
-const billOfMaterials = await BillOfMaterials.findOne({productName:finishedGoodsName});
-if(!billOfMaterials){
-  return {
-    status: 409,
-    message: "Product Not Found In Bill Of Materials",
-  };
-}
-      const FinishedGoodsUpdate = await FinishedGoods.findByIdAndUpdate(
-        finishedGoodsId,
-        {
-          finishedGoodsName,
-          batchNumber,
-          productionDate,
-          plant:productionOrderCreation.plant,
-          materials:billOfMaterials.materials,
-          quantityProduced,
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-    
+    const billOfMaterials = await BillOfMaterials.findOne({ productName: finishedGoodsName });
+    if (!billOfMaterials) {
+      return {
+        status: 409,
+        message: "Product Not Found In Bill Of Materials",
+      };
+    }
+    const FinishedGoodsUpdate = await FinishedGoods.findByIdAndUpdate(
+      finishedGoodsId,
+      {
+        finishedGoodsName,
+        batchNumber,
+        productionDate,
+        plant: productionOrderCreation.plant,
+        materials: billOfMaterials.materials,
+        quantityProduced,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'finished-goods',
+      recordId: finishedGoodsId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
 
     return {
       status: 201,
@@ -285,20 +304,34 @@ if(!billOfMaterials){
 
 
 finishedGoodsService.removeFinishedGoods = async (
-  finishedGoodsId
+  finishedGoodsId,
+  user
 ) => {
   try {
-    const finishedGoods = await FinishedGoods.findByIdAndDelete(
+    const finishedGoods = await FinishedGoods.findById(
       finishedGoodsId
     );
 
-    if(!finishedGoods){
+    if (!finishedGoods) {
       return {
         status: 201,
         message: "Finished Goods not found or can't able to delete right now,Please try again later",
         token: "sampleToken",
       };
     }
+
+    await FinishedGoods.findByIdAndDelete(
+      finishedGoodsId
+    );
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'finished-goods',
+      recordId: finishedGoodsId,
+      user: user,
+      data: finishedGoods
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Finished Goods  deleted successfully",

@@ -133,7 +133,8 @@ adminRouter.delete('/removeFinishedGoods',finishedGoodsController.removeFinished
 adminRouter.delete('/removeInvoiceCreation',invoiceCreationController.removeInvoiceCreation);
 adminRouter.post('/signIn',adminController.signIn);
 adminRouter.post('/signUp',adminController.signUp);
-adminRouter.post('/verifyOtp',adminController.verifyOtp);
+adminRouter.post('/verify-user',adminController.verifyUser);
+adminRouter.get('/get-pending-users',adminController.pendingUsers)
 // adminRouter.post('/otpSignUp',adminController.otpSignUp);
 
 

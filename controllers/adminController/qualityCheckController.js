@@ -78,6 +78,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
         inspectorName,
         qualityStatus,
         comments,
+        editedBy
       } = req.body;
   
 
@@ -91,6 +92,7 @@ qualityCheckController.editQualityCheck = async (req, res) => {
         inspectorName,
         qualityStatus,
         comments,
+        editedBy
       });
   
       res.status(result.status).json({
@@ -111,9 +113,9 @@ qualityCheckController.editQualityCheck = async (req, res) => {
   qualityCheckController.removeQualityCheck = async (req, res) => {
     try {
       console.log("deleting quality Check...");
-  const {qualityCheckId} = req.query;
+  const {qualityCheckId, user} = req.query;
       // Pass the extracted data to the service function
-      const result = await qualityCheckService.removeQualityCheck(qualityCheckId);
+      const result = await qualityCheckService.removeQualityCheck(qualityCheckId, user);
   
       res.status(result.status).json({
         message: result.message,

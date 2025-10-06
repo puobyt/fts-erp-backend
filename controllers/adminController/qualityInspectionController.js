@@ -28,7 +28,7 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
   try {
     console.log("Adding new Quality Inspection ");
 
-    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity } = req.body;
+    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity, createdBy } = req.body;
 
     const result = await qualityInspectionService.newQualityInspection({
       inspectionNumber,
@@ -36,7 +36,8 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
       inspectionResults,
       date,
       batchNumber,
-      quantity
+      quantity,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -66,7 +67,8 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
       inspectionResults,
       date,
       batchNumber,
-      quantity
+      quantity,
+      editedBy
     } = req.body;
 
     const result =
@@ -78,7 +80,8 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
         inspectionResults,
         date,
         batchNumber,
-        quantity
+        quantity,
+        editedBy
       });
 
     res.status(result.status).json({
@@ -98,9 +101,9 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
 qualityInspectionController.removeFinalQualityInspection = async (req, res) => {
   try {
     console.log("deleting Rework...");
-const {qualityInspectionId} = req.query;
+const {qualityInspectionId, user} = req.query;
 
-    const result = await qualityInspectionService.removeFinalQualityInspection(qualityInspectionId);
+    const result = await qualityInspectionService.removeFinalQualityInspection(qualityInspectionId,user);
 
     res.status(result.status).json({
       message: result.message,

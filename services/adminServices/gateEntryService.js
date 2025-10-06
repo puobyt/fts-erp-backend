@@ -1,3 +1,4 @@
+const { AuditLog } = require("../../models/auditLog");
 const GateEntry = require("../../models/gateEntry");
 const rework = require("../../models/rework");
 const VendorManagement = require("../../models/vendorManagement");
@@ -20,7 +21,8 @@ gateEntryService.newGateExit = async (gateExitData) => {
       returnReason,
       returnedBy,
       qcStatus = 'pending',
-      qcDocuments = []
+      qcDocuments = [],
+      createdBy
     } = gateExitData;
 
     console.log("newGateExit", gateExitData);
@@ -43,7 +45,7 @@ gateEntryService.newGateExit = async (gateExitData) => {
       docNumber,
       originalDocNumber,
       vehicleNumber,
-      vendorName,   
+      vendorName,
       date,
       returnReason,
       returnedBy,
@@ -51,6 +53,15 @@ gateEntryService.newGateExit = async (gateExitData) => {
     });
 
     const savedExit = await gateExit.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'gate-exit',
+      recordId: savedExit._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,
@@ -67,76 +78,76 @@ gateEntryService.newGateExit = async (gateExitData) => {
 };
 
 
-  gateEntryService.newQcReturnEntry = async (qcReturnData) => {
-    try {
-      const {
-        entryTime,
-        materials,
-        docNumber,
-        originalDocNumber,
-        vehicleNumber,
-        vendorName,
-        date,
-        returnReason,
-        returnedBy,
-        qcStatus = 'pending',
-        qcDocuments = []
-      } = qcReturnData;
-      console.log('qc return data',qcReturnData)
-      if (!originalDocNumber || !returnReason || !returnedBy) {
-        return {
-          status: 400,
-          message: "Missing required QC return fields"
-        };
-      }
-
-      const newQcReturn = new GateEntry({
-        gateType: 'qc_return_entry',
-        entryTime,
-        materials: materials.map(mat => ({
-          ...mat,
-          qcStatus,
-          originalQuantity: mat.quantity
-        })),
-        docNumber,
-        originalDocNumber,
-        vehicleNumber,
-        vendorName,
-        date,
-        returnReason,
-        returnedBy,
-        qcDocuments
-      });
-
-      await newQcReturn.save();
-      for (const material of materials) {
-  const reworkData = new rework({
-    batchNumber: material.batchNumber || '',
-    materialName: material.materialName,
-    issueDescription: returnReason,               // Reason the item was returned
-    proposedReworkAction: 'Rework Qc Failed',                     // Leave blank for now
-    reworkStatus: 'Pending',
-    quantityForRework: material.quantity?.toString(),
-    createdBy: qcReturnData.createdBy || null,
-    assigned: qcReturnData.assigned || null,
-    // inspectionDate and inspectorName intentionally left blank
-  });
-
-  await reworkData.save();
-}
+gateEntryService.newQcReturnEntry = async (qcReturnData) => {
+  try {
+    const {
+      entryTime,
+      materials,
+      docNumber,
+      originalDocNumber,
+      vehicleNumber,
+      vendorName,
+      date,
+      returnReason,
+      returnedBy,
+      qcStatus = 'pending',
+      qcDocuments = []
+    } = qcReturnData;
+    console.log('qc return data', qcReturnData)
+    if (!originalDocNumber || !returnReason || !returnedBy) {
       return {
-        status: 201,
-        message: "QC return entry recorded successfully",
-        data: newQcReturn
-      };
-    } catch (error) {
-      console.error("Error in newQcReturnEntry:", error.message);
-      return {
-        status: 500,
-        message: "Failed to record QC return"
+        status: 400,
+        message: "Missing required QC return fields"
       };
     }
-  };
+
+    const newQcReturn = new GateEntry({
+      gateType: 'qc_return_entry',
+      entryTime,
+      materials: materials.map(mat => ({
+        ...mat,
+        qcStatus,
+        originalQuantity: mat.quantity
+      })),
+      docNumber,
+      originalDocNumber,
+      vehicleNumber,
+      vendorName,
+      date,
+      returnReason,
+      returnedBy,
+      qcDocuments
+    });
+
+    await newQcReturn.save();
+    for (const material of materials) {
+      const reworkData = new rework({
+        batchNumber: material.batchNumber || '',
+        materialName: material.materialName,
+        issueDescription: returnReason,               // Reason the item was returned
+        proposedReworkAction: 'Rework Qc Failed',                     // Leave blank for now
+        reworkStatus: 'Pending',
+        quantityForRework: material.quantity?.toString(),
+        createdBy: qcReturnData.createdBy || null,
+        assigned: qcReturnData.assigned || null,
+        // inspectionDate and inspectorName intentionally left blank
+      });
+
+      await reworkData.save();
+    }
+    return {
+      status: 201,
+      message: "QC return entry recorded successfully",
+      data: newQcReturn
+    };
+  } catch (error) {
+    console.error("Error in newQcReturnEntry:", error.message);
+    return {
+      status: 500,
+      message: "Failed to record QC return"
+    };
+  }
+};
 
 
 gateEntryService.updateQcStatus = async (updateData) => {
@@ -177,7 +188,7 @@ gateEntryService.fetchGateEntry = async (type) => {
     const query = type ? { gateType: type } : {};
     const gateEntries = await GateEntry.find(query).sort({ createdAt: -1 });
     const firmNames = await VendorManagement.distinct("nameOfTheFirm");
-    
+
     return {
       status: 200,
       firmNames,
@@ -194,7 +205,7 @@ gateEntryService.fetchGateEntry = async (type) => {
 
 gateEntryService.newGateEntry = async (entryData) => {
   try {
-    const { entryTime, materials, docNumber, vehicleNumber, vendorName, date } = entryData;
+    const { entryTime, materials, docNumber, vehicleNumber, vendorName, date, createdBy } = entryData;
 
     console.log("new gate entry service", entryData);
 
@@ -233,6 +244,15 @@ gateEntryService.newGateEntry = async (entryData) => {
 
     const savedEntry = await newEntry.save();
 
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'gate-entry',
+      recordId: savedEntry._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Gate entry added successfully",
@@ -262,6 +282,7 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
       vehicleNumber,
       vendorName,
       date,
+      editedBy
     } = gateEntryData;
 
     if (adminAuthPassword !== authPassword) {
@@ -319,6 +340,15 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
       }
     );
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'gate-entry',
+      recordId: gateEntryId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Gate Entry Edited Successfully",
@@ -332,10 +362,23 @@ gateEntryService.editGateEntry = async (gateEntryData) => {
   }
 };
 
-gateEntryService.removeGateEntry = async (gateEntryId) => {
+gateEntryService.removeGateEntry = async (gateEntryId, user) => {
   try {
-    const gateEntry = await GateEntry.findByIdAndDelete(gateEntryId);
+    const gateEntry = await GateEntry.findById(gateEntryId);
+    if (!gateEntry) {
+      return res.status(404).json({ message: 'Gate entry not found' });
+    }
 
+    await GateEntry.findByIdAndDelete(gateEntryId);
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'gate-entry',
+      recordId: gateEntry._id,
+      user: user,
+      data: gateEntry
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Gate Entry deleted successfully",
