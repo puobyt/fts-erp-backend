@@ -122,7 +122,8 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
-      packingMaterials
+      packingMaterials,
+      createdBy
     } = req.body;
 
     const result =
@@ -137,7 +138,8 @@ productionOrderCreationController.newProductionOrderCreationOutput = async (
         Yield,
         outputQualityRating,
         outputHandlingInstructions,
-        packingMaterials
+        packingMaterials,
+        createdBy
       });
 
     res.status(result.status).json({

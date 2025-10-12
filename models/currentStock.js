@@ -54,6 +54,8 @@ const schema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isReturnedItem: { type: Boolean }
+
   },
   {
     timestamps: true,

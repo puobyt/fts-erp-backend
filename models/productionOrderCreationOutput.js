@@ -9,6 +9,15 @@ const PackingMaterialSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const ReturnMaterialSchema = new mongoose.Schema(
+  {
+    item: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    unit: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const schema = new mongoose.Schema(
   {
     productName: { type: String },
@@ -23,7 +32,8 @@ const schema = new mongoose.Schema(
     outputQualityRating: { type: String },
     outputHandlingInstructions: { type: String },
 
-    packingMaterials: [PackingMaterialSchema], 
+    packingMaterials: [PackingMaterialSchema],
+    returnItems: [ReturnMaterialSchema],
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },
