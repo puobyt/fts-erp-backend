@@ -52,8 +52,8 @@ purchaseOrderController.editPurchaseOrderCreation = async (req, res) => {
 purchaseOrderController.removePurchaseOrderCreation = async (req, res) => {
   try {
     console.log("deleting Purchase Order Creation...");
-    const { purchaseOrderId } = req.query;
-    const result = await purchaseOrderService.removePurchaseOrderCreation(purchaseOrderId);
+    const { purchaseOrderId, user } = req.query;
+    const result = await purchaseOrderService.removePurchaseOrderCreation(purchaseOrderId,user);
     res.status(result.status).json({
       message: result.message,
       userToken: result.token,

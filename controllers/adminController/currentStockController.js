@@ -30,7 +30,8 @@ currentStockController.newCurrentStock = async (req, res) => {
   try {
     console.log("Adding new current stock ");
 
-    const { materialName, materialCode, grn, quantity, unit, price, storageLocation, vendorName, dateRecieved, expiryDate } = req.body;
+    const { materialName,materialCode,grn, quantity, unit, price,storageLocation, vendorName, dateRecieved,expiryDate,createdBy } = req.body;
+
 
     const result = await currentStockService.newCurrentStock({
       materialName,
@@ -42,7 +43,8 @@ currentStockController.newCurrentStock = async (req, res) => {
       storageLocation,
       vendorName,
       dateRecieved,
-      expiryDate
+      expiryDate,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -113,7 +115,8 @@ currentStockController.editCurrentStock = async (req, res) => {
       storageLocation,
       vendorName,
       dateRecieved,
-      expiryDate
+      expiryDate,
+      editedBy
     } = req.body;
 
     // Pass the extracted data to the service function
@@ -129,7 +132,8 @@ currentStockController.editCurrentStock = async (req, res) => {
       storageLocation,
       vendorName,
       dateRecieved,
-      expiryDate
+      expiryDate,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -151,9 +155,9 @@ currentStockController.editCurrentStock = async (req, res) => {
 currentStockController.removeCurrentStock = async (req, res) => {
   try {
     console.log("deleting current stock...");
-    const { currentStockId } = req.query;
+const {currentStockId, user} = req.query;
     // Pass the extracted data to the service function
-    const result = await currentStockService.removeCurrentStock(currentStockId);
+    const result = await currentStockService.removeCurrentStock(currentStockId,user);
 
     res.status(result.status).json({
       message: result.message,

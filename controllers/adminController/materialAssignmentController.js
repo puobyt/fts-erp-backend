@@ -33,7 +33,7 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
   try {
     console.log("Adding new Material Assignment ");
 
-    const { pendingItemId, assignmentNumber, processOrderNumber, materials, assignedTo, indentNumber, date, finishedGoodsName } =
+    const { pendingItemId, assignmentNumber, processOrderNumber, materials, assignedTo, indentNumber, date, finishedGoodsName, createdBy } =
       req.body;
 
     const result = await materialAssignmentService.newMaterialAssignment({
@@ -44,7 +44,8 @@ materialAssignmentController.newMaterialAssignment = async (req, res) => {
       assignedTo,
       indentNumber,
       date,
-      finishedGoodsName
+      finishedGoodsName,
+      createdBy
     });
 
     if (result.status == 200) {
@@ -84,6 +85,7 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
       processOrderNumber,
       materials,
       assignedTo,
+      editedBy
     } = req.body;
 
     const result =
@@ -97,6 +99,8 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
         processOrderNumber,
         materials,
         assignedTo,
+        editedBy
+
       });
 
     res.status(result.status).json({
@@ -116,9 +120,9 @@ materialAssignmentController.editMaterialAssignment = async (req, res) => {
 materialAssignmentController.removeMaterialAssignment = async (req, res) => {
   try {
     console.log("deleting Rework...");
-    const { materialAssignmentId } = req.query;
+    const { materialAssignmentId, user } = req.query;
     // Pass the extracted data to the service function
-    const result = await materialAssignmentService.removeMaterialAssignment(materialAssignmentId);
+    const result = await materialAssignmentService.removeMaterialAssignment(materialAssignmentId, user);
 
     res.status(result.status).json({
       message: result.message,

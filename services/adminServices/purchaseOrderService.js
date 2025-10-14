@@ -1,3 +1,4 @@
+const { AuditLog } = require("../../models/auditLog");
 const PurchaseOrderCreation = require("../../models/purchaseOrderCreation");
 const VendorManagement = require("../../models/vendorManagement");
 const crypto = require("crypto");
@@ -84,6 +85,7 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
       termsAndConditions,
       materials,
       deliveryAddress,
+      createdBy,
     } = newPurchaseData;
     const existingPurchaseOrderNumber = await PurchaseOrderCreation.findOne({
       purchaseOrderNumber,
@@ -184,6 +186,15 @@ purchaseOrderService.newPurchaseOrderCreation = async (newPurchaseData) => {
     });
 
     await newPurchaseOrder.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'purchase-order-creation',
+      recordId: newPurchaseOrder._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Purchase Order added successfully",
@@ -237,8 +248,9 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
       deliveryAddress,
       termsAndConditions,
       materials,
+      editedBy
     } = orderData;
-    console.log('deliveryaddress',deliveryAddress)
+    console.log('deliveryaddress', deliveryAddress)
     if (adminAuthPassword !== authPassword) {
       return {
         status: 401,
@@ -376,6 +388,15 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
           runValidators: true,
         }
       );
+
+      const newAuditLog = new AuditLog({
+        action: 'edit',
+        model: 'purchase-order-creation',
+        recordId: orderId,
+        user: editedBy,
+      })
+
+      await newAuditLog.save();
     }
 
     return {
@@ -394,11 +415,26 @@ purchaseOrderService.editPurchaseOrderCreation = async (orderData) => {
   }
 };
 
-purchaseOrderService.removePurchaseOrderCreation = async (purchaseOrderId) => {
+purchaseOrderService.removePurchaseOrderCreation = async (purchaseOrderId, user) => {
   try {
-    const purchaseOrder = await PurchaseOrderCreation.findByIdAndDelete(
-      purchaseOrderId
-    );
+    const purchaseOrder = await PurchaseOrderCreation.findById(purchaseOrderId);
+
+    if (!purchaseOrder) {
+      return res.status(404).json({ message: 'Purchase Order not found' });
+    }
+
+    // Now delete the purchase order
+    await PurchaseOrderCreation.findByIdAndDelete(purchaseOrderId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'purchase-order-creation',
+      recordId: purchaseOrderId,
+      user: user,
+      data: purchaseOrder
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,

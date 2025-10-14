@@ -1,5 +1,6 @@
 const express = require("express");
 const ProcessOrder = require("../../models/processOrder");
+const { AuditLog } = require("../../models/auditLog");
 let processOrderService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -35,6 +36,7 @@ processOrderService.newProcessOrder = async (processOrderData) => {
       orderQuantity,
       unit,
       materialInput,
+      createdBy
     } = processOrderData;
 
     const existingProcessOrderNumber = await ProcessOrder.findOne({
@@ -98,6 +100,16 @@ processOrderService.newProcessOrder = async (processOrderData) => {
     });
 
     await newProcessOrder.save();
+
+    const newAuditLog = new AuditLog({
+          action: 'create',
+          model: 'process-order',
+          recordId: newProcessOrder._id,
+          user: createdBy,
+        })
+    
+        await newAuditLog.save();
+
     return {
       status: 201,
       message: "Process Order added successfully",
@@ -127,7 +139,8 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       productCode,
       batch,
       orderQuantity,
-      materialInput
+      materialInput,
+      editedBy
     } = processOrderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -219,6 +232,15 @@ processOrderService.editProcessOrder = async (processOrderData) => {
       );
     }
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'process-order',
+      recordId: processOrderId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Process Order Edited successfully",
@@ -232,9 +254,9 @@ processOrderService.editProcessOrder = async (processOrderData) => {
   }
 };
 
-processOrderService.removeProcessOrder = async (processOrderId) => {
+processOrderService.removeProcessOrder = async (processOrderId,user) => {
   try {
-    const processOrder = await ProcessOrder.findByIdAndDelete(processOrderId);
+    const processOrder = await ProcessOrder.findById(processOrderId);
 
     if (!processOrder) {
       return {
@@ -244,6 +266,18 @@ processOrderService.removeProcessOrder = async (processOrderId) => {
         token: "sampleToken",
       };
     }
+
+    await ProcessOrder.findByIdAndDelete(processOrderId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'process-order',
+      recordId: processOrder._id,
+      user: user,
+      data: processOrder
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,

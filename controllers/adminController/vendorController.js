@@ -39,6 +39,7 @@ vendorController.newVendorManagement = async (req, res) => {
       bankDetails,
       pan,
       gst,
+      createdBy
     } = req.body;
 
     const result = await vendorService.newVendorManagement({
@@ -52,6 +53,7 @@ vendorController.newVendorManagement = async (req, res) => {
       bankDetails,
       pan,
       gst,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -138,6 +140,7 @@ vendorController.editVendorManagement = async (req, res) => {
       bankDetails,
       pan,
       gst,
+      editedBy
     } = req.body;
 
     // Pass the extracted data to the service function
@@ -154,6 +157,7 @@ vendorController.editVendorManagement = async (req, res) => {
       bankDetails,
       pan,
       gst,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -175,10 +179,11 @@ vendorController.editVendorManagement = async (req, res) => {
 vendorController.removeVendorManagement = async (req, res) => {
   try {
     console.log("deleting vendor...");
-    const { vendorId } = req.query;
+const {vendorId, user} = req.query;
+
 
     // Pass the extracted data to the service function
-    const result = await vendorService.removeVendorManagement(vendorId);
+    const result = await vendorService.removeVendorManagement(vendorId,user);
 
     res.status(result.status).json({
       message: result.message,

@@ -1,36 +1,37 @@
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 const FinishedGoods = require("../../models/finishedGoods");
 const MainStock = require("../../models/mainStock");
+const { AuditLog } = require("../../models/auditLog");
 let requestCreationMaterialService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
-requestCreationMaterialService.fetchRequestCreationForMaterials = async (query={}) => {
+requestCreationMaterialService.fetchRequestCreationForMaterials = async (query = {}) => {
   try {
     const data = await RequestCreationForMaterials.find(query);
     const materials = await MainStock.aggregate([
       {
         $project: {
-          materialName: 1, 
-          materialCode: 1, 
-          _id: 0,         
+          materialName: 1,
+          materialCode: 1,
+          _id: 0,
         },
       },
     ]);
     const finishedGoods = await FinishedGoods.aggregate([
-          {
-            $group: {
-              _id: { finishedGoodsName: "$finishedGoodsName", materialCode: "$materialCode" }
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              materialName: "$_id.finishedGoodsName",
-              materialCode: "$_id.materialCode"
-            }
-          }
-        ]);
+      {
+        $group: {
+          _id: { finishedGoodsName: "$finishedGoodsName", materialCode: "$materialCode" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          materialName: "$_id.finishedGoodsName",
+          materialCode: "$_id.materialCode"
+        }
+      }
+    ]);
 
     return {
       status: 200,
@@ -52,19 +53,19 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
   requestCreationData
 ) => {
   try {
-    const { requestNumber, materials, requiredDate,finishedGoodsName,status } =
+    const { requestNumber, materials, requiredDate, finishedGoodsName, status, createdBy } =
       requestCreationData;
 
-          const existingRequestNumber= await RequestCreationForMaterials.findOne({
-            requestNumber,
-            });
-            
-            if (existingRequestNumber) {
-              return {
-                status: 409,
-                message: "Request Number already exists",
-              };
-            }
+    const existingRequestNumber = await RequestCreationForMaterials.findOne({
+      requestNumber,
+    });
+
+    if (existingRequestNumber) {
+      return {
+        status: 409,
+        message: "Request Number already exists",
+      };
+    }
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
         { requestNumber: requestNumber },
@@ -88,7 +89,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
     if (!requestNumber) {
 
       const lastOrder = await RequestCreationForMaterials.findOne()
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .select("requestNumber");
 
       if (lastOrder && lastOrder.requestNumber) {
@@ -99,7 +100,7 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
       }
     }
     const newData = new RequestCreationForMaterials({
-      requestNumber:assignedRequestNumber,
+      requestNumber: assignedRequestNumber,
       materials,
       requiredDate,
       finishedGoodsName,
@@ -107,6 +108,15 @@ requestCreationMaterialService.newRequestCreationForMaterials = async (
     });
 
     await newData.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'request-creation-material',
+      recordId: newData._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "New Request Creation For Materials added successfully",
@@ -135,7 +145,8 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       materials,
       requiredDate,
       finishedGoodsName,
-      status
+      status,
+      editedBy
     } = requestCreationData;
     if (adminAuthPassword !== authPassword) {
       return {
@@ -144,17 +155,17 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       };
     }
 
-    const existingRequestNumber= await RequestCreationForMaterials.findOne({
+    const existingRequestNumber = await RequestCreationForMaterials.findOne({
       requestNumber,
-        _id: { $ne: requestMaterialsId }, 
-      });
-      
-      if (existingRequestNumber) {
-        return {
-          status: 409,
-          message: "Request Number already exists",
-        };
-      }
+      _id: { $ne: requestMaterialsId },
+    });
+
+    if (existingRequestNumber) {
+      return {
+        status: 409,
+        message: "Request Number already exists",
+      };
+    }
 
     const existing = await RequestCreationForMaterials.findOne({
       $and: [
@@ -169,29 +180,29 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
       await RequestCreationForMaterials.findOne({
         $and: [
           { _id: requestMaterialsId },
-          { requestNumber: requestNumber},
-          {materials: materials},
+          { requestNumber: requestNumber },
+          { materials: materials },
           { requiredDate: requiredDate },
           { status: status },
           { finishedGoodsName: finishedGoodsName },
         ],
       });
 
-      let assignedRequestNumber = requestNumber;
+    let assignedRequestNumber = requestNumber;
 
-      if (!requestNumber) {
-  
-        const lastOrder = await RequestCreationForMaterials.findOne()
-          .sort({ createdAt: -1 }) 
-          .select("requestNumber");
-  
-        if (lastOrder && lastOrder.requestNumber) {
-          const lastNumber = parseInt(lastOrder.requestNumber.match(/\d+$/), 10);
-          assignedRequestNumber = `FRN/RCM/${(lastNumber || 0) + 1}`;
-        } else {
-          assignedRequestNumber = "FRN/RCM/1";
-        }
+    if (!requestNumber) {
+
+      const lastOrder = await RequestCreationForMaterials.findOne()
+        .sort({ createdAt: -1 })
+        .select("requestNumber");
+
+      if (lastOrder && lastOrder.requestNumber) {
+        const lastNumber = parseInt(lastOrder.requestNumber.match(/\d+$/), 10);
+        assignedRequestNumber = `FRN/RCM/${(lastNumber || 0) + 1}`;
+      } else {
+        assignedRequestNumber = "FRN/RCM/1";
       }
+    }
     if (existing && !currentRequestMaterialsOrder) {
       return {
         status: 409,
@@ -203,7 +214,7 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
         await RequestCreationForMaterials.findByIdAndUpdate(
           requestMaterialsId,
           {
-            requestNumber:assignedRequestNumber,
+            requestNumber: assignedRequestNumber,
             materials,
             requiredDate,
             finishedGoodsName,
@@ -215,6 +226,15 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
           }
         );
     }
+
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'request-creation-material',
+      recordId: requestMaterialsId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,
@@ -233,11 +253,12 @@ requestCreationMaterialService.editRequestCreationForMaterials = async (
 };
 
 requestCreationMaterialService.removeRequestCreationForMaterials = async (
-  requestCreationId
+  requestCreationId,
+  user
 ) => {
   try {
     const requestCreationForMaterials =
-      await RequestCreationForMaterials.findByIdAndDelete(requestCreationId);
+      await RequestCreationForMaterials.findById(requestCreationId);
 
     if (!requestCreationForMaterials) {
       return {
@@ -247,6 +268,19 @@ requestCreationMaterialService.removeRequestCreationForMaterials = async (
         token: "sampleToken",
       };
     }
+
+    await RequestCreationForMaterials.findByIdAndDelete(requestCreationId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'request-creation-material',
+      recordId: requestMaterialsId,
+      user: user,
+      data: requestCreationForMaterials
+    })
+
+    await newAuditLog.save();
+    
     if (requestCreationForMaterials) {
       return {
         status: 201,
@@ -272,7 +306,7 @@ requestCreationMaterialService.updateStatusRequestCreationForMaterials = async (
 ) => {
   try {
     const requestCreationForMaterials =
-      await RequestCreationForMaterials.findByIdAndUpdate(id,{status:status});
+      await RequestCreationForMaterials.findByIdAndUpdate(id, { status: status });
 
     if (!requestCreationForMaterials) {
       return {

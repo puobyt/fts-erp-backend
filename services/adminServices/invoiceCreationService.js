@@ -2,6 +2,7 @@ let invoiceCreationService = {};
 const InvoiceCreation = require("../../models/invoiceCreation");
 const FinishedGoods = require("../../models/finishedGoods");
 const outOfStock = require("../../models/outOfStock");
+const { AuditLog } = require("../../models/auditLog");
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
 
@@ -38,7 +39,8 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      createdBy
     } = invoiceData;
 
     const existingInvoiceNumber = await InvoiceCreation.findOne({
@@ -165,6 +167,15 @@ invoiceCreationService.newInvoiceCreation = async (invoiceData) => {
     });
 
     await newInvoice.save();
+
+    const newAuditLog = new AuditLog({
+          action: 'create',
+          model: 'invoice-creation',
+          recordId: newInvoice._id,
+          user: createdBy,
+        })
+    
+        await newAuditLog.save();
     return {
       status: 201,
       message: "Invoice added successfully",
@@ -191,7 +202,8 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       itemName,
       quantity,
       price,
-      invoicePreparedBy
+      invoicePreparedBy,
+      editedBy
     } = invoiceData;
 
     if (adminAuthPassword !== authPassword) {
@@ -307,6 +319,15 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
       );
     }
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'invoice-creation',
+      recordId: invoiceId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Invoice Edited Successfully",
@@ -320,9 +341,9 @@ invoiceCreationService.editInvoiceCreation = async (invoiceData) => {
   }
 };
 
-invoiceCreationService.removeInvoiceCreation = async (invoiceId) => {
+invoiceCreationService.removeInvoiceCreation = async (invoiceId, user) => {
   try {
-    const invoiceCreation = await InvoiceCreation.findByIdAndDelete(invoiceId);
+    const invoiceCreation = await InvoiceCreation.findById(invoiceId);
 
     if (!invoiceCreation) {
       return {
@@ -332,6 +353,18 @@ invoiceCreationService.removeInvoiceCreation = async (invoiceId) => {
         token: "sampleToken",
       };
     }
+
+    await InvoiceCreation.findByIdAndDelete(invoiceId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'invoice-creation',
+      recordId: invoiceId,
+      user: user,
+      data:invoiceCreation
+    })
+
+    await newAuditLog.save();
 
     return {
       status: 201,

@@ -8,6 +8,7 @@ const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
 const OutOfStock = require('../../models/outOfStock')
 const reworkService = require("./reworkService");
+const { AuditLog } = require("../../models/auditLog");
 let qualityInspectionService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -48,7 +49,7 @@ qualityInspectionService.fetchQualityInspection = async (query = {}) => {
 
 qualityInspectionService.newQualityInspection = async (inspectionData) => {
   try {
-    const { inspectionNumber, productName, inspectionResults, date, batchNumber, quantity } = inspectionData;
+    const { inspectionNumber, productName, inspectionResults, date, batchNumber, quantity, createdBy } = inspectionData;
 
     const existingInspectionNumber = await FinalQualityInspection.findOne({
       inspectionNumber,
@@ -138,7 +139,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       }
 
       const { materials } = billOfMaterials;
-      console.log('billOfMaterials',billOfMaterials)
+      console.log('billOfMaterials', billOfMaterials)
 
       const enrichedMaterials = [];
 
@@ -152,7 +153,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
           const outOfStockData = await OutOfStock.findOne({
             materialName: materialsList,
           });
-          if(!outOfStockData){
+          if (!outOfStockData) {
             return {
               status: 409,
               message: `Batch not found for material: ${materialsList}`,
@@ -162,15 +163,15 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
 
         let vendorData
         vendorData = await PurchaseOrderCreation.findOne({
-            materialName: materialsList,
-          });
-          console.log('vendorData11',vendorData)
+          materialName: materialsList,
+        });
+        console.log('vendorData11', vendorData)
 
         if (!vendorData) {
           vendorData = await PurchaseOrderCreation.findOne({
             materials: { $elemMatch: { materialName: { $in: materialsList } } }
           });
-          console.log('vendorData222',vendorData)
+          console.log('vendorData222', vendorData)
 
         }
         if (!vendorData) {
@@ -241,6 +242,15 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
     });
 
     await newData.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'final-qc',
+      recordId: newData._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "New Quality Inspection added successfully",
@@ -270,7 +280,8 @@ qualityInspectionService.editQualityInspection = async (
       inspectionResults,
       date,
       batchNumber,
-      quantity
+      quantity,
+      editedBy
     } = qualityInpectionData;
 
     if (adminAuthPassword !== authPassword) {
@@ -390,6 +401,15 @@ qualityInspectionService.editQualityInspection = async (
           runValidators: true,
         }
       );
+
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'final-qc',
+      recordId: qualityInspectionId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Quality Inspection Edited Successfully",
@@ -409,11 +429,12 @@ qualityInspectionService.editQualityInspection = async (
 };
 
 qualityInspectionService.removeFinalQualityInspection = async (
-  qualityInspectionId
+  qualityInspectionId,
+  user
 ) => {
   try {
-    const finalQualityInspection =
-      await FinalQualityInspection.findByIdAndDelete(qualityInspectionId);
+    const finalQualityInspection = await FinalQualityInspection.findById(qualityInspectionId);
+
 
     if (!finalQualityInspection) {
       return {
@@ -423,6 +444,17 @@ qualityInspectionService.removeFinalQualityInspection = async (
         token: "sampleToken",
       };
     }
+    await FinalQualityInspection.findByIdAndDelete(qualityInspectionId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'final-qc',
+      recordId: qualityInspectionId,
+      user: editedBy,
+      data: finalQualityInspection
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "Final Quality Inspection deleted successfully",

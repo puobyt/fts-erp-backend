@@ -4,6 +4,7 @@ const purchaseOrderService = require("../../services/adminServices/purchaseOrder
 const VendorManagement = require("../../models/vendorManagement");
 const CurrentStock = require("../../models/currentStock");
 const OutOfStock = require("../../models/outOfStock");
+const { AuditLog } = require("../../models/auditLog");
 let mainStockService = {};
 require("dotenv").config();
 
@@ -61,6 +62,7 @@ mainStockService.newMainStock = async (mainStockData) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      createdBy
     } = mainStockData;
 
     if (adminAuthPassword !== authPassword) {
@@ -116,6 +118,14 @@ mainStockService.newMainStock = async (mainStockData) => {
     });
 
     await newMainStock.save();
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'main-stock',
+      recordId: newMainStock._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: "New Main stock added successfully",
@@ -148,6 +158,7 @@ mainStockService.editMainStock = async (mainStockData) => {
       storageLocation,
       dateRecieved,
       expiryDate,
+      editedBy,
     } = mainStockData;
 
     if (adminAuthPassword !== authPassword) {
@@ -244,6 +255,15 @@ mainStockService.editMainStock = async (mainStockData) => {
       }
     );
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'main-stock',
+      recordId: mainStockId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Main Stock Edited Successfully",
@@ -257,9 +277,19 @@ mainStockService.editMainStock = async (mainStockData) => {
   }
 };
 
-mainStockService.removeMainStock = async (mainStockId) => {
+mainStockService.removeMainStock = async (mainStockId, user) => {
   try {
-    const mainStock = await MainStock.findByIdAndDelete(mainStockId);
+    const mainStock = await MainStock.findById(mainStockId);
+    await MainStock.findByIdAndDelete(mainStockId);
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'main-stock',
+      recordId: mainStock._id,
+      user: user,
+      data: mainStock
+    })
+    
+    await newAuditLog.save();
     if (mainStock) {
       return {
         status: 201,

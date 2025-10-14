@@ -7,6 +7,7 @@ const VendorManagement = require("../../models/vendorManagement");
 const MainStock = require("../../models/mainStock");
 const MaterialAssignment = require("../../models/materialAssignment");
 const QualityCheck = require("../../models/qualityCheck");
+const { AuditLog } = require("../../models/auditLog");
 let currentStockService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -71,6 +72,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       vendorName,
       dateRecieved,
       expiryDate,
+      createdBy
     } = newStockData;
 
     const existingGrnNumber = await CurrentStock.findOne({
@@ -170,6 +172,15 @@ currentStockService.newCurrentStock = async (newStockData) => {
 
     await newStock.save();
 
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'current-stock',
+      recordId: newStock._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
+
     // const newData = new QualityCheck({
     //   batchNumber:assignedGrn,
     //   materialName,
@@ -215,6 +226,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       vendorName,
       dateRecieved,
       expiryDate,
+      editedBy
     } = currentStockData;
 
     if (adminAuthPassword !== authPassword) {
@@ -312,6 +324,15 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       }
     );
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'current-stock',
+      recordId: currentStockId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Current Stock Edited Successfully",
@@ -325,9 +346,19 @@ currentStockService.editCurrentStock = async (currentStockData) => {
   }
 };
 
-currentStockService.removeCurrentStock = async (currentStockId) => {
+currentStockService.removeCurrentStock = async (currentStockId,user) => {
   try {
-    const currentStock = await CurrentStock.findByIdAndDelete(currentStockId);
+    const currentStock = await CurrentStock.findById(currentStockId);
+    await CurrentStock.findByIdAndDelete(currentStockId);
+     const newAuditLog = new AuditLog({
+          action: 'delete',
+          model: 'current-stock',
+          recordId: currentStock._id,
+          user: user,
+          data: currentStock
+        })
+    
+        await newAuditLog.save();
     if (currentStock) {
       return {
         status: 201,

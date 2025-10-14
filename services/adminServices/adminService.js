@@ -18,12 +18,7 @@ const invoiceCreation = require("../../models/invoiceCreation");
 const finishedGoods = require("../../models/finishedGoods");
 
 let adminService = {};
-const allowedEmails = [
-  "puobyt@gmail.com",
-  "bobydavist@gmail.com",
-  "jishnuanil055@gmail.com",
-  "jishnuanil255@gmail.com",
-];
+
 adminService.signIn = async (email, password) => {
   try {
     const admin = await Admin.findOne({ email });
@@ -41,7 +36,7 @@ adminService.signIn = async (email, password) => {
       console.log("No admin token generated in admin sign in service");
     }
 
-    const adminData = { email: admin.email, userName: admin.userName };
+    const adminData = { email: admin.email, userName: admin.userName, role: admin?.role };
 
     return {
       status: 200,
@@ -59,12 +54,6 @@ adminService.signIn = async (email, password) => {
 
 adminService.signUp = async (userName, email, password) => {
   try {
-    if (!allowedEmails.includes(email)) {
-      return {
-        status: 403,
-        message: "You are not authorized to sign-up ",
-      };
-    }
 
     const adminEmail = await Admin.findOne({ email });
     if (adminEmail) {
@@ -77,18 +66,11 @@ adminService.signUp = async (userName, email, password) => {
     const saltRounds = 10;
     const hashedPassword = bcrypt.hashSync(password, saltRounds);
 
-    const OTP = otpGenerator(6);
-    const text = `Your OTP is:${OTP}. Please use this code to verify your identity.`;
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    sendMail(email, OTP);
-    console.log("sendMail executed");
 
     const pendingAdmin = new PendingAdmin({
       userName,
       email,
       password: hashedPassword,
-      OTP,
-      otpExpiresAt,
     });
 
     await pendingAdmin.save();
@@ -103,30 +85,32 @@ adminService.signUp = async (userName, email, password) => {
   }
 };
 
-adminService.verifyOtp = async (otp, email) => {
-  const pendingAdmin = await PendingAdmin.findOne({ email, OTP: otp });
+adminService.verifyUser = async (userId, role, action) => {
+  const pendingAdmin = await PendingAdmin.findOne({ _id: userId });
   if (!pendingAdmin) {
-    console.log("not verified");
-    return { status: 400, message: " OTP is invalid", success: false };
+    console.log("User not found");
+    return { status: 400, message: "User not found", success: false };
   }
 
-  if (new Date() > pendingAdmin.otpExpiresAt) {
-    await PendingAdmin.deleteMany({ email });
-    return { status: 400, message: "OTP expired" };
-  }
-  const newAdmin = new Admin({
-    userName: pendingAdmin.userName,
-    email: pendingAdmin.email,
-    password: pendingAdmin.password,
-  });
+  if (action === 'approve') {
+    const newAdmin = new Admin({
+      userName: pendingAdmin.userName,
+      email: pendingAdmin.email,
+      password: pendingAdmin.password,
+      role: role
+    });
 
-  await newAdmin.save();
-  await PendingAdmin.deleteMany({ email });
+    await newAdmin.save();
+    await PendingAdmin.deleteMany({ email: pendingAdmin.email });
+  } else {
+    await PendingAdmin.deleteMany({ email: pendingAdmin.email });
+
+  }
   return {
     status: 201,
     success: true,
     userToken: "",
-    message: "Sign up successfull",
+    message: "Request created",
   };
 };
 
@@ -425,5 +409,36 @@ adminService.tracebilityPackingAndShipping = async (processOrder) => {
     };
   }
 };
+
+adminService.fetchPendingUsers = async () => {
+  try {
+    const users = await PendingAdmin.find({});
+    if (users && users.length > 0) {
+      return {
+        status: 200,
+        message: "users data found successfully!",
+        usersData: users,
+        success: true,
+      };
+    } else {
+      return {
+        status: 200,
+        message: "users data found successfully!",
+        usersData: [],
+        success: true,
+      };
+    }
+  } catch (error) {
+    console.error(
+      "Error occurred in fetching pending users:",
+      err.message
+    );
+    return {
+      status: 500,
+      message: "An error occurred while fetching pending users data.",
+      success: false,
+    };
+  }
+}
 
 module.exports = adminService;

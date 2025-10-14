@@ -4,6 +4,7 @@ const ProductionOrderCreationOutput = require("../../models/productionOrderCreat
 const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
 const { AuditLog } = require("../../models/auditLog");
+
 const qualityCheck = require("../../models/qualityCheck");
 const currentStock = require("../../models/currentStock");
 const mainStock = require("../../models/mainStock");
@@ -88,7 +89,7 @@ productOrderCreationService.fetchProductOrderCreationOutput = async () => {
       "An error occured at fetching Production Order outputs Creation in admin service",
       error.message
     );
-  
+
   }
 };
 productOrderCreationService.newProductionOrderCreation = async (
@@ -106,6 +107,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       instructions,
       startDate,
       endDate,
+      createdBy
     } = productionOrderData;
     const existingBatchNumber = await ProductionOrderCreation.findOne({
       batch,
@@ -177,6 +179,15 @@ productOrderCreationService.newProductionOrderCreation = async (
     });
 
     await newData.save();
+
+    const newAuditLog = new AuditLog({
+      action: 'create',
+      model: 'process-order-creation',
+      recordId: newData._id,
+      user: createdBy,
+    })
+
+    await newAuditLog.save();
     return {
       status: 201,
       message: " New production order added successfully",
@@ -188,7 +199,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       "An error occured at adding production order in admin service",
       error.message
     );
-  
+
   }
 };
 
@@ -270,6 +281,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
 
     await newData.save();
 
+
     if (returnItems && returnItems.length > 0) {
       for (let i = 0; i < returnItems.length; i++) {
         let itemsDetails = await currentStock.findOne({ materialName: returnItems[i].item })
@@ -313,6 +325,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       }
     }
 
+
     const newAuditLog = new AuditLog({
       action: 'create',
       model: 'production-order-creation-output',
@@ -353,6 +366,7 @@ productOrderCreationService.editProductionOrderCreation = async (
       instructions,
       startDate,
       endDate,
+      editedBy
     } = productionOrderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -458,6 +472,15 @@ productOrderCreationService.editProductionOrderCreation = async (
         );
     }
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'process-order-creation',
+      recordId: productionOrderId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Production Order  Edited Successfully",
@@ -486,7 +509,8 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       Yield,
       outputQualityRating,
       outputHandlingInstructions,
-      packingMaterials
+      packingMaterials,
+      editedBy
     } = productionOrderData;
 
     if (adminAuthPassword !== authPassword) {
@@ -574,6 +598,15 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
         );
     }
 
+    const newAuditLog = new AuditLog({
+      action: 'edit',
+      model: 'production-order-creation-output',
+      recordId: productionOrderoutputId,
+      user: editedBy,
+    })
+
+    await newAuditLog.save();
+
     return {
       status: 201,
       message: "Production Order output  Edited Successfully",
@@ -588,11 +621,12 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
   }
 };
 productOrderCreationService.removeProductionOrderCreation = async (
-  productionOrderId
+  productionOrderId,
+  user
 ) => {
   try {
     const productionOrderCreation =
-      await ProductionOrderCreation.findByIdAndDelete(productionOrderId);
+      await ProductionOrderCreation.findById(productionOrderId);
 
     if (!productionOrderCreation) {
       return {
@@ -602,6 +636,18 @@ productOrderCreationService.removeProductionOrderCreation = async (
         token: "sampleToken",
       };
     }
+
+    await ProductionOrderCreation.findByIdAndDelete(productionOrderId);
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'process-order-creation',
+      recordId: productionOrderId,
+      user: user,
+      data: productionOrderCreation
+    })
+
+    await newAuditLog.save();
     if (productionOrderCreation) {
       return {
         status: 201,
@@ -619,11 +665,12 @@ productOrderCreationService.removeProductionOrderCreation = async (
 };
 
 productOrderCreationService.removeProductionOrderCreationOutput = async (
-  productionOrderoutputId
+  productionOrderoutputId,
+  user
 ) => {
   try {
     const productionOrderCreationOutput =
-      await ProductionOrderCreationOutput.findByIdAndDelete(
+      await ProductionOrderCreationOutput.findById(
         productionOrderoutputId
       );
 
@@ -635,6 +682,20 @@ productOrderCreationService.removeProductionOrderCreationOutput = async (
         token: "sampleToken",
       };
     }
+
+
+    await ProductionOrderCreationOutput.findByIdAndDelete(
+      productionOrderoutputId
+    );
+
+    const newAuditLog = new AuditLog({
+      action: 'delete',
+      model: 'production-order-creation-output',
+      recordId: productionOrderoutputId,
+      user: user,
+      data: productionOrderCreationOutput
+    })
+    await newAuditLog.save();
 
     return {
       status: 201,

@@ -42,14 +42,15 @@ requestCreationMaterialController.newRequestCreationForMaterials = async (
   try {
     console.log("Adding new  Request Creation For Materials creation ");
 
-    const { requestNumber, materials, requiredDate, finishedGoodsName, status } = req.body;
+    const { requestNumber, materials, requiredDate, finishedGoodsName, status, createdBy } = req.body;
     const result =
       await requestCreationMaterialService.newRequestCreationForMaterials({
         requestNumber,
         materials,
         requiredDate,
         finishedGoodsName,
-        status
+        status,
+        createdBy
       });
 
     res.status(result.status).json({
@@ -79,6 +80,7 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
       requiredDate,
       status,
       finishedGoodsName,
+      editedBy
     } = req.body;
 
 
@@ -90,6 +92,7 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
       requiredDate,
       status,
       finishedGoodsName,
+      editedBy
     });
 
     res.status(result.status).json({
@@ -110,9 +113,9 @@ requestCreationMaterialController.editRequestCreationForMaterials = async (req, 
 requestCreationMaterialController.removeRequestCreationForMaterials = async (req, res) => {
   try {
     console.log("deleting request creation materials...");
-    const { requestCreationId } = req.query;
+    const { requestCreationId, user } = req.query;
     // Pass the extracted data to the service function
-    const result = await requestCreationMaterialService.removeRequestCreationForMaterials(requestCreationId);
+    const result = await requestCreationMaterialService.removeRequestCreationForMaterials(requestCreationId,user);
 
     res.status(result.status).json({
       message: result.message,

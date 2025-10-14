@@ -29,7 +29,7 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
     console.log("Adding new Finished Goods ");
     console.log("Received data:", req.body);
 
-    const { finishedGoodsName, batchNumber, productionDate, quantityProduced } =
+    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy } =
       req.body;
 
     const result = await finishedGoodsService.newFinishedGoods({
@@ -37,6 +37,7 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
       batchNumber,
       productionDate,
       quantityProduced,
+      createdBy
     });
 
     res.status(result.status).json({
@@ -64,7 +65,8 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
       finishedGoodsName,
       batchNumber,
       productionDate,
-      quantityProduced
+      quantityProduced,
+      editedBy
     } = req.body;
 
     const result =
@@ -74,7 +76,8 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
         finishedGoodsName,
         batchNumber,
         productionDate,
-        quantityProduced
+        quantityProduced,
+        editedBy
       });
 
     res.status(result.status).json({
@@ -94,9 +97,9 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
 finishedGoodsController.removeFinishedGoods = async (req, res) => {
   try {
     console.log("deleting Rework...");
-const {finishedGoodsId} = req.query;
+const {finishedGoodsId, user} = req.query;
 
-    const result = await finishedGoodsService.removeFinishedGoods(finishedGoodsId);
+    const result = await finishedGoodsService.removeFinishedGoods(finishedGoodsId, user);
 
     res.status(result.status).json({
       message: result.message,
