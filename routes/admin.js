@@ -73,13 +73,16 @@ adminRouter.get('/search/production',adminController.tracebilityProductionSearch
 adminRouter.get('/search/packing&shipping',adminController.tracebilityPackingAndShipping);
 adminRouter.get('/invoiceCreations',invoiceCreationController.fetchInvoiceCreations);
 adminRouter.get('/current-stock/:id/pdf-data',adminController.fetchPDFData);
-adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement); 
+adminRouter.post('/newVendorManagmenent',vendorController.newVendorManagement);
+adminRouter.post('/import-vendors',vendorController.importVendors);
 adminRouter.post('/newPurchaseOrderCreation',purchaseOrderController.newPurchaseOrderCreation);
 adminRouter.post('/newGateEntry',upload.none(),gateEntryController.newGateEntry);
+adminRouter.post('/import-newGateEntry',upload.none(),gateEntryController.importNewGateEntry);
 adminRouter.post('/newGateExit',upload.array('qcDocuments'),gateEntryController.newGateExit);
 adminRouter.post('/newQcReturnEntry',upload.array('qcDocuments'),gateEntryController.newQcReturnEntry);
 adminRouter.patch('/newQcReturn/:id',gateEntryController.updateQcStatus);
 adminRouter.post('/newCurrentStock',currentStockController.newCurrentStock);
+adminRouter.post('/import-stock',currentStockController.importStock);
 adminRouter.post('/newQualityCheck',qualityCheckController.newQualityCheck);
 adminRouter.post('/qc-parameters',qualityCheckController.addQcParams);
 adminRouter.post('/newMainStock',mainStockController.newMainStock);
