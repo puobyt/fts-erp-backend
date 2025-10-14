@@ -4,6 +4,10 @@ const ProductionOrderCreationOutput = require("../../models/productionOrderCreat
 const MainStock = require("../../models/mainStock");
 const ProcessOrder = require("../../models/processOrder");
 const { AuditLog } = require("../../models/auditLog");
+
+const qualityCheck = require("../../models/qualityCheck");
+const currentStock = require("../../models/currentStock");
+const mainStock = require("../../models/mainStock");
 let productOrderCreationService = {};
 require("dotenv").config();
 let adminAuthPassword = process.env.ADMIN_AUTH_PASS;
@@ -59,7 +63,21 @@ productOrderCreationService.fetchProductOrderCreationOutput = async () => {
   try {
     const data = await ProductionOrderCreationOutput.find({});
     const batches = await ProductionOrderCreation.distinct("batch");
-    const products = await ProductionOrderCreation.distinct("productName");
+    const products = await ProductionOrderCreation.aggregate([
+      {
+        $group: {
+          _id: "$productName",  // Group by productName
+          materials: { $addToSet: "$materials" }  // Collect unique materials for each productName
+        }
+      },
+      {
+        $project: {
+          _id: 0,                // Remove the _id field
+          productName: "$_id",   // Set productName as the key
+          materials: 1           // Include materials field
+        }
+      }
+    ]);
     return {
       status: 200,
       data: data,
@@ -201,6 +219,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       outputQualityRating,
       outputHandlingInstructions,
       packingMaterials,
+      returnItems,
       createdBy
 
     } = productionOrderData;
@@ -256,10 +275,56 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
       Yield: Yield,
       outputQualityRating,
       outputHandlingInstructions,
-      packingMaterials
+      packingMaterials,
+      returnItems
     });
 
     await newData.save();
+
+
+    if (returnItems && returnItems.length > 0) {
+      for (let i = 0; i < returnItems.length; i++) {
+        let itemsDetails = await currentStock.findOne({ materialName: returnItems[i].item })
+        if (!itemsDetails) {
+          itemsDetails = await mainStock.findOne({ materialName: returnItems[i].item })
+        }
+
+        if (itemsDetails) {
+          let assignedGrn;
+          const lastOrder = await currentStock.findOne()
+            .sort({ createdAt: -1 })
+            .select("grn");
+
+          if (lastOrder && lastOrder.grn) {
+            const lastNumber = parseInt(lastOrder.grn.match(/\d+$/), 10);
+            const nextNumber = String((lastNumber || 0) + 1).padStart(3, "0");
+            assignedGrn = `FRN/MT/${nextNumber}`;
+          } else {
+            assignedGrn = "FRN/MT/1";
+          }
+          const newStock = new currentStock({
+            materialName: itemsDetails.materialName,
+            materialCode: itemsDetails.materialCode,
+            grn: assignedGrn,
+            quantity: returnItems[i].quantity,
+            unit: returnItems[i].unit,
+            quantityReceived: returnItems[i].quantity,
+            price: itemsDetails.price,
+            storageLocation: itemsDetails.storageLocation,
+            vendorName : itemsDetails.vendorName,
+            vendorId: itemsDetails.vendorId,
+            dateRecieved: Date.now(),
+            expiryDate: itemsDetails.expiryDate,
+            isReturnedItem: true
+
+          })
+
+          await newStock.save()
+
+        }
+      }
+    }
+
 
     const newAuditLog = new AuditLog({
       action: 'create',

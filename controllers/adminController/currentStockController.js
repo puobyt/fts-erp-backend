@@ -13,9 +13,9 @@ currentStockController.fetchCurrentStock = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       data: result.data,
-      purchaseOrderCreationData:result.purchaseOrderCreationData,
-      materials:result.materials,
-      vendors:result.vendors,
+      purchaseOrderCreationData: result.purchaseOrderCreationData,
+      materials: result.materials,
+      vendors: result.vendors,
       userToken: "",
     });
   } catch (error) {
@@ -31,6 +31,7 @@ currentStockController.newCurrentStock = async (req, res) => {
     console.log("Adding new current stock ");
 
     const { materialName,materialCode,grn, quantity, unit, price,storageLocation, vendorName, dateRecieved,expiryDate,createdBy } = req.body;
+
 
     const result = await currentStockService.newCurrentStock({
       materialName,
@@ -59,6 +60,44 @@ currentStockController.newCurrentStock = async (req, res) => {
     res.status(500).json({ info: "An error occurred in Server" });
   }
 };
+
+currentStockController.importStock = async (req, res) => {
+  try {
+
+    const { Stocks } = req.body.sheetsData
+    const stocks = Stocks
+
+    console.log('Adding new stock', stocks)
+
+    for (let i = 0; i < stocks.length; i++) {
+      const { materialName, materialCode, grn, quantity, unit, price, storageLocation, vendorName, dateRecieved, expiryDate } = stocks[i];
+
+      await currentStockService.newCurrentStock({
+        materialName,
+        materialCode,
+        grn,
+        quantity,
+        unit,
+        price,
+        storageLocation,
+        vendorName,
+        dateRecieved,
+        expiryDate
+      });
+    }
+
+
+    res.status(200).json({
+      message: "Imported Successfully",
+    });
+  } catch (error) {
+    console.log(
+      "An error occurred while adding current stocks in admin controller:",
+      error.message
+    );
+    res.status(500).json({ info: "An error occurred in Server" });
+  }
+}
 
 currentStockController.editCurrentStock = async (req, res) => {
   try {
@@ -117,7 +156,6 @@ currentStockController.removeCurrentStock = async (req, res) => {
   try {
     console.log("deleting current stock...");
 const {currentStockId, user} = req.query;
-console.log('soock',currentStockId)
     // Pass the extracted data to the service function
     const result = await currentStockService.removeCurrentStock(currentStockId,user);
 
