@@ -17,6 +17,7 @@ const QualityCheck = require("../../models/qualityCheck");
 const RequestCreationForMaterials = require("../../models/requestCreationForMaterials");
 const Rework = require("../../models/rework");
 const VendorManagement = require("../../models/vendorManagement");
+const Certificate = require("../../models/certificate");
 
 
 const auditLogsService = {}
@@ -39,6 +40,7 @@ const MODEL_NAME_MAPPING = {
   'request-creation-for-materials': 'RequestCreationForMaterials',
   'rework': 'Rework',
   'vendor-management': 'VendorManagement',
+  'certificate': 'Certificate',
 };
 const getModelName = (auditLogModelName) => {
   console.log(`auditLogModelName --- ${auditLogModelName}`, MODEL_NAME_MAPPING[auditLogModelName])

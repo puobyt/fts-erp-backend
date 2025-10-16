@@ -21,6 +21,7 @@ const validate = require('../middleware/validate');
 const multer = require('multer');
 const path = require('path');
 const auditLogsController = require('../controllers/adminController/auditLogsController');
+const certificateController = require('../controllers/adminController/certificateController');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -70,6 +71,7 @@ adminRouter.get('/purchase-orders',purchaseOrderController.getAllPurchaseOrders)
 adminRouter.get('/purchase-orders/:poId/production-orders', productionOrderCreationController.fetchProductionOrderForPO);
 adminRouter.get('/production-orders/:prodOrderId/materials', productionOrderCreationController.fetchMaterialsForProductionOrder);
 adminRouter.get('/audit-logs',auditLogsController.getAllLogs);
+adminRouter.get('/certificates',certificateController.fetchCertificates);
 
 // adminRouter.get('/firms',purchaseOrderController.fetchFirms);
 adminRouter.get('/search/production',adminController.tracebilityProductionSearch);
@@ -100,6 +102,7 @@ adminRouter.post('/newBillOfMaterials',billOfMaterialsController.newBillOfMateri
 adminRouter.post('/newQualityInspection',qualityInspectionController.newQualityInspection);
 adminRouter.post('/newFinishedGoods',finishedGoodsController.newFinishedGoods);
 adminRouter.post('/newInvoiceCreation',invoiceCreationController.newInvoiceCreation);
+adminRouter.post('/newCertificate',certificateController.newCertificate);
 
 adminRouter.put('/editInvoiceCreation',invoiceCreationController.editInvoiceCreation);
 adminRouter.put('/editVendorManagmenent',vendorController.editVendorManagement);
