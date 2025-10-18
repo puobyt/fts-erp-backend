@@ -14,6 +14,7 @@ var adminRouter = require("./routes/admin");
 
 const dbConnect = require("./configs/database");
 const { default: rateLimit } = require("express-rate-limit");
+const certificateService = require("./services/adminServices/certificateService");
 
 var app = express();
 
@@ -48,6 +49,32 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Database connection
 dbConnect();
+
+// Schedule daily certificate expiry reminders (runs once per day)
+function scheduleCertificateReminders() {
+  const runJob = async () => {
+    try {
+      await certificateService.send30DayExpiryReminders();
+    } catch (e) {
+      console.log("Certificate reminder job error", e.message);
+    }
+  };
+
+  const now = new Date();
+  const firstRun = new Date(now);
+  // Run at 08:00 server time daily
+  firstRun.setHours(8, 0, 0, 0);
+  if (firstRun <= now) {
+    firstRun.setDate(firstRun.getDate() + 1);
+  }
+  const delay = firstRun.getTime() - now.getTime();
+  setTimeout(() => {
+    runJob();
+    setInterval(runJob, 24 * 60 * 60 * 1000);
+  }, delay);
+}
+
+scheduleCertificateReminders();
 
 // Routes
 app.use("/", adminRouter);

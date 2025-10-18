@@ -28,7 +28,6 @@
       },
       docNumber: {
         type: String,
-        required: true,
       },
       materials: [
         {
@@ -43,7 +42,6 @@
           },
           unit: {
             type: String,
-            required: true,
             enum: ['KG', 'Gram', 'Litre', 'ML', 'Pieces'],
           },
           batchNumber: {
@@ -83,6 +81,18 @@
         type: String, // Added for return reason
       },
       originalDocNumber: {
+        type: String, // Added for tracking original document number in returns
+      },
+      goodsName: {
+        type: String, // Added for tracking original document number in returns
+      },
+      quantity: {
+        type: String, // Added for tracking original document number in returns
+      },
+      unit: {
+        type: String, // Added for tracking original document number in returns
+      },
+      shippingAddress: {
         type: String, // Added for tracking original document number in returns
       },
       returnedBy: {

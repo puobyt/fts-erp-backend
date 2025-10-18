@@ -12,22 +12,20 @@ gateEntryService.newGateExit = async (gateExitData) => {
   try {
     const {
       exitTime,
-      materials,
       docNumber,
-      originalDocNumber,
       vehicleNumber,
-      vendorName,
-      date,
       returnReason,
-      returnedBy,
-      qcStatus = 'pending',
-      qcDocuments = [],
-      createdBy
+      date,
+      goodsName,
+      quantity,
+      unit,
+      shippingAddress,
+      createdBy,
     } = gateExitData;
 
     console.log("newGateExit", gateExitData);
 
-    if (!exitTime || !docNumber || !vehicleNumber) {
+    if (!exitTime || !vehicleNumber) {
       return {
         status: 400,
         message: "Missing required exit fields"
@@ -37,19 +35,14 @@ gateEntryService.newGateExit = async (gateExitData) => {
     const gateExit = new GateEntry({
       gateType: 'return_exit',
       exitTime,
-      materials: materials.map(mat => ({
-        ...mat,
-        qcStatus,
-        originalQuantity: mat.quantity
-      })),
       docNumber,
-      originalDocNumber,
       vehicleNumber,
-      vendorName,
-      date,
       returnReason,
-      returnedBy,
-      qcDocuments
+      date,
+      goodsName,
+      quantity,
+      unit,
+      shippingAddress,
     });
 
     const savedExit = await gateExit.save();
