@@ -22,6 +22,7 @@ const multer = require('multer');
 const path = require('path');
 const auditLogsController = require('../controllers/adminController/auditLogsController');
 const certificateController = require('../controllers/adminController/certificateController');
+const dashboardController = require('../controllers/adminController/dashboardController');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -72,6 +73,13 @@ adminRouter.get('/purchase-orders/:poId/production-orders', productionOrderCreat
 adminRouter.get('/production-orders/:prodOrderId/materials', productionOrderCreationController.fetchMaterialsForProductionOrder);
 adminRouter.get('/audit-logs',auditLogsController.getAllLogs);
 adminRouter.get('/certificates',certificateController.fetchCertificates);
+
+// Dashboard routes
+adminRouter.get('/dashboard',dashboardController.getDashboardData);
+adminRouter.get('/dashboard/certificates-expiring',dashboardController.getCertificatesCloseToExpiry);
+adminRouter.get('/dashboard/main-stock-count',dashboardController.getMainStockCount);
+adminRouter.get('/dashboard/out-of-stock-count',dashboardController.getOutOfStockCount);
+adminRouter.get('/dashboard/finished-goods-count',dashboardController.getFinishedGoodsCount);
 
 // adminRouter.get('/firms',purchaseOrderController.fetchFirms);
 adminRouter.get('/search/production',adminController.tracebilityProductionSearch);

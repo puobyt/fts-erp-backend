@@ -3,42 +3,36 @@ const gateEntryService = require("../../services/adminServices/gateEntryService"
 let gateEntryController = {};
 gateEntryController.newGateExit = async (req, res) => {
   try {
-    const uploadedFiles = req.files
-    console.log('Uploaded files:', uploadedFiles);
-    console.log(req.body)
+    const uploadedFiles = req.files;
+    console.log("Uploaded files:", uploadedFiles);
+    console.log(req.body);
 
     // Parse materials if sent as JSON string
-    const materials = typeof req.body.materials === 'string' ? JSON.parse(req.body.materials) : req.body.materials;
-    console.log(req.body)
+    console.log(req.body);
     const formData = {
       exitTime: req.body.exitTime,
-      materials,
       docNumber: req.body.docNumber,
       vehicleNumber: req.body.vehicleNumber,
-      vendorName: req.body.vendorName,
-      returnReason: req.body.returnReason,
-      returnedBy: req.body.returnedBy,
+      returnReason: req.body.reason,
       date: new Date(req.body.date),
-      // Map files with relevant info
-      qcDocuments: uploadedFiles.map(file => ({
-        originalName: file.originalname,
-        path: file.path,
-        mimetype: file.mimetype,
-        size: file.size
-      })),
-      createdBy: req.body.createdBy
+      goodsName: req.body.goodsName,
+      quantity: req.body.quantity,
+      unit: req.body.unit,
+      shippingAddress: req.body.shippingAddress,
+      createdBy: req.body.createdBy,
     };
 
     const result = await gateEntryService.newGateExit(formData);
 
     res.status(result.status).json({
       message: result.message,
-      data: result.data
+      data: result.data,
     });
-
   } catch (error) {
     console.error("Error in newGateExit controller:", error.message);
-    res.status(500).json({ info: "Failed to process gate exit", error: error.message });
+    res
+      .status(500)
+      .json({ info: "Failed to process gate exit", error: error.message });
   }
 };
 
@@ -46,44 +40,43 @@ gateEntryController.newQcReturnEntry = async (req, res) => {
   try {
     const uploadedFiles = req.files || [];
     console.log(req.files);
-    console.log(req.body)
+    console.log(req.body);
     const formData = {
       ...req.body,
       materials: JSON.parse(req.body.materials),
-      serialNumbers: JSON.parse(req.body.serialNumbers || '[]'),
+      serialNumbers: JSON.parse(req.body.serialNumbers || "[]"),
       date: new Date(req.body.date),
       returnReason: req.body.returnReason,
       returnedBy: req.body.returnedBy,
-      qcDocuments: uploadedFiles.map(file => ({
+      qcDocuments: uploadedFiles.map((file) => ({
         originalName: file.originalname,
         path: file.path,
         mimetype: file.mimetype,
-        size: file.size
-      }))
+        size: file.size,
+      })),
     };
 
     const result = await gateEntryService.newQcReturnEntry(formData);
 
     res.status(result.status).json({
       message: result.message,
-      data: result.data
+      data: result.data,
     });
   } catch (error) {
     console.error("Error in newQcReturnEntry controller:", error);
     res.status(500).json({
       info: "Failed to process QC return",
-      error: error.message
+      error: error.message,
     });
   }
 };
-
 
 gateEntryController.updateQcStatus = async (req, res) => {
   try {
     const result = await gateEntryService.updateQcStatus(req.body);
     res.status(result.status).json({
       message: result.message,
-      data: result.data
+      data: result.data,
     });
   } catch (error) {
     console.error("Error in updateQcStatus controller:", error.message);
@@ -97,7 +90,7 @@ gateEntryController.fetchGateEntry = async (req, res) => {
     res.status(result.status).json({
       message: result.message,
       firmNames: result.firmNames,
-      data: result.data
+      data: result.data,
     });
   } catch (error) {
     console.error("Error fetching gate entries:", error.message);
@@ -116,11 +109,12 @@ gateEntryController.newGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
-      createdBy
+      createdBy,
     } = req.body;
 
     // Ensure materials are parsed correctly
-    const parsedMaterials = typeof materials === "string" ? JSON.parse(materials) : materials;
+    const parsedMaterials =
+      typeof materials === "string" ? JSON.parse(materials) : materials;
 
     const result = await gateEntryService.newGateEntry({
       entryTime,
@@ -129,7 +123,7 @@ gateEntryController.newGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
-      createdBy
+      createdBy,
     });
 
     res.status(result.status).json({
@@ -137,7 +131,6 @@ gateEntryController.newGateEntry = async (req, res) => {
       data: result.data,
       userToken: result.token,
     });
-
   } catch (error) {
     console.log("Error in newGateEntry controller:", error.message);
     res.status(500).json({ message: "Internal server error" });
@@ -146,16 +139,14 @@ gateEntryController.newGateEntry = async (req, res) => {
 
 gateEntryController.importNewGateEntry = async (req, res) => {
   try {
-    const { Entry } = req.body.sheetsData
-    const entry = Entry
+    const { Entry } = req.body.sheetsData;
+    const entry = Entry;
 
-    console.log('Adding new entry', entry)
+    console.log("Adding new entry", entry);
 
     for (let i = 0; i < entry.length; i++) {
-
-      const { entryTime, vehicleNumber, docNumber, vendorName, date, ...rest } = entry[i];
-
-
+      const { entryTime, vehicleNumber, docNumber, vendorName, date, ...rest } =
+        entry[i];
 
       // extract all material sets
       const materials = [];
@@ -169,7 +160,8 @@ gateEntryController.importNewGateEntry = async (req, res) => {
         j++;
       }
 
-      const parsedMaterials = typeof materials === "string" ? JSON.parse(materials) : materials;
+      const parsedMaterials =
+        typeof materials === "string" ? JSON.parse(materials) : materials;
 
       const utc_days = Math.floor(entryTime - 25569);
       const utc_value = utc_days * 86400;
@@ -185,16 +177,20 @@ gateEntryController.importNewGateEntry = async (req, res) => {
       const minutes = Math.floor(total_seconds / 60) % 60;
 
       console.log(`Data ${i}`, {
-        entryTime: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
+        entryTime: `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`,
         materials: parsedMaterials,
         docNumber,
         vehicleNumber,
         vendorName,
         date,
-      })
+      });
 
       await gateEntryService.newGateEntry({
-        entryTime:`${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}`,
+        entryTime: `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`,
         materials: parsedMaterials,
         docNumber,
         vehicleNumber,
@@ -204,20 +200,28 @@ gateEntryController.importNewGateEntry = async (req, res) => {
     }
 
     res.status(200).json({
-      message: 'Successfully imported',
+      message: "Successfully imported",
     });
   } catch (error) {
     console.log("Error in newGateEntry controller:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 gateEntryController.editGateEntry = async (req, res) => {
   try {
     console.log("editing gate entry");
-    const { authPassword, materials, docNumber, gateEntryId, entryTime, vehicleNumber, vendorName, date, editedBy } =
-
-      req.body;
+    const {
+      authPassword,
+      materials,
+      docNumber,
+      gateEntryId,
+      entryTime,
+      vehicleNumber,
+      vendorName,
+      date,
+      editedBy,
+    } = req.body;
     const result = await gateEntryService.editGateEntry({
       authPassword,
       gateEntryId,
@@ -227,7 +231,7 @@ gateEntryController.editGateEntry = async (req, res) => {
       vehicleNumber,
       vendorName,
       date,
-      editedBy
+      editedBy,
     });
     res.status(result.status).json({
       message: result.message,
