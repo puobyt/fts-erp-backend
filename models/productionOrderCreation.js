@@ -30,7 +30,9 @@ const schema = new mongoose.Schema(
     productQuantity: {
       type: String,
     },
-
+    unit: {
+      type: String,
+    },
     productDescription: {
       type: String,
     },

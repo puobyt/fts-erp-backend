@@ -30,7 +30,8 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
           _id: {
             processOrderNumber: "$processOrderNumber",
             productName: "$productName",
-            plant: "$plant"
+            plant: "$plant",
+            unit: "$unit",
           },
         },
       },
@@ -39,7 +40,8 @@ productOrderCreationService.fetchProductOrderCreation = async () => {
           _id: 0,
           processOrderNumber: "$_id.processOrderNumber",
           productName: "$_id.productName",
-          plant: "$_id.plant"
+          plant: "$_id.plant",
+          unit: "$_id.unit",
         },
       },
     ]);
@@ -101,6 +103,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       plant,
       productName,
       productQuantity,
+      unit,
       productDescription,
       batch,
       materials,
@@ -170,6 +173,7 @@ productOrderCreationService.newProductionOrderCreation = async (
       plant,
       productName,
       productQuantity,
+      unit,
       productDescription,
       batch: assignedBatch,
       materials,
@@ -210,6 +214,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
     const {
       productName,
       producedQuantity,
+      unit,
       productionCompletionDate,
       // qualityCheckStatus,
       storageLocationforOutput,
@@ -267,6 +272,7 @@ productOrderCreationService.newProductionOrderCreationOutput = async (
     const newData = new ProductionOrderCreationOutput({
       productName,
       producedQuantity: producedQuantity,
+      unit: unit,
       productionCompletionDate,
       // qualityCheckStatus,
       storageLocationforOutput,
@@ -501,6 +507,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
       productionOrderoutputId,
       productName,
       producedQuantity,
+      unit,
       productionCompletionDate,
       // qualityCheckStatus,
       storageLocationforOutput,
@@ -581,6 +588,7 @@ productOrderCreationService.editProductionOrderCreationOutput = async (
           {
             productName,
             producedQuantity: producedQuantity,
+            unit: unit,
             productionCompletionDate,
             // qualityCheckStatus,
             storageLocationforOutput,

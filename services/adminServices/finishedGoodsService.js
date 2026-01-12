@@ -199,6 +199,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
       batchNumber,
       productionDate,
       quantityProduced,
+      unit,
       editedBy
     } = finishedGoodsData;
 
@@ -271,6 +272,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         plant: productionOrderCreation.plant,
         materials: billOfMaterials.materials,
         quantityProduced,
+        unit,
       },
       {
         new: true,

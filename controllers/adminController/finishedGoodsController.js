@@ -66,6 +66,7 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
       batchNumber,
       productionDate,
       quantityProduced,
+      unit,
       editedBy
     } = req.body;
 
@@ -77,6 +78,7 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
         batchNumber,
         productionDate,
         quantityProduced,
+        unit,
         editedBy
       });
 

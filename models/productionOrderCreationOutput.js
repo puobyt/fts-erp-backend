@@ -23,6 +23,7 @@ const schema = new mongoose.Schema(
     productName: { type: String },
     purchaseOrder: { type: mongoose.Schema.ObjectId, ref: "PurchaseOrderCreation" },
     producedQuantity: { type: String },
+    unit: { type: String },
     productionCompletionDate: { type: Date },
     // qualityCheckStatus: { type: String },
     storageLocationforOutput: { type: String },

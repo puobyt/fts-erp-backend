@@ -30,7 +30,7 @@ currentStockController.newCurrentStock = async (req, res) => {
   try {
     console.log("Adding new current stock ");
 
-    const { materialName,materialCode,grn, quantity, unit, price,storageLocation, vendorName, dateRecieved,expiryDate,createdBy } = req.body;
+    const { materialName,materialCode,grn,mfgDate, quantity, unit, price,storageLocation, vendorName, dateRecieved,expiryDate,createdBy } = req.body;
 
 
     const result = await currentStockService.newCurrentStock({
@@ -42,6 +42,7 @@ currentStockController.newCurrentStock = async (req, res) => {
       price,
       storageLocation,
       vendorName,
+      mfgDate,
       dateRecieved,
       expiryDate,
       createdBy
@@ -115,6 +116,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       storageLocation,
       vendorName,
       dateRecieved,
+      mfgDate,
       expiryDate,
       editedBy
     } = req.body;
@@ -132,6 +134,7 @@ currentStockController.editCurrentStock = async (req, res) => {
       storageLocation,
       vendorName,
       dateRecieved,
+      mfgDate,
       expiryDate,
       editedBy
     });
