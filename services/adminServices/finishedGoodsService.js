@@ -57,7 +57,7 @@ finishedGoodsService.fetchFinishedGoods = async () => {
 
 finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
   try {
-    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy } =
+    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy, expiryDate } =
       finishedGoodsData;
     console.log("Looking for productName in ProductionOrderCreation:", finishedGoodsName);
 
@@ -78,6 +78,7 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
         { batchNumber: batchNumber },
         { productionDate: productionDate },
         { quantityProduced: quantityProduced },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -162,6 +163,7 @@ finishedGoodsService.newFinishedGoods = async (finishedGoodsData) => {
       description: processOrder.description,
       storageLocation: productionOrderCreationOutput.storageLocationforOutput,
       quantityProduced,
+      expiryDate,
     });
 
     await newFinishedGoods.save();
@@ -200,6 +202,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
       productionDate,
       quantityProduced,
       unit,
+      expiryDate,
       editedBy
     } = finishedGoodsData;
 
@@ -228,6 +231,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         { batchNumber: batchNumber },
         { productionDate: productionDate },
         { quantityProduced: quantityProduced },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -238,6 +242,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         { batchNumber: batchNumber },
         { productionDate: productionDate },
         { quantityProduced: quantityProduced },
+        { expiryDate: expiryDate },
       ],
     });
 
@@ -272,6 +277,7 @@ finishedGoodsService.editFinishedGoods = async (finishedGoodsData) => {
         plant: productionOrderCreation.plant,
         materials: billOfMaterials.materials,
         quantityProduced,
+        expiryDate,
         unit,
       },
       {

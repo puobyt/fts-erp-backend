@@ -29,7 +29,7 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
     console.log("Adding new Finished Goods ");
     console.log("Received data:", req.body);
 
-    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy } =
+    const { finishedGoodsName, batchNumber, productionDate, quantityProduced, createdBy, expiryDate } =
       req.body;
 
     const result = await finishedGoodsService.newFinishedGoods({
@@ -37,7 +37,8 @@ finishedGoodsController.newFinishedGoods = async (req, res) => {
       batchNumber,
       productionDate,
       quantityProduced,
-      createdBy
+      createdBy,
+      expiryDate,
     });
 
     res.status(result.status).json({
@@ -67,6 +68,7 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
       productionDate,
       quantityProduced,
       unit,
+      expiryDate,
       editedBy
     } = req.body;
 
@@ -79,6 +81,7 @@ finishedGoodsController.editFinishedGoods = async (req, res) => {
         productionDate,
         quantityProduced,
         unit,
+        expiryDate,
         editedBy
       });
 
