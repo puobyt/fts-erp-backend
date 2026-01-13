@@ -28,7 +28,7 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
   try {
     console.log("Adding new Quality Inspection ");
 
-    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity, createdBy } = req.body;
+    const { inspectionNumber, productName, inspectionResults,date,batchNumber,quantity, unit, createdBy } = req.body;
 
     const result = await qualityInspectionService.newQualityInspection({
       inspectionNumber,
@@ -37,6 +37,7 @@ qualityInspectionController.newQualityInspection = async (req, res) => {
       date,
       batchNumber,
       quantity,
+      unit,
       createdBy
     });
 
@@ -68,6 +69,7 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
       date,
       batchNumber,
       quantity,
+      unit,
       editedBy
     } = req.body;
 
@@ -81,6 +83,7 @@ qualityInspectionController.editQualityInspection = async (req, res) => {
         date,
         batchNumber,
         quantity,
+        unit,
         editedBy
       });
 

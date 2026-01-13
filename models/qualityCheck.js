@@ -8,6 +8,7 @@ const schema = new mongoose.Schema(
     materialCode: { type: String, required: true },
     inspectionDate: { type: Date, required: true },
     expiryDate: { type: Date, required: true },
+    mfgDate: { type: Date},
     inspectorName: { type: String },
     qualityStatus: { type: String },
     comments: { type: String },

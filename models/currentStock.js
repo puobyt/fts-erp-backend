@@ -43,6 +43,9 @@ const schema = new mongoose.Schema(
     dateRecieved: {
       type: Date,
     },
+    mfgDate: {
+      type: Date,
+    },
     expiryDate: {
       type: Date,
     },

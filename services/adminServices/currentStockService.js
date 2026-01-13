@@ -70,6 +70,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       price,
       storageLocation,
       vendorName,
+      mfgDate,
       dateRecieved,
       expiryDate,
       createdBy
@@ -161,6 +162,7 @@ currentStockService.newCurrentStock = async (newStockData) => {
       grn: assignedGrn,
       quantity,
       unit,
+      mfgDate,
       quantityReceived: quantity,
       price,
       storageLocation,
@@ -225,6 +227,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
       storageLocation,
       vendorName,
       dateRecieved,
+      mfgDate,
       expiryDate,
       editedBy
     } = currentStockData;
@@ -296,6 +299,7 @@ currentStockService.editCurrentStock = async (currentStockData) => {
         vendorName,
         storageLocation,
         dateRecieved,
+        mfgDate,
         expiryDate,
       },
       {

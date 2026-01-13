@@ -49,7 +49,8 @@ qualityInspectionService.fetchQualityInspection = async (query = {}) => {
 
 qualityInspectionService.newQualityInspection = async (inspectionData) => {
   try {
-    const { inspectionNumber, productName, inspectionResults, date, batchNumber, quantity, createdBy } = inspectionData;
+    const { inspectionNumber, productName, inspectionResults, date, batchNumber, quantity,unit, createdBy } = inspectionData;
+    console.log('inspectionData', inspectionData)
 
     const existingInspectionNumber = await FinalQualityInspection.findOne({
       inspectionNumber,
@@ -228,6 +229,7 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
         description: processOrder.description,
         storageLocation: productionOrderCreationOutput.storageLocationforOutput,
         quantityProduced: productionOrderCreationOutput.producedQuantity,
+        unit: unit,
       });
 
       await finishedGoods.save();
@@ -238,7 +240,8 @@ qualityInspectionService.newQualityInspection = async (inspectionData) => {
       inspectionResults,
       date,
       batchNumber,
-      quantity
+      quantity,
+      unit,
     });
 
     await newData.save();
@@ -281,6 +284,7 @@ qualityInspectionService.editQualityInspection = async (
       date,
       batchNumber,
       quantity,
+      unit,
       editedBy
     } = qualityInpectionData;
 
@@ -377,6 +381,7 @@ qualityInspectionService.editQualityInspection = async (
           productionDate:
             productionOrderCreationOutput.productionCompletionDate,
           quantityProduced: productionOrderCreationOutput.producedQuantity,
+          unit: unit,
         });
         await finishedGoods.save();
       }
@@ -394,7 +399,8 @@ qualityInspectionService.editQualityInspection = async (
           inspectionResults,
           date,
           batchNumber,
-          quantity
+          quantity,
+          unit
         },
         {
           new: true,

@@ -36,6 +36,7 @@ vendorService.newVendorManagement = async (newVendorData) => {
     } = newVendorData;
 
     const existingVendor = await VendorManagement.findOne({ $or: [{ vendorCode }, { gst }] });
+    console.log('existingVendor', existingVendor)
 
     if (existingVendor) {
       return {

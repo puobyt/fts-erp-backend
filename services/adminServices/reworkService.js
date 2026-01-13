@@ -10,7 +10,7 @@ reworkService.fetchRework = async (query = {}) => {
     const batches = await CurrentStock.aggregate([
       {
         $group: {
-          _id: { batchNumber: "$batchNumber", materialName: "$materialName" },
+          _id: { batchNumber: "$grn", materialName: "$materialName" },
         },
       },
       {

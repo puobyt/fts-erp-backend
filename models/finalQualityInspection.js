@@ -20,6 +20,9 @@ const schema = new mongoose.Schema(
     quantity: {
       type: String,
     },
+    unit: {
+      type: String,
+    },
 
     createdBy: { type: mongoose.Schema.ObjectId, ref: "Admin" },
     assigned: { type: mongoose.Schema.ObjectId, ref: "Admin" },

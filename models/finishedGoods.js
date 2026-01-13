@@ -46,6 +46,12 @@ const schema = new mongoose.Schema({
   }, quantityProduced: {
     type: String,
   },
+  unit:{
+    type: String,
+  },
+  expiryDate: {
+    type: Date,
+  },
 
   createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
   assigned: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
